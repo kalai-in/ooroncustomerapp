@@ -1,0 +1,7 @@
+{
+  "BASE_URL": "https://admin.ooron.in/customer/",
+  "WEB_URL": "https://ooron.in",
+  "SOCKET_BASE_URL": "wss://admin.ooron.in:8080/app/w73uw1egonunwexdhebg",
+  "DEEPLINK_SCHEME": "ooron",
+  "DEEPLINK_HOST": "ooron.in"
+}

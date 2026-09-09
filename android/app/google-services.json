@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "29465567254",
+    "project_id": "ooron-82352",
+    "storage_bucket": "ooron-82352.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29465567254:android:a8072eafc93a2962695537",
+        "android_client_info": {
+          "package_name": "app.ooron.customer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZzZdHPAgwkTjGSDIzRcHSPT079Ww36D4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

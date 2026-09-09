@@ -1,0 +1,76 @@
+import 'package:customer/commons/widgets/app_svg_icon.dart';
+import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/localization/language_label_key.dart';
+import 'package:customer/core/theme/app_decorations.dart';
+import 'package:customer/utils/extensions/context_extensions.dart';
+import 'package:customer/utils/extensions/localization_extensions.dart';
+import 'package:flutter/material.dart';
+import 'package:customer/commons/widgets/app_text.dart';
+
+class CheckoutDeliveryEtaSection extends StatelessWidget {
+  const CheckoutDeliveryEtaSection({
+    super.key,
+    required this.distance,
+    required this.itemCount,
+    this.timeToDeliver,
+  });
+
+  /// Raw distance string from API, e.g. "7.1 km".
+  final String? distance;
+
+  /// ETA string from API, e.g. "21 mins". Empty/null for ecommerce.
+  final String? timeToDeliver;
+
+  /// Number of items in the cart, shown in the subtitle.
+  final int itemCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final eta = timeToDeliver ?? '';
+    final title = eta.isEmpty
+        ? context.translate(LanguageLabelKeys.delivery)
+        : '${context.translate(LanguageLabelKeys.deliveryIn)} $eta';
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: 14),
+      child: Row(
+        spacing: 10, crossAxisAlignment: .start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: AppDecorations.box(
+              color: context.cs.onSecondaryContainer.withValues(alpha: 0.12),
+              shape: .circle,
+            ),
+            child: AppSvgIcon(
+              AssetsConstants.orderTimeIcon,
+              color: context.cs.onSecondaryContainer,
+              size: 24,
+              fit: BoxFit.scaleDown,
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                AppText(
+                  title,
+                  style: context.tt.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                AppText(
+                  '${context.translate(LanguageLabelKeys.shipmentOf)} $itemCount ${itemCount == 1 ? context.translate(LanguageLabelKeys.item) : context.translate(LanguageLabelKeys.items)}',
+                  style: context.tt.bodySmall?.copyWith(
+                    color: context.cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

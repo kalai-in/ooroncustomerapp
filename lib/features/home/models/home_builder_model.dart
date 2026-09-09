@@ -1,0 +1,634 @@
+import 'package:customer/features/products/models/product_model.dart';
+import 'package:customer/utils/json_parsers.dart';
+
+class HomeBuilderModel {
+  int? status;
+  String? message;
+  HomeBuilderDataModel? data;
+
+  HomeBuilderModel({this.status, this.message, this.data});
+
+  HomeBuilderModel.fromJson(Map<String, dynamic> json) {
+    status = parseInt(json['status']);
+    message = parseString(json['message']);
+    data = json['data'] is Map<String, dynamic>
+        ? HomeBuilderDataModel.fromJson(json['data'] as Map<String, dynamic>)
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
+    if (this.data != null) {
+      data['data'] = this.data!.toJson();
+    }
+    return data;
+  }
+}
+
+class HomeBuilderDataModel {
+  Layout? layout;
+  String? homeType;
+  String? homeLayoutName;
+  List<CategoryTabs>? categoryTabs;
+  int? zoneId;
+  String? timeToDeliver;
+  String? distance;
+  String? availableModes;
+  String? layoutMode;
+  String? quickButtonLabel;
+  String? ecommerceButtonLabel;
+  List<String>? searchSuggestions;
+  int? storeClosed;
+
+  HomeBuilderDataModel({
+    this.layout,
+    this.homeType,
+    this.homeLayoutName,
+    this.categoryTabs,
+    this.zoneId,
+    this.timeToDeliver,
+    this.distance,
+    this.availableModes,
+    this.layoutMode,
+    this.quickButtonLabel,
+    this.ecommerceButtonLabel,
+    this.searchSuggestions,
+    this.storeClosed,
+  });
+
+  HomeBuilderDataModel.fromJson(Map<String, dynamic> json) {
+    layout = json['layout'] is Map<String, dynamic>
+        ? Layout.fromJson(json['layout'] as Map<String, dynamic>)
+        : null;
+    homeType = parseString(json['home_type']);
+    homeLayoutName = parseString(json['home_layout_name']);
+    final rawCategoryTabs = json['category_tabs'];
+    if (rawCategoryTabs is List) {
+      categoryTabs = rawCategoryTabs
+          .map((v) => CategoryTabs.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+    zoneId = parseInt(json['zone_id']);
+    timeToDeliver = parseString(json['time_to_deliver']);
+    distance = parseString(json['distance']);
+    availableModes = parseString(json['available_modes']);
+    layoutMode = parseString(json['layout_mode']);
+    quickButtonLabel = parseString(json['quick_button_label']);
+    ecommerceButtonLabel = parseString(json['ecommerce_button_label']);
+    searchSuggestions = json['search_suggestions'] is List
+        ? (json['search_suggestions'] as List).map((e) => e.toString()).toList()
+        : <String>[];
+    storeClosed = parseInt(json['store_closed']);
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (layout != null) {
+      data['layout'] = layout!.toJson();
+    }
+    data['home_type'] = homeType;
+    data['home_layout_name'] = homeLayoutName;
+    if (categoryTabs != null) {
+      data['category_tabs'] = categoryTabs!.map((v) => v.toJson()).toList();
+    }
+    data['zone_id'] = zoneId;
+    data['time_to_deliver'] = timeToDeliver;
+    data['distance'] = distance;
+    data['available_modes'] = availableModes;
+    data['layout_mode'] = layoutMode;
+    data['quick_button_label'] = quickButtonLabel;
+    data['ecommerce_button_label'] = ecommerceButtonLabel;
+    data['search_suggestions'] = searchSuggestions;
+    data['store_closed'] = storeClosed;
+    return data;
+  }
+}
+
+class Layout {
+  List<Sections>? sections;
+  String? backgroundTheme;
+  String? backgroundColor;
+  String? backgroundImageUrl;
+  String? textColor;
+  String? headerIconUrl;
+  String? imageAspect;
+
+  Layout({
+    this.sections,
+    this.backgroundTheme,
+    this.backgroundColor,
+    this.backgroundImageUrl,
+    this.textColor,
+    this.headerIconUrl,
+    this.imageAspect,
+  });
+
+  Layout.fromJson(Map<String, dynamic> json) {
+    final rawSections = json['sections'];
+    if (rawSections is List) {
+      sections = rawSections
+          .map((v) => Sections.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+    backgroundTheme = parseString(json['background_theme']);
+    backgroundColor = parseString(json['background_color']);
+    backgroundImageUrl = parseString(json['background_image_url']);
+    textColor = parseString(json['text_color']);
+    headerIconUrl = parseString(json['header_icon_url']);
+    imageAspect = parseString(json['image_aspect']) ?? "";
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (sections != null) {
+      data['sections'] = sections!.map((v) => v.toJson()).toList();
+    }
+    data['background_theme'] = backgroundTheme;
+    data['background_color'] = backgroundColor;
+    data['background_image_url'] = backgroundImageUrl;
+    data['text_color'] = textColor;
+    data['header_icon_url'] = headerIconUrl;
+    return data;
+  }
+}
+
+class Sections {
+  String? id;
+  String? type;
+  int? marginTop;
+  int? marginBottom;
+  int? borderRadius;
+  List<Blocks>? blocks;
+
+  Sections({
+    this.id,
+    this.type,
+    this.marginTop,
+    this.marginBottom,
+    this.borderRadius,
+    this.blocks,
+  });
+
+  Sections.fromJson(Map<String, dynamic> json) {
+    id = parseString(json['id']);
+    type = parseString(json['type']);
+    marginTop = parseInt(json['margin_top']);
+    marginBottom = parseInt(json['margin_bottom']);
+    borderRadius = parseInt(json['border_radius']);
+    final rawBlocks = json['blocks'];
+    if (rawBlocks is List) {
+      blocks = rawBlocks
+          .map((v) => Blocks.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['type'] = type;
+    data['margin_top'] = marginTop;
+    data['margin_bottom'] = marginBottom;
+    data['border_radius'] = borderRadius;
+    if (blocks != null) {
+      data['blocks'] = blocks!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class Blocks {
+  String? id;
+  String? type;
+  Config? config;
+  List<Items>? items;
+  String? layout;
+  List<Categories>? categories;
+  List<ProductDataModel>? products;
+  List<Brands>? brands;
+  String? imageUrl;
+  Images? images;
+  String? redirectType;
+  int? redirectId;
+  String? redirectUrl;
+  bool? hasChild;
+  String? manualProductIds;
+  int? categoryId;
+  List<String>? viewMorePreviewImages;
+
+  Blocks({
+    this.id,
+    this.type,
+    this.config,
+    this.items,
+    this.layout,
+    this.categories,
+    this.products,
+    this.brands,
+    this.imageUrl,
+    this.images,
+    this.redirectType,
+    this.redirectId,
+    this.redirectUrl,
+    this.hasChild,
+    this.manualProductIds,
+    this.categoryId,
+    this.viewMorePreviewImages,
+  });
+
+  Blocks.fromJson(Map<String, dynamic> json) {
+    id = parseString(json['id']);
+    type = parseString(json['type']);
+    config = json['config'] is Map<String, dynamic>
+        ? Config.fromJson(json['config'] as Map<String, dynamic>)
+        : null;
+    final rawItems = json['items'];
+    if (rawItems is List) {
+      items = rawItems
+          .map((v) => Items.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+    layout = parseString(json['layout']);
+    final rawCategories = json['categories'];
+    if (rawCategories is List) {
+      categories = rawCategories
+          .map((v) => Categories.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+    final rawProducts = json['products'];
+    if (rawProducts is List) {
+      products = rawProducts
+          .map((v) => ProductDataModel.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+    final rawBrands = json['brands'];
+    if (rawBrands is List) {
+      brands = rawBrands
+          .map((v) => Brands.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+    imageUrl = parseString(json['image_url']);
+    images = json['images'] is Map<String, dynamic>
+        ? Images.fromJson(json['images'] as Map<String, dynamic>)
+        : null;
+    redirectType = parseString(json['redirect_type']);
+    redirectId = parseInt(json['redirect_id']);
+    redirectUrl = parseString(json['redirect_url']);
+    hasChild = parseBool(json['has_child']) ?? false;
+    manualProductIds = parseString(json['manual_product_ids']) ?? "";
+    categoryId = parseInt(json['category_id']) ?? 0;
+    viewMorePreviewImages = json['viewMorePreviewImages'] is List
+        ? (json['viewMorePreviewImages'] as List)
+              .map((e) => e.toString())
+              .toList()
+        : <String>[];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['type'] = type;
+    if (config != null) {
+      data['config'] = config!.toJson();
+    }
+    if (items != null) {
+      data['items'] = items!.map((v) => v.toJson()).toList();
+    }
+    data['layout'] = layout;
+    if (categories != null) {
+      data['categories'] = categories!.map((v) => v.toJson()).toList();
+    }
+    if (products != null) {
+      data['products'] = products!.map((v) => v.toJson()).toList();
+    }
+    if (brands != null) {
+      data['brands'] = brands!.map((v) => v.toJson()).toList();
+    }
+    data['image_url'] = imageUrl;
+    if (images != null) {
+      data['images'] = images!.toJson();
+    }
+    data['redirect_type'] = redirectType;
+    data['redirect_id'] = redirectId;
+    data['redirect_url'] = redirectUrl;
+    data['manual_product_ids'] = manualProductIds;
+    data['category_id'] = categoryId;
+    data['viewMorePreviewImages'] = viewMorePreviewImages;
+    return data;
+  }
+}
+
+class Config {
+  String? carouselStyle;
+  String? indicator;
+  bool? autoScroll;
+  bool? infiniteLoop;
+  int? speedMs;
+  int? chipGap;
+  int? chipRadius;
+  int? brandGap;
+  String? variant;
+  String? sectionTitle;
+  String? dataSource;
+  int? limit;
+  int? columns;
+  int? productGridGap;
+  int? productCardRadius;
+  int? blockPadding;
+  String? backgroundImageUrl;
+  bool? showName;
+  int? gridGap;
+  int? tileRadius;
+  String? textAlign;
+  String? textColor;
+  String? backgroundColor;
+  String? sectionSubtitle;
+  int? imageHeight;
+  int? brandRadius;
+  int? gridRows;
+  String? gridLayoutType;
+  String? imageAspect;
+  String? bgImageAspect;
+  String? itemTextColor;
+
+  Config({
+    this.carouselStyle,
+    this.indicator,
+    this.autoScroll,
+    this.infiniteLoop,
+    this.speedMs,
+    this.chipGap,
+    this.chipRadius,
+    this.brandGap,
+    this.variant,
+    this.sectionTitle,
+    this.dataSource,
+    this.limit,
+    this.columns,
+    this.productGridGap,
+    this.productCardRadius,
+    this.blockPadding,
+    this.backgroundImageUrl,
+    this.showName,
+    this.gridGap,
+    this.tileRadius,
+    this.textAlign,
+    this.textColor,
+    this.backgroundColor,
+    this.sectionSubtitle,
+    this.imageHeight,
+    this.brandRadius,
+    this.gridRows,
+    this.gridLayoutType,
+    this.imageAspect,
+    this.bgImageAspect,
+    this.itemTextColor,
+  });
+
+  Config.fromJson(Map<String, dynamic> json) {
+    carouselStyle = parseString(json['carousel_style']);
+    indicator = parseString(json['indicator']);
+    autoScroll = parseBool(json['auto_scroll']);
+    infiniteLoop = parseBool(json['infinite_loop']);
+    speedMs = parseInt(json['speed_ms']);
+    chipGap = parseInt(json['category_gap']) ?? parseInt(json['chip_gap']);
+    chipRadius =
+        parseInt(json['category_radius']) ?? parseInt(json['chip_radius']);
+    brandGap = parseInt(json['brand_gap']);
+    variant = parseString(json['variant']);
+    sectionTitle = parseString(json['section_title']);
+    dataSource = parseString(json['data_source']);
+    limit = parseInt(json['limit']);
+    columns = parseInt(json['grid_columns']) ?? parseInt(json['columns']);
+    productGridGap = parseInt(json['product_grid_gap']);
+    productCardRadius = parseInt(json['product_card_radius']);
+    blockPadding = parseInt(json['block_padding']);
+    backgroundImageUrl = parseString(json['background_image_url']);
+    showName = parseBool(json['show_name']);
+    gridGap = parseInt(json['grid_gap']);
+    tileRadius = parseInt(json['tile_radius']);
+    textAlign = parseString(json['text_align']);
+    textColor = parseString(json['text_color']);
+    backgroundColor = parseString(json['background_color']);
+    sectionSubtitle = parseString(json['section_subtitle']);
+    imageHeight = parseInt(json['image_height']);
+    brandRadius = parseInt(json['brand_radius']);
+    gridRows = parseInt(json['grid_rows']);
+    gridLayoutType = parseString(json['grid_layout_type']);
+    imageAspect = parseString(json['image_aspect']) ?? "";
+    bgImageAspect = parseString(json['bg_image_aspect']);
+    itemTextColor = parseString(json['item_text_color']) ?? "";
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['carousel_style'] = carouselStyle;
+    data['indicator'] = indicator;
+    data['auto_scroll'] = autoScroll;
+    data['infinite_loop'] = infiniteLoop;
+    data['speed_ms'] = speedMs;
+    data['category_gap'] = chipGap;
+    data['category_radius'] = chipRadius;
+    data['brand_gap'] = brandGap;
+    data['variant'] = variant;
+    data['section_title'] = sectionTitle;
+    data['data_source'] = dataSource;
+    data['limit'] = limit;
+    data['grid_columns'] = columns;
+    data['product_grid_gap'] = productGridGap;
+    data['product_card_radius'] = productCardRadius;
+    data['block_padding'] = blockPadding;
+    data['background_image_url'] = backgroundImageUrl;
+    data['show_name'] = showName;
+    data['grid_gap'] = gridGap;
+    data['tile_radius'] = tileRadius;
+    data['text_align'] = textAlign;
+    data['text_color'] = textColor;
+    data['background_color'] = backgroundColor;
+    data['section_subtitle'] = sectionSubtitle;
+    data['image_height'] = imageHeight;
+    data['brand_radius'] = brandRadius;
+    data['grid_rows'] = gridRows;
+    data['grid_layout_type'] = gridLayoutType;
+    data['image_aspect'] = imageAspect;
+    data['bg_image_aspect'] = bgImageAspect;
+    data['item_text_color'] = itemTextColor;
+    return data;
+  }
+}
+
+class Items {
+  String? imageUrl;
+  Images? images;
+  String? redirectType;
+  int? redirectId;
+  String? redirectUrl;
+  bool? hasChild;
+
+  Items({
+    this.imageUrl,
+    this.images,
+    this.redirectType,
+    this.redirectId,
+    this.redirectUrl,
+    this.hasChild,
+  });
+
+  Items.fromJson(Map<String, dynamic> json) {
+    imageUrl = parseString(json['image_url']);
+    images = json['images'] is Map<String, dynamic>
+        ? Images.fromJson(json['images'] as Map<String, dynamic>)
+        : null;
+    redirectType = parseString(json['redirect_type']);
+    redirectId = parseInt(json['redirect_id']);
+    redirectUrl = parseString(json['redirect_url']);
+    hasChild = parseBool(json['has_child']) ?? false;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['image_url'] = imageUrl;
+    if (images != null) {
+      data['images'] = images!.toJson();
+    }
+    data['redirect_type'] = redirectType;
+    data['redirect_id'] = redirectId;
+    data['redirect_url'] = redirectUrl;
+    return data;
+  }
+}
+
+class Images {
+  String? app;
+  String? web;
+  String? tablet;
+  String? imageUrl;
+
+  Images({this.app, this.web, this.tablet, this.imageUrl});
+
+  Images.fromJson(Map<String, dynamic> json) {
+    app = parseString(json['app']);
+    web = parseString(json['web']);
+    tablet = parseString(json['tablet']);
+    imageUrl = parseString(json['image_url']);
+  }
+
+  String? get displayUrl => app?.isNotEmpty == true
+      ? app
+      : imageUrl?.isNotEmpty == true
+      ? imageUrl
+      : web?.isNotEmpty == true
+      ? web
+      : null;
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['app'] = app;
+    data['web'] = web;
+    data['tablet'] = tablet;
+    data['image_url'] = imageUrl;
+    return data;
+  }
+}
+
+class Categories {
+  int? id;
+  String? name;
+  String? slug;
+  String? imageUrl;
+  bool? hasChild;
+
+  Categories({this.id, this.name, this.slug, this.imageUrl, this.hasChild});
+
+  Categories.fromJson(Map<String, dynamic> json) {
+    id = parseInt(json['id']);
+    name = parseString(json['name']);
+    slug = parseString(json['slug']);
+    imageUrl = parseString(json['image_url']);
+    hasChild = parseBool(json['has_child']) ?? false;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['slug'] = slug;
+    data['image_url'] = imageUrl;
+    data['has_child'] = hasChild;
+    return data;
+  }
+}
+
+class Brands {
+  int? id;
+  String? name;
+  String? imageUrl;
+
+  Brands({this.id, this.name, this.imageUrl});
+
+  Brands.fromJson(Map<String, dynamic> json) {
+    id = parseInt(json['id']);
+    name = parseString(json['name']);
+    imageUrl = parseString(json['image_url']);
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['image_url'] = imageUrl;
+    return data;
+  }
+}
+
+class CategoryTabs {
+  String? id;
+  String? name;
+  String? backgroundTheme;
+  String? backgroundColor;
+  String? backgroundImageUrl;
+  String? textColor;
+  String? headerIconUrl;
+  String? imageUrl;
+  String? slug;
+
+  CategoryTabs({
+    this.id,
+    this.name,
+    this.backgroundTheme,
+    this.backgroundColor,
+    this.backgroundImageUrl,
+    this.textColor,
+    this.headerIconUrl,
+    this.imageUrl,
+    this.slug,
+  });
+
+  CategoryTabs.fromJson(Map<String, dynamic> json) {
+    id = parseString(json['id']);
+    name = parseString(json['name']);
+    backgroundTheme = parseString(json['background_theme']);
+    backgroundColor = parseString(json['background_color']);
+    backgroundImageUrl = parseString(json['background_image_url']);
+    textColor = parseString(json['text_color']);
+    headerIconUrl = parseString(json['header_icon_url']);
+    imageUrl = parseString(json['image_url']);
+    slug = parseString(json['slug']);
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['background_theme'] = backgroundTheme;
+    data['background_color'] = backgroundColor;
+    data['background_image_url'] = backgroundImageUrl;
+    data['text_color'] = textColor;
+    data['header_icon_url'] = headerIconUrl;
+    data['image_url'] = imageUrl;
+    data['slug'] = slug;
+    return data;
+  }
+}

@@ -1,0 +1,12 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "dart.analysisExcludedFolders": [
+        "build"
+    ],
+    "files.watcherExclude": {
+        "**/build/**": true
+    },
+    "search.exclude": {
+        "**/build": true
+    }
+}

@@ -56,25 +56,31 @@ class HomeSectionWidget extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: .start,
-        children: blocks.map((block) => _buildBlock(block)).toList(),
+        children: blocks.map((block) => _buildBlock(context, block)).toList(),
       ),
     );
   }
 
-  Widget _buildBlock(Blocks block) {
-    final radius = section.borderRadius ?? 0;
-    Widget content = _blockContent(block);
-    if (radius > 0) {
-      content = ClipRRect(
-        borderRadius: BorderRadius.circular(radius.toDouble()),
-        child: content,
-      );
+  BorderRadius _cornersToBorderRadius(BorderRadiusCorners? corners) {
+    return BorderRadius.only(
+      topLeft: Radius.circular((corners?.topLeft ?? 0).toDouble()),
+      topRight: Radius.circular((corners?.topRight ?? 0).toDouble()),
+      bottomLeft: Radius.circular((corners?.bottomLeft ?? 0).toDouble()),
+      bottomRight: Radius.circular((corners?.bottomRight ?? 0).toDouble()),
+    );
+  }
+
+  Widget _buildBlock(BuildContext context, Blocks block) {
+    final radius = _cornersToBorderRadius(section.borderRadiusCorners);
+    Widget content = _blockContent(context, block);
+    if (radius != BorderRadius.zero) {
+      content = ClipRRect(borderRadius: radius, child: content);
     }
     return content;
   }
 
-  int _gridColumns(Blocks block, {int fallback = 2}) {
-    final configColumns = block.config?.columns;
+  int _gridColumns(BuildContext context, Blocks block, {int fallback = 2}) {
+    final configColumns = block.config?.columns?.resolve(_isTablet(context));
     if (configColumns != null && configColumns > 0) return configColumns;
     final match = RegExp(r'grid_(\d+)').firstMatch(block.layout ?? '');
     if (match != null) {
@@ -84,14 +90,17 @@ class HomeSectionWidget extends StatelessWidget {
     return fallback;
   }
 
-  Widget _blockContent(Blocks block) {
+  Widget _blockContent(BuildContext context, Blocks block) {
+    final isTablet = _isTablet(context);
     switch (BlockType.fromRaw(block.type)) {
       case BlockType.bannerSlider:
         if (block.items?.isNotEmpty == true) {
           return HomeBannerCarousel(
             items: block.items!,
             config: block.config,
-            sectionBorderRadius: section.borderRadius ?? 0,
+            sectionBorderRadius: _cornersToBorderRadius(
+              section.borderRadiusCorners,
+            ),
           );
         }
 
@@ -99,9 +108,10 @@ class HomeSectionWidget extends StatelessWidget {
         if (block.categories?.isNotEmpty == true) {
           return HomeCategoryBlock(
             categories: block.categories!,
-            columns: _gridColumns(block, fallback: 4),
-            gap: (block.config?.chipGap ?? 0).toDouble(),
-            borderRadius: (block.config?.chipRadius ?? 0).toDouble(),
+            columns: _gridColumns(context, block, fallback: 4),
+            gap: (block.config?.chipGap?.resolve(isTablet) ?? 0).toDouble(),
+            borderRadius: (block.config?.chipRadius?.resolve(isTablet) ?? 0)
+                .toDouble(),
             layout: SectionLayout.fromRaw(block.layout),
             sectionTitle: block.config?.sectionTitle,
             variant: ProductVariant.fromRaw(block.config?.variant),
@@ -109,7 +119,7 @@ class HomeSectionWidget extends StatelessWidget {
             backgroundColor: block.config?.backgroundColor,
             textColor: block.config?.textColor,
             itemTextColor: block.config?.itemTextColor,
-            bgImageAspect: block.config?.bgImageAspect,
+            bgImageAspect: block.config?.bgImageAspect?.resolve(isTablet),
             onTap: onCategoryTap,
           );
         }
@@ -118,16 +128,16 @@ class HomeSectionWidget extends StatelessWidget {
         if (block.products?.isNotEmpty == true) {
           return HomeProductBlock(
             products: block.products!,
-            columns: block.config?.columns ?? 2,
+            columns: block.config?.columns?.resolve(isTablet) ?? 2,
             layout: ProductLayout.fromRaw(block.layout),
             variant: ProductVariant.fromRaw(block.config?.variant),
             backgroundImageUrl: block.config?.backgroundImageUrl,
             backgroundColor: block.config?.backgroundColor,
             textColor: block.config?.textColor,
-            imageAspect: block.config?.imageAspect,
+            imageAspect: block.config?.imageAspect?.resolve(isTablet),
             sectionTitle: block.config?.sectionTitle,
             blockPadding: block.config?.blockPadding ?? 0,
-            itemGap: block.config?.productGridGap ?? 0,
+            itemGap: block.config?.productGridGap?.resolve(isTablet) ?? 0,
             itemRadius: block.config?.productCardRadius ?? 0,
             limit: block.config?.limit ?? 0,
             onTap: onProductTap,
@@ -144,18 +154,19 @@ class HomeSectionWidget extends StatelessWidget {
         if (block.brands?.isNotEmpty == true) {
           return HomeBrandBlock(
             brands: block.brands!,
-            gap: (block.config?.brandGap ?? 0).toDouble(),
+            gap: (block.config?.brandGap?.resolve(isTablet) ?? 0).toDouble(),
             layout: SectionLayout.fromRaw(block.layout),
-            columns: _gridColumns(block, fallback: 4),
+            columns: _gridColumns(context, block, fallback: 4),
             sectionTitle: block.config?.sectionTitle,
-            borderRadius: (block.config?.brandRadius ?? 0).toDouble(),
+            borderRadius: (block.config?.brandRadius?.resolve(isTablet) ?? 0)
+                .toDouble(),
             showName: block.config?.showName,
             variant: ProductVariant.fromRaw(block.config?.variant),
             backgroundImageUrl: block.config?.backgroundImageUrl,
             backgroundColor: block.config?.backgroundColor,
             textColor: block.config?.textColor,
             itemTextColor: block.config?.itemTextColor,
-            bgImageAspect: block.config?.bgImageAspect,
+            bgImageAspect: block.config?.bgImageAspect?.resolve(isTablet),
             onTap: onBrandTap,
           );
         }
@@ -164,18 +175,18 @@ class HomeSectionWidget extends StatelessWidget {
         if (block.items?.isNotEmpty == true) {
           return HomeGridBanner(
             items: block.items!,
-            columns: _gridColumns(block, fallback: 2),
-            rows: block.config?.gridRows ?? 1,
+            columns: _gridColumns(context, block, fallback: 2),
+            rows: block.config?.gridRows?.resolve(isTablet) ?? 1,
             layoutType: GridLayoutType.fromRaw(block.config?.gridLayoutType),
-            gap: block.config?.gridGap ?? 0,
+            gap: block.config?.gridGap?.resolve(isTablet) ?? 0,
             borderRadius: block.config?.tileRadius ?? 0,
-            imageAspect: block.config?.imageAspect,
+            imageAspect: block.config?.imageAspect?.resolve(isTablet),
             variant: ProductVariant.fromRaw(block.config?.variant),
             backgroundImageUrl: block.config?.backgroundImageUrl,
             backgroundColor: block.config?.backgroundColor,
             textColor: block.config?.textColor,
             sectionTitle: block.config?.sectionTitle,
-            bgImageAspect: block.config?.bgImageAspect,
+            bgImageAspect: block.config?.bgImageAspect?.resolve(isTablet),
             blockPadding: block.config?.blockPadding ?? 0,
           );
         }

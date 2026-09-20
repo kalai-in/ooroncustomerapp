@@ -56,7 +56,7 @@ class BlogListSkeletonLoader extends StatelessWidget {
                 ShimmerBox(color, width: 180, height: 13),
                 AppSpacing.h10,
                 Row(
-                  spacing: 12,
+                  spacing: ThemeConstants.spaceM,
                   children: [
                     ShimmerBox(color, width: 40, height: 12),
                     ShimmerBox(color, width: 40, height: 12),

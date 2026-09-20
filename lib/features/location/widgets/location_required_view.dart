@@ -2,6 +2,7 @@ import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
+import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_scaffold.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
@@ -42,7 +43,7 @@ class LocationRequiredView extends StatelessWidget {
                 children: [
                   AppSvgIcon(
                     AssetsConstants.weAreNotHere,
-                    size: 150,
+                    size: context.widthFraction(0.385),
                     color: context.cs.primary,
                     useColorMapper: true,
                   ),
@@ -77,7 +78,7 @@ class LocationRequiredView extends StatelessWidget {
                     isLoading: isSettingLocation,
                     prefixIcon: AppSvgIcon(
                       AssetsConstants.enableLocationIcon,
-                      size: 20,
+                      size: ThemeConstants.iconM,
                       color: context.cs.onPrimary,
                     ),
                   ),
@@ -90,7 +91,7 @@ class LocationRequiredView extends StatelessWidget {
                     variant: AppButtonVariant.outline,
                     prefixIcon: AppSvgIcon(
                       AssetsConstants.searchIcon,
-                      size: 18,
+                      size: ThemeConstants.iconS,
                       color: context.cs.primary,
                     ),
                   ),

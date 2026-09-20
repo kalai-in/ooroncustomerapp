@@ -5,6 +5,7 @@ import 'package:customer/features/category/models/category_model.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class SidebarLoader extends StatelessWidget {
   final Color bg;
@@ -19,11 +20,11 @@ class SidebarLoader extends StatelessWidget {
         itemCount: 8,
         itemBuilder: (_, _) => Padding(
           padding: const EdgeInsetsDirectional.symmetric(
-            vertical: 10,
-            horizontal: 14,
+            vertical: ThemeConstants.paddingS,
+            horizontal: ThemeConstants.paddingM,
           ),
           child: Column(
-            spacing: 6,
+            spacing: ThemeConstants.spaceS,
             children: [
               Container(
                 width: 50,
@@ -78,11 +79,11 @@ class SidebarItem extends StatelessWidget {
             width: double.infinity,
             color: isSelected ? selectedBg : Colors.transparent,
             padding: const EdgeInsetsDirectional.symmetric(
-              vertical: 10,
-              horizontal: 6,
+              vertical: ThemeConstants.paddingS,
+              horizontal: ThemeConstants.paddingXS,
             ),
             child: Column(
-              spacing: 6,
+              spacing: ThemeConstants.spaceS,
               children: [
                 AnimatedSlide(
                   offset: isSelected ? const Offset(0, -0.1) : Offset.zero,

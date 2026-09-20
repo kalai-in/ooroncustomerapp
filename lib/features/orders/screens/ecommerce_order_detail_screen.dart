@@ -24,18 +24,33 @@ import 'package:open_file/open_file.dart';
 import 'package:customer/commons/widgets/app_scaffold.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
-class EcommerceOrderDetailScreen extends StatelessWidget {
+class EcommerceOrderDetailScreen extends StatefulWidget {
   final String orderItemId;
 
   /// Gates OTP visibility — true only when opened from the Ongoing tab.
   final bool isOngoing;
-  final GlobalKey _otherItemsSectionKey = GlobalKey();
 
-  EcommerceOrderDetailScreen({
+  const EcommerceOrderDetailScreen({
     super.key,
     required this.orderItemId,
     this.isOngoing = false,
   });
+
+  @override
+  State<EcommerceOrderDetailScreen> createState() =>
+      _EcommerceOrderDetailScreenState();
+}
+
+class _EcommerceOrderDetailScreenState
+    extends State<EcommerceOrderDetailScreen> {
+  final GlobalKey _otherItemsSectionKey = GlobalKey();
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   void _scrollToOtherItems() {
     final sectionContext = _otherItemsSectionKey.currentContext;
@@ -116,6 +131,7 @@ class EcommerceOrderDetailScreen extends StatelessWidget {
               title: context.translate(LanguageLabelKeys.orderDetail),
               showBackButton: true,
               onBackPressed: () => _popWithResult(context),
+              scrollController: _scrollController,
               actions: [
                 BlocBuilder<
                   EcommerceOrderDetailCubit,
@@ -148,7 +164,7 @@ class EcommerceOrderDetailScreen extends StatelessWidget {
                     ),
                     onRetry: () => context
                         .read<EcommerceOrderDetailCubit>()
-                        .loadOrderDetail(orderItemId),
+                        .loadOrderDetail(widget.orderItemId),
                   );
                 }
 
@@ -171,8 +187,9 @@ class EcommerceOrderDetailScreen extends StatelessWidget {
                   return RefreshIndicator(
                     onRefresh: () => context
                         .read<EcommerceOrderDetailCubit>()
-                        .loadOrderDetail(orderItemId),
+                        .loadOrderDetail(widget.orderItemId),
                     child: ListView(
+                      controller: _scrollController,
                       padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingL),
                       children: [
                         OrderTimelineStatusCard(
@@ -204,7 +221,7 @@ class EcommerceOrderDetailScreen extends StatelessWidget {
                             currency: order.currency ?? '',
                           ),
                         ],
-                        if (isOngoing &&
+                        if (widget.isOngoing &&
                             order.otp != null &&
                             order.otp != 0) ...[
                           AppSpacing.h12,
@@ -230,7 +247,7 @@ class EcommerceOrderDetailScreen extends StatelessWidget {
                                   invoiceState is InvoiceDownloadLoading,
                               onDownloadInvoice: () => context
                                   .read<InvoiceDownloadCubit>()
-                                  .downloadEcommerceInvoice(orderItemId),
+                                  .downloadEcommerceInvoice(widget.orderItemId),
                             );
                           },
                         ),
@@ -238,7 +255,7 @@ class EcommerceOrderDetailScreen extends StatelessWidget {
                           AppSpacing.h12,
                           EcommerceOrderDetailStoreDeliveryCard(order: order),
                         ],
-                        AppSpacing.h80,
+                        AppSpacing.h8,
                       ],
                     ),
                   );

@@ -141,14 +141,18 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
     if (!widget.showSidebar) {
       return AppScaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: CustomAppBar(title: _title, showBackButton: true),
+        appBar: CustomAppBar(
+          title: _title,
+          showBackButton: true,
+          scrollController: _productPager.controller,
+        ),
         body: Stack(
           children: [
             Row(
               crossAxisAlignment: .start,
               children: [
                 SubCategoryContentPanel(
-                  controller: _productPager.controller,
+                  pager: _productPager,
                   selectedCategoryId: widget.parentCategory.id,
                   showSidebar: false,
                   onRetry: () => context.read<ProductCubit>().loadProducts(
@@ -173,7 +177,11 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
 
     return AppScaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(title: _title, showBackButton: true),
+      appBar: CustomAppBar(
+        title: _title,
+        showBackButton: true,
+        scrollController: _productPager.controller,
+      ),
       body: Stack(
         children: [
           BlocListener<SubCategorySelectionCubit, SubCategorySelectionState>(
@@ -212,7 +220,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                               ? state
                               : null;
                           return SubCategorySidebarPanel(
-                            controller: _sidebarPager.controller,
+                            pager: _sidebarPager,
                             selectedCategoryId: active?.leftSelectedId,
                             autoChildCategoryId:
                                 active?.rightShowsSubcategories == true
@@ -233,7 +241,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                         ? state
                         : null;
                     return SubCategoryContentPanel(
-                      controller: _productPager.controller,
+                      pager: _productPager,
                       selectedCategoryId: active?.rightCategory.id,
                       showSidebar: true,
                       autoChildCategory: active?.rightShowsSubcategories == true

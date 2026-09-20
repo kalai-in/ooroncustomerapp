@@ -66,6 +66,7 @@ class CheckoutCartItemsSection extends StatelessWidget {
                 child: CheckoutDeliveryEtaSection(
                   distance: cartData.distance,
                   timeToDeliver: cartData.timeToDeliver,
+                  estimatedDeliveryDate: cartData.estimatedDeliveryDate,
                   itemCount: items.length,
                 ),
               ),
@@ -94,16 +95,16 @@ class CheckoutCartItemsSection extends StatelessWidget {
                 },
                 child: Padding(
                   padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: 6,
+                    horizontal: ThemeConstants.paddingXS,
                     vertical: ThemeConstants.paddingXS,
                   ),
                   child: Row(
                     mainAxisSize: .min,
-                    spacing: 4,
+                    spacing: ThemeConstants.spaceXS,
                     children: [
                       AppSvgIcon(
                         AssetsConstants.deleteIcon,
-                        size: 16,
+                        size: ThemeConstants.iconXS,
                         color: context.cs.error,
                       ),
                       AppText(
@@ -221,7 +222,7 @@ class CheckoutCartItemTile extends StatelessWidget {
               opacity: isOutOfStock ? 0.5 : 1,
               child: Row(
                 crossAxisAlignment: .start,
-                spacing: 12,
+                spacing: ThemeConstants.spaceM,
                 children: [
                   Stack(
                     children: [
@@ -261,7 +262,7 @@ class CheckoutCartItemTile extends StatelessWidget {
                               ),
                             ),
                             padding: const EdgeInsetsDirectional.symmetric(
-                              horizontal: 6,
+                              horizontal: ThemeConstants.paddingXS,
                               vertical: 3,
                             ),
                             child: AppText(
@@ -303,7 +304,7 @@ class CheckoutCartItemTile extends StatelessWidget {
                                 ),
                                 child: AppSvgIcon(
                                   AssetsConstants.closeIcon,
-                                  size: 16,
+                                  size: ThemeConstants.iconXS,
                                   color: context.cs.onSurface,
                                 ),
                               ),
@@ -315,7 +316,7 @@ class CheckoutCartItemTile extends StatelessWidget {
                           Container(
                             padding: const EdgeInsetsDirectional.symmetric(
                               horizontal: ThemeConstants.paddingS,
-                              vertical: 3,
+                              vertical: ThemeConstants.paddingXS,
                             ),
                             decoration: AppDecorations.box(
                               color: context.cs.surfaceContainerHighest
@@ -337,12 +338,12 @@ class CheckoutCartItemTile extends StatelessWidget {
                           AppSpacing.h6,
                           Row(
                             mainAxisSize: .min,
-                            spacing: 4,
+                            spacing: ThemeConstants.spaceXS,
                             children: [
                               AppSvgIcon(
                                 AssetsConstants.offerIcon,
                                 color: context.cs.onSecondaryContainer,
-                                size: 12,
+                                size: ThemeConstants.iconXS,
                               ),
                               Flexible(
                                 child: AppText(
@@ -366,7 +367,7 @@ class CheckoutCartItemTile extends StatelessWidget {
                                   state.countFor(resolveCheckoutVariantId(item)),
                               builder: (context, qty) => Row(
                                 crossAxisAlignment: .center,
-                                spacing: 6,
+                                spacing: ThemeConstants.spaceS,
                                 children: [
                                   AppText(
                                     '${item.currency}${(displayPrice * qty).formatPrice(dp)}',
@@ -630,7 +631,7 @@ class CheckoutQtyBtn extends StatelessWidget {
           horizontal: ThemeConstants.paddingS,
           vertical: ThemeConstants.paddingS,
         ),
-        child: AppSvgIcon(icon, size: 15, color: color),
+        child: AppSvgIcon(icon, size: ThemeConstants.iconXS, color: color),
       ),
     );
   }

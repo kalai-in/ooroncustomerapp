@@ -62,7 +62,7 @@ class OrderDetailSkeletonLoader extends StatelessWidget {
           ShimmerBox(color, width: 120, height: 14),
           AppSpacing.h12,
           Row(
-            spacing: 8,
+            spacing: ThemeConstants.spaceS,
             children: [
               ShimmerBox(color, width: 18, height: 18),
               Expanded(child: ShimmerBox(color, height: 12)),
@@ -70,7 +70,7 @@ class OrderDetailSkeletonLoader extends StatelessWidget {
           ),
           AppSpacing.h8,
           Row(
-            spacing: 8,
+            spacing: ThemeConstants.spaceS,
             children: [
               ShimmerBox(color, width: 18, height: 18),
               Expanded(child: ShimmerBox(color, height: 12)),
@@ -91,13 +91,13 @@ class OrderDetailSkeletonLoader extends StatelessWidget {
           for (var i = 0; i < 2; i++) ...[
             Row(
               crossAxisAlignment: .start,
-              spacing: 12,
+              spacing: ThemeConstants.spaceM,
               children: [
                 ShimmerBox(color, width: 56, height: 56, radius: AppRadius.r8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: .start,
-                    spacing: 8,
+                    spacing: ThemeConstants.spaceS,
                     children: [
                       ShimmerBox(color, width: double.infinity, height: 13),
                       ShimmerBox(color, width: 80, height: 12),

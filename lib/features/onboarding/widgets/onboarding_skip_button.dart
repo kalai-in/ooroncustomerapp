@@ -4,6 +4,7 @@ import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class OnboardingSkipButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -20,8 +21,8 @@ class OnboardingSkipButton extends StatelessWidget {
         borderRadius: AppRadius.r20,
         child: Padding(
           padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: 18,
-            vertical: 9,
+            horizontal: ThemeConstants.paddingL,
+            vertical: ThemeConstants.paddingS,
           ),
           child: AppText(
             context.translate(LanguageLabelKeys.skip),

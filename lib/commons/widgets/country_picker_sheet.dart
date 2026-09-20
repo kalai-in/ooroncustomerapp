@@ -76,7 +76,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
               padding: const EdgeInsetsDirectional.only(start: ThemeConstants.paddingL, end: ThemeConstants.paddingS),
               child: AppSvgIcon(
                 AssetsConstants.searchIcon,
-                size: 18,
+                size: ThemeConstants.iconS,
                 color: context.cs.onSurfaceVariant,
                 fit: BoxFit.scaleDown,
               ),
@@ -87,7 +87,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
             ),
             // No `border` override — the default outline set is what makes the
             // field visible against the sheet's surface-coloured background.
-            contentPadding: const EdgeInsetsDirectional.symmetric(vertical: 10),
+            contentPadding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingS),
           ),
           AppSpacing.h12,
           Flexible(
@@ -157,7 +157,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                                 height: 28,
                                 errorWidget: AppSvgIcon(
                                   AssetsConstants.flagIcon,
-                                  size: 20,
+                                  size: ThemeConstants.iconM,
                                   color: context.cs.onSurfaceVariant,
                                 ),
                               ),

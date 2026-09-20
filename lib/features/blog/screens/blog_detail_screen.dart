@@ -18,19 +18,35 @@ import 'package:customer/commons/widgets/app_scaffold.dart';
 import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
-class BlogDetailScreen extends StatelessWidget {
+class BlogDetailScreen extends StatefulWidget {
   final Blog blog;
   const BlogDetailScreen({super.key, required this.blog});
 
   @override
+  State<BlogDetailScreen> createState() => _BlogDetailScreenState();
+}
+
+class _BlogDetailScreenState extends State<BlogDetailScreen> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final blog = widget.blog;
     final categoryName = blog.category?.name;
     return AppScaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(
         title: context.translate(LanguageLabelKeys.blogDetail),
+        scrollController: _scrollController,
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.spaceXXXL),
         child: Column(
           crossAxisAlignment: .start,
@@ -44,13 +60,13 @@ class BlogDetailScreen extends StatelessWidget {
                   if ((categoryName != null && categoryName.isNotEmpty) ||
                       (blog.createdAt ?? '').isNotEmpty)
                     Padding(
-                      padding: const EdgeInsetsDirectional.only(bottom: 10),
+                      padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
                       child: Row(
                         children: [
                           if (categoryName != null && categoryName.isNotEmpty)
                             Container(
                               padding: const EdgeInsetsDirectional.symmetric(
-                                horizontal: 10,
+                                horizontal: ThemeConstants.paddingS,
                                 vertical: ThemeConstants.paddingXS,
                               ),
                               decoration: AppDecorations.box(
@@ -128,7 +144,7 @@ class BlogDetailScreen extends StatelessWidget {
 
   Widget _buildHeroImage(BuildContext context) {
     return AppNetworkImage(
-      url: blog.imageUrl!,
+      url: widget.blog.imageUrl!,
       width: double.infinity,
       fit: BoxFit.cover,
       placeholder: Container(
@@ -152,13 +168,13 @@ class BlogDetailScreen extends StatelessWidget {
 
   Widget _buildTags(BuildContext context) {
     return Wrap(
-      spacing: 6,
+      spacing: ThemeConstants.spaceS,
       runSpacing: 6,
-      children: (blog.tagNames ?? [])
+      children: (widget.blog.tagNames ?? [])
           .map(
             (tag) => Container(
               padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: 10,
+                horizontal: ThemeConstants.paddingS,
                 vertical: ThemeConstants.paddingXS,
               ),
               decoration: AppDecorations.box(

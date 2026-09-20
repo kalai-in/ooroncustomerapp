@@ -1,6 +1,8 @@
 import 'package:customer/commons/cubit/base_pagination_cubit.dart';
+import 'package:customer/commons/utils/pagination_scroll_controller.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/commons/widgets/empty_state_widget.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/features/category/cubit/sub_category_cubit.dart';
 import 'package:customer/features/category/models/category_model.dart';
@@ -20,7 +22,7 @@ import 'package:customer/commons/widgets/app_text.dart';
 typedef _ProductState = PaginationState<ProductDataModel>;
 
 class SubCategoryContentPanel extends StatelessWidget {
-  final ScrollController controller;
+  final PaginationScrollController pager;
   final String? selectedCategoryId;
   final VoidCallback onRetry;
   final bool showSidebar;
@@ -31,7 +33,7 @@ class SubCategoryContentPanel extends StatelessWidget {
 
   const SubCategoryContentPanel({
     super.key,
-    required this.controller,
+    required this.pager,
     required this.selectedCategoryId,
     required this.onRetry,
     this.showSidebar = true,
@@ -43,7 +45,7 @@ class SubCategoryContentPanel extends StatelessWidget {
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
     return ProductGridSkeleton(
       crossAxisCount: showSidebar ? (isTablet ? 3 : 2) : (isTablet ? 5 : 3),
-      spacing: 8 * (isTablet ? 1.75 : 1.0),
+      spacing: ThemeConstants.spaceS * (isTablet ? 1.75 : 1.0),
       mainAxisSpacing: 12 * (isTablet ? 1.75 : 1.0),
     );
   }
@@ -82,7 +84,7 @@ class SubCategoryContentPanel extends StatelessWidget {
         child: BlocBuilder<SubCategoryChildrenCubit, PaginationState<Category>>(
           builder: (context, state) => SubCategoryChildrenPanel(
             state: state,
-            controller: controller,
+            pager: pager,
             onSelect: onSelectChildCategory ?? (_) {},
           ),
         ),
@@ -112,10 +114,12 @@ class SubCategoryContentPanel extends StatelessWidget {
                   );
                 }
                 if (state is PaginationLoaded<ProductDataModel>) {
-                  return SubCategoryProductPanel(
-                    state: state,
-                    controller: controller,
-                    showSidebar: showSidebar,
+                  return pager.attach(
+                    SubCategoryProductPanel(
+                      state: state,
+                      controller: pager.controller,
+                      showSidebar: showSidebar,
+                    ),
                   );
                 }
                 return AppSpacing.shrink;

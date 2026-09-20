@@ -1,8 +1,7 @@
 import 'package:customer/commons/widgets/api_country_phone_field.dart';
 import 'package:customer/commons/widgets/app_button.dart';
-import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/commons/widgets/app_text_field.dart';
-import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/commons/models/countries_model.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
@@ -37,7 +36,7 @@ class ForgotPasswordInputSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: .stretch,
-      spacing: 28,
+      spacing: ThemeConstants.spaceXXL,
       children: [
         if (isPhone) _buildPhoneField(context) else _buildEmailField(context),
         AppButton(
@@ -55,11 +54,6 @@ class ForgotPasswordInputSection extends StatelessWidget {
       labelText: context.translate(LanguageLabelKeys.email),
       hintText: context.translate(LanguageLabelKeys.enterEmail),
       keyboardType: TextInputType.emailAddress,
-      prefixIcon: AppSvgIcon(
-        AssetsConstants.emailIcon,
-        color: context.cs.primary,
-        size: 20,
-      ),
       validator: (v) => v.validateEmail(context),
     );
   }
@@ -67,7 +61,7 @@ class ForgotPasswordInputSection extends StatelessWidget {
   Widget _buildPhoneField(BuildContext context) {
     return Column(
       crossAxisAlignment: .start,
-      spacing: 8,
+      spacing: ThemeConstants.spaceS,
       children: [
         AppText(
           context.translate(LanguageLabelKeys.phoneNumber),

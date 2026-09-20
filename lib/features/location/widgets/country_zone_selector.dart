@@ -185,13 +185,13 @@ class _Heading extends StatelessWidget {
         Container(
           width: 40,
           height: 40,
-          padding: const EdgeInsetsDirectional.all(10),
+          padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
           decoration: AppDecorations.primaryIconBox(
             color: context.cs.primaryContainer,
           ),
           child: AppSvgIcon(
             AssetsConstants.addressIcon,
-            size: 20,
+            size: ThemeConstants.iconM,
             color: context.cs.primary,
           ),
         ),

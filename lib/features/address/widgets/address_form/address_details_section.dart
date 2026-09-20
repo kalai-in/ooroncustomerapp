@@ -1,3 +1,4 @@
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:customer/core/localization/language_label_key.dart';
@@ -11,8 +12,15 @@ class AddressDetailsSection extends StatelessWidget {
   final TextEditingController areaCtrl;
   final TextEditingController cityCtrl;
   final TextEditingController pincodeCtrl;
-  final TextEditingController stateCtrl;
-  final TextEditingController countryCtrl;
+
+  /// State selector — either the [RegionDropdownField] (country has regions)
+  /// or the free-text manual fallback, built by the parent so it can switch
+  /// between the two based on the regions api response.
+  final Widget stateField;
+
+  /// Country selector — the [CountryDropdownField], built by the parent so
+  /// selecting a country can drive the region fetch.
+  final Widget countryField;
 
   /// Snapshotted once by the parent at init — whether these fields already
   /// had a value (from the saved address / map geocode) before the user
@@ -20,8 +28,6 @@ class AddressDetailsSection extends StatelessWidget {
   /// re-lock a field the moment the user finishes typing into it.
   final bool cityPrefilled;
   final bool pincodePrefilled;
-  final bool statePrefilled;
-  final bool countryPrefilled;
 
   const AddressDetailsSection({
     super.key,
@@ -30,12 +36,10 @@ class AddressDetailsSection extends StatelessWidget {
     required this.areaCtrl,
     required this.cityCtrl,
     required this.pincodeCtrl,
-    required this.stateCtrl,
-    required this.countryCtrl,
+    required this.stateField,
+    required this.countryField,
     required this.cityPrefilled,
     required this.pincodePrefilled,
-    required this.statePrefilled,
-    required this.countryPrefilled,
   });
 
   @override
@@ -44,8 +48,6 @@ class AddressDetailsSection extends StatelessWidget {
     // fields missing from the geocoding result stay open for manual entry.
     final showCity = !cityPrefilled;
     final showPincode = !pincodePrefilled;
-    final showState = !statePrefilled;
-    final showCountry = !countryPrefilled;
 
     final cityField = AppTextField(
       controller: cityCtrl,
@@ -70,30 +72,8 @@ class AddressDetailsSection extends StatelessWidget {
           : null,
     );
 
-    final stateField = AppTextField(
-      controller: stateCtrl,
-      isRequired: true,
-      labelText: context.translate(LanguageLabelKeys.stateLabel),
-      hintText: context.translate(LanguageLabelKeys.enterState),
-      textCapitalization: TextCapitalization.words,
-      validator: (v) => (v == null || v.trim().isEmpty)
-          ? context.translate(LanguageLabelKeys.required)
-          : null,
-    );
-
-    final countryField = AppTextField(
-      controller: countryCtrl,
-      isRequired: true,
-      labelText: context.translate(LanguageLabelKeys.country),
-      hintText: context.translate(LanguageLabelKeys.enterCountry),
-      textCapitalization: TextCapitalization.words,
-      validator: (v) => (v == null || v.trim().isEmpty)
-          ? context.translate(LanguageLabelKeys.required)
-          : null,
-    );
-
     return Column(
-      spacing: 14,
+      spacing: ThemeConstants.spaceL,
       children: [
         AppTextField(
           controller: addressCtrl,
@@ -129,21 +109,20 @@ class AddressDetailsSection extends StatelessWidget {
         if (showCity || showPincode)
           Row(
             crossAxisAlignment: .start,
-            spacing: 12,
+            spacing: ThemeConstants.spaceM,
             children: [
               if (showCity) Expanded(child: cityField),
               if (showPincode) Expanded(child: pincodeField),
             ],
           ),
-        if (showState || showCountry)
-          Row(
-            crossAxisAlignment: .start,
-            spacing: 12,
-            children: [
-              if (showState) Expanded(child: stateField),
-              if (showCountry) Expanded(child: countryField),
-            ],
-          ),
+        Row(
+          crossAxisAlignment: .start,
+          spacing: ThemeConstants.spaceM,
+          children: [
+            Expanded(child: countryField),
+            Expanded(child: stateField),
+          ],
+        ),
       ],
     );
   }

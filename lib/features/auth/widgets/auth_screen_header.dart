@@ -1,3 +1,4 @@
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
@@ -16,7 +17,7 @@ class AuthScreenHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: .start,
-      spacing: 6,
+      spacing: ThemeConstants.spaceS,
       children: [
         AppText(
           title,

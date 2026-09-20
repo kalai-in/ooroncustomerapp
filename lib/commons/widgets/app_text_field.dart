@@ -120,7 +120,7 @@ class _AppTextFieldState extends State<AppTextField> {
               _obscure
                   ? AssetsConstants.passwordVisibleIcon
                   : AssetsConstants.passwordHideIcon,
-              size: 20,
+              size: ThemeConstants.iconM,
               color: cs.onSurfaceVariant,
             ),
             onPressed: () => setState(() => _obscure = !_obscure),
@@ -130,7 +130,7 @@ class _AppTextFieldState extends State<AppTextField> {
     return Column(
       crossAxisAlignment: .start,
       mainAxisSize: .min,
-      spacing: 6,
+      spacing: ThemeConstants.spaceS,
       children: [
         // ── Label above field ─────────────────────────────────────────────
         if (widget.labelText != null)
@@ -230,7 +230,7 @@ class _MobilePrefix extends StatelessWidget {
         AppSpacing.w4,
         AppSvgIcon(
           AssetsConstants.arrowDownIcon,
-          size: 18,
+          size: ThemeConstants.iconS,
           color: colorScheme.onSurfaceVariant,
         ),
         AppSpacing.w6,

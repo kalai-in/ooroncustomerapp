@@ -69,11 +69,11 @@ class _AppSelectFieldState extends State<AppSelectField> {
       suffixIcon: Padding(
         padding: const EdgeInsetsDirectional.only(end: ThemeConstants.paddingL, start: ThemeConstants.paddingS),
         child: widget.isLoading
-            ? const LoadingWidget(size: 16)
+            ? const LoadingWidget(size: ThemeConstants.loaderSizeS)
             : AppSvgIcon(
                 AssetsConstants.arrowDownIcon,
                 color: context.cs.onSurfaceVariant,
-                size: 18,
+                size: ThemeConstants.iconS,
               ),
       ),
       suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),

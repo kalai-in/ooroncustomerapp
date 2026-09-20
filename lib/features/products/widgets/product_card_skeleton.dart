@@ -120,7 +120,7 @@ class ProductListItemSkeleton extends StatelessWidget {
     return ShimmerBuilder(
       builder: (context, color) => Container(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: 10,
+          horizontal: ThemeConstants.paddingS,
           vertical: ThemeConstants.paddingS,
         ),
         decoration: AppDecorations.box(

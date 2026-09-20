@@ -24,17 +24,36 @@ import 'package:customer/commons/widgets/app_scaffold.dart';
 import 'package:customer/commons/widgets/app_button.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
-class OrderDetailScreen extends StatelessWidget {
+class OrderDetailScreen extends StatefulWidget {
   final String orderId;
 
   /// Gates OTP visibility — true only when opened from the Ongoing tab.
   final bool isOngoing;
 
+  /// True only right after a delivered-order-tracking hand-off — plays a
+  /// one-time attention pulse on the rating control. See
+  /// [OrderDetailArgs.highlightRating].
+  final bool highlightRating;
+
   const OrderDetailScreen({
     super.key,
     required this.orderId,
     this.isOngoing = false,
+    this.highlightRating = false,
   });
+
+  @override
+  State<OrderDetailScreen> createState() => _OrderDetailScreenState();
+}
+
+class _OrderDetailScreenState extends State<OrderDetailScreen> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   /// Cancels every non-cancelled item via [OrderStatusUpdateCubit]; the
   /// screen's existing listener patches each item into [OrderDetailCubit] as
@@ -145,7 +164,8 @@ class OrderDetailScreen extends StatelessWidget {
               title: context.translate(LanguageLabelKeys.orderDetail),
               showBackButton: true,
               onBackPressed: () => _popWithResult(context),
-              actions: [OrderHelpButton(orderId: orderId)],
+              scrollController: _scrollController,
+              actions: [OrderHelpButton(orderId: widget.orderId)],
             ),
             body: BlocBuilder<OrderDetailCubit, OrderDetailState>(
               builder: (context, state) {
@@ -162,7 +182,7 @@ class OrderDetailScreen extends StatelessWidget {
                     ),
                     onRetry: () => context
                         .read<OrderDetailCubit>()
-                        .loadOrderDetail(orderId),
+                        .loadOrderDetail(widget.orderId),
                   );
                 }
 
@@ -173,8 +193,9 @@ class OrderDetailScreen extends StatelessWidget {
                   return RefreshIndicator(
                     onRefresh: () => context
                         .read<OrderDetailCubit>()
-                        .loadOrderDetail(orderId),
+                        .loadOrderDetail(widget.orderId),
                     child: ListView(
+                      controller: _scrollController,
                       padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingL),
                       children: [
                         OrderTimelineStatusCard(
@@ -196,7 +217,7 @@ class OrderDetailScreen extends StatelessWidget {
                             currency: order.currency ?? '',
                           ),
                         ],
-                        if (isOngoing &&
+                        if (widget.isOngoing &&
                             order.otp != null &&
                             order.otp != 0) ...[
                           AppSpacing.h12,
@@ -207,6 +228,7 @@ class OrderDetailScreen extends StatelessWidget {
                           items: items,
                           currency: order.currency,
                           order: order,
+                          highlightRating: widget.highlightRating,
                         ),
                         AppSpacing.h12,
                         OrderDetailCustomerInfoCard(
@@ -254,7 +276,7 @@ class OrderDetailScreen extends StatelessWidget {
                                   invoiceState is InvoiceDownloadLoading,
                               onDownloadInvoice: () => context
                                   .read<InvoiceDownloadCubit>()
-                                  .downloadQuickInvoice(orderId),
+                                  .downloadQuickInvoice(widget.orderId),
                             );
                           },
                         ),
@@ -262,7 +284,7 @@ class OrderDetailScreen extends StatelessWidget {
                           AppSpacing.h12,
                           OrderDetailDeliveryBoyCard(order: order),
                         ],
-                        AppSpacing.h80,
+                        AppSpacing.h8,
                       ],
                     ),
                   );

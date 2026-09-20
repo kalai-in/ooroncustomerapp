@@ -1,4 +1,5 @@
 import 'package:customer/commons/widgets/loading_widget.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/commons/widgets/app_text.dart';
@@ -136,7 +137,7 @@ class AppButton extends StatelessWidget {
 
   Widget _child(BuildContext context, Color color) {
     if (isLoading) {
-      return LoadingWidget(size: 22);
+      return LoadingWidget(size: ThemeConstants.loaderSize);
     }
     final labelText = AppText(
       label,
@@ -150,7 +151,7 @@ class AppButton extends StatelessWidget {
       return Row(
         mainAxisAlignment: .center,
         mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
-        spacing: 8,
+        spacing: ThemeConstants.spaceS,
         children: [
           IconTheme.merge(
             data: IconThemeData(color: color),

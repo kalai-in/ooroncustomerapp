@@ -79,7 +79,7 @@ class ProductDetailInfoTable extends StatelessWidget {
             Padding(
               padding: const EdgeInsetsDirectional.symmetric(
                 horizontal: ThemeConstants.paddingL,
-                vertical: 10,
+                vertical: ThemeConstants.paddingS,
               ),
               child: Row(
                 crossAxisAlignment: .start,
@@ -215,10 +215,10 @@ class _PolicyItem extends StatelessWidget {
                 : context.cs.surfaceContainerHighest,
             borderRadius: AppRadius.r12,
           ),
-          padding: const EdgeInsetsDirectional.all(10),
+          padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
           child: AppSvgIcon(
             p.icon,
-            size: 18,
+            size: ThemeConstants.iconS,
             useColorMapper: true,
             color: context.cs.primary,
           ),

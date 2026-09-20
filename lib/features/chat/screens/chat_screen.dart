@@ -35,7 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (_initialized) return;
     _initialized = true;
     _args = ModalRoute.of(context)!.settings.arguments as ChatScreenArgs;
-    _cubit = ChatCubit()
+    _cubit = ChatCubit(sendLocation: _args.sendLocation)
       ..connect(_args.roomId, conversationId: _args.conversationId);
   }
 
@@ -192,7 +192,7 @@ class _ReconnectBanner extends StatelessWidget {
           children: [
             AppSvgIcon(
               AssetsConstants.refreshIcon,
-              size: 18,
+              size: ThemeConstants.iconS,
               color: context.cs.onErrorContainer,
             ),
             const SizedBox(width: 8),

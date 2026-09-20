@@ -74,7 +74,7 @@ class HomeSkeletonLoader extends StatelessWidget {
       crossAxisAlignment: .start,
       children: [
         Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, 0, ThemeConstants.paddingL, 10),
+          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, 0, ThemeConstants.paddingL, ThemeConstants.paddingS),
           child: ShimmerBox(color, width: 140, height: 16),
         ),
         SizedBox(

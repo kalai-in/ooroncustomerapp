@@ -24,7 +24,7 @@ class TransactionListSkeletonLoader extends StatelessWidget {
 
   Widget _tile(BuildContext context, Color color) {
     return Container(
-      margin: const EdgeInsetsDirectional.only(bottom: 10),
+      margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
       decoration: outlined
           ? AppDecorations.outlinedCard(
               color: context.cs.surface,
@@ -35,19 +35,19 @@ class TransactionListSkeletonLoader extends StatelessWidget {
               shadowColor: context.theme.shadowColor.withValues(alpha: 0.08),
             ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(14),
+        padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
         child: Column(
           crossAxisAlignment: .start,
           children: [
             Row(
               crossAxisAlignment: .center,
-              spacing: 12,
+              spacing: ThemeConstants.spaceM,
               children: [
                 ShimmerBox(color, width: 40, height: 40, radius: AppRadius.r8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: .start,
-                    spacing: 6,
+                    spacing: ThemeConstants.spaceS,
                     children: [
                       ShimmerBox(color, width: 130, height: 14),
                       ShimmerBox(color, width: 90, height: 11),

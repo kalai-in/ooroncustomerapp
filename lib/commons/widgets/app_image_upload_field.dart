@@ -43,7 +43,7 @@ class AppImageUploadField extends StatelessWidget {
           ListTile(
             leading: AppSvgIcon(
               AssetsConstants.cameraIcon,
-              size: 22,
+              size: ThemeConstants.iconM,
               color: context.cs.onSurfaceVariant,
             ),
             title: AppText(context.translate(LanguageLabelKeys.takePhoto)),
@@ -52,7 +52,7 @@ class AppImageUploadField extends StatelessWidget {
           ListTile(
             leading: AppSvgIcon(
               AssetsConstants.galleryIcon,
-              size: 22,
+              size: ThemeConstants.iconM,
               color: context.cs.onSurfaceVariant,
             ),
             title: AppText(
@@ -112,15 +112,15 @@ class AppImageUploadField extends StatelessWidget {
                       right: 0,
                       bottom: 0,
                       child: Container(
-                        padding: EdgeInsetsDirectional.symmetric(vertical: 6),
+                        padding: EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXS),
                         color: context.cs.scrim.withValues(alpha: 0.5),
                         child: Row(
                           mainAxisAlignment: .center,
-                          spacing: 6,
+                          spacing: ThemeConstants.spaceS,
                           children: [
                             AppSvgIcon(
                               AssetsConstants.editIcon,
-                              size: 14,
+                              size: ThemeConstants.iconXS,
                               color: context.cs.onInverseSurface,
                             ),
                             AppText(
@@ -149,7 +149,7 @@ class AppImageUploadField extends StatelessWidget {
     return [
       AppSvgIcon(
         AssetsConstants.uploadIcon,
-        size: 32,
+        size: ThemeConstants.iconXL,
         color: hasError ? context.cs.error : context.cs.primary,
       ),
       AppSpacing.h8,

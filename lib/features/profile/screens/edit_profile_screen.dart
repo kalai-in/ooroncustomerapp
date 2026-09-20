@@ -45,6 +45,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _mobileController = TextEditingController();
+  final _scrollController = ScrollController();
 
   File? _profileImage;
   String? _profileImageUrl;
@@ -64,6 +65,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _usernameController.dispose();
     _emailController.dispose();
     _mobileController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -126,7 +128,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ListTile(
             leading: AppSvgIcon(
               AssetsConstants.cameraIcon,
-              size: 22,
+              size: ThemeConstants.iconL,
               color: context.cs.onSurfaceVariant,
             ),
             title: AppText(context.translate(LanguageLabelKeys.takePhoto)),
@@ -135,7 +137,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ListTile(
             leading: AppSvgIcon(
               AssetsConstants.galleryIcon,
-              size: 22,
+              size: ThemeConstants.iconL,
               color: context.cs.onSurfaceVariant,
             ),
             title: AppText(
@@ -189,6 +191,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(
         title: context.translate(LanguageLabelKeys.editProfile),
+        scrollController: _scrollController,
       ),
       bottomNavigationBar:
           BlocSelector<ProfileUpdateCubit, ProfileUpdateState, bool>(
@@ -238,6 +241,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ],
         child: SingleChildScrollView(
+          controller: _scrollController,
           padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXXL, ThemeConstants.spaceXXXL, ThemeConstants.paddingXXL, ThemeConstants.paddingL),
           child: Form(
             key: _formKey,
@@ -331,18 +335,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       url: _profileImageUrl!,
                       placeholder: AppSvgIcon(
                         AssetsConstants.userIcon,
-                        size: 48,
+                        size: ThemeConstants.iconXL,
                         color: context.cs.primary, fit: BoxFit.scaleDown,
                       ),
                       errorWidget: AppSvgIcon(
                         AssetsConstants.userIcon,
-                        size: 48,
+                        size: ThemeConstants.iconXL,
                         color: context.cs.primary, fit: BoxFit.scaleDown,
                       ),
                     )
                   : AppSvgIcon(
                       AssetsConstants.userIcon,
-                      size: 48,
+                      size: ThemeConstants.iconXL,
                       color: context.cs.primary,
                       fit: BoxFit.scaleDown,
                     ),
@@ -359,10 +363,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 color: context.cs.primary,
                 border: Border.all(color: context.cs.surface, width: 2),
               ),
-              padding: const EdgeInsetsDirectional.all(5.0),
+              padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
               child: AppSvgIcon(
                 AssetsConstants.cameraIcon,
-                size: 24,
+                size: ThemeConstants.iconL,
                 color: context.cs.onPrimary,
                 fit: BoxFit.scaleDown,
               ),

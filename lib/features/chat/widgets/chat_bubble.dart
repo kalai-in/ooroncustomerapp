@@ -84,10 +84,10 @@ class ChatBubble extends StatelessWidget {
                 if (message.message.isNotEmpty || message.attachment == null)
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
-                      14,
-                      10,
-                      14,
-                      6,
+                      ThemeConstants.paddingM,
+                      ThemeConstants.paddingS,
+                      ThemeConstants.paddingM,
+                      ThemeConstants.paddingXS,
                     ),
                     child: AppText(
                       message.message,
@@ -100,7 +100,7 @@ class ChatBubble extends StatelessWidget {
                     ),
                   ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(14, 0, 14, ThemeConstants.paddingS),
+                  padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, 0, ThemeConstants.paddingM, ThemeConstants.paddingS),
                   child: Row(
                     mainAxisSize: .min,
                     children: [
@@ -307,7 +307,7 @@ class _AudioAttachmentState extends State<_AudioAttachment> {
     );
 
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, 10, ThemeConstants.paddingM, ThemeConstants.paddingXS),
+      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, ThemeConstants.paddingS, ThemeConstants.paddingM, ThemeConstants.paddingXS),
       child: Row(
         mainAxisSize: .min,
         children: [
@@ -322,7 +322,8 @@ class _AudioAttachmentState extends State<_AudioAttachment> {
                     ? AssetsConstants.pauseIcon
                     : AssetsConstants.playIcon,
                 color: iconColor,
-                size: 22,
+                size: ThemeConstants.iconL,
+                fit: BoxFit.scaleDown,
               ),
             ),
           ),
@@ -408,7 +409,7 @@ class _FileAttachmentState extends State<_FileAttachment> {
     return InkWell(
       onTap: _open,
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 14, ThemeConstants.paddingXS),
+        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, ThemeConstants.paddingS, ThemeConstants.paddingM, ThemeConstants.paddingXS),
         child: Row(
           mainAxisSize: .min,
           children: [
@@ -423,7 +424,7 @@ class _FileAttachmentState extends State<_FileAttachment> {
               ),
               child: _downloading
                   ? Padding(
-                      padding: const EdgeInsetsDirectional.all(10),
+                      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
                       child: LoadingWidget(),
                     )
                   : AppSvgIcon(
@@ -431,7 +432,8 @@ class _FileAttachmentState extends State<_FileAttachment> {
                           ? AssetsConstants.playCircleIcon
                           : AssetsConstants.fileIcon,
                       color: isMe ? context.cs.onPrimary : context.cs.primary,
-                      size: 20,
+                      size: ThemeConstants.iconL,
+                      fit: BoxFit.scaleDown,
                     ),
             ),
             AppSpacing.w10,
@@ -477,7 +479,7 @@ class _FullScreenImage extends StatelessWidget {
               : AppSvgIcon(
                   AssetsConstants.fileBrokenIcon,
                   color: context.cs.onInverseSurface,
-                  size: 64,
+                  size: ThemeConstants.iconL, fit: BoxFit.scaleDown,
                 ),
         ),
       ),
@@ -494,17 +496,17 @@ class _StatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (status) {
-    MessageStatus.sending => LoadingWidget(size: 10),
+    MessageStatus.sending => LoadingWidget(size: ThemeConstants.loaderSizeS),
     MessageStatus.sent => AppSvgIcon(
       AssetsConstants.checkReadIcon,
-      size: 14,
+      size: ThemeConstants.iconXS,
       color: context.cs.onPrimary.withValues(alpha: 0.7),
     ),
     MessageStatus.failed => GestureDetector(
       onTap: onRetry,
       child: AppSvgIcon(
         AssetsConstants.infoCircleIcon,
-        size: 14,
+        size: ThemeConstants.iconXS,
         color: context.cs.error,
       ),
     ),

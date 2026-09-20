@@ -1,4 +1,5 @@
 import 'package:customer/commons/cubit/base_pagination_cubit.dart';
+import 'package:customer/commons/utils/pagination_scroll_controller.dart';
 import 'package:customer/commons/widgets/empty_state_widget.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
@@ -13,13 +14,13 @@ import 'package:customer/core/constants/theme_constants.dart';
 class SubCategoryChildrenPanel extends StatelessWidget {
   final PaginationState<Category> state;
   final ValueChanged<Category> onSelect;
-  final ScrollController? controller;
+  final PaginationScrollController? pager;
 
   const SubCategoryChildrenPanel({
     super.key,
     required this.state,
     required this.onSelect,
-    this.controller,
+    this.pager,
   });
 
   bool _isTablet(BuildContext context) =>
@@ -77,8 +78,8 @@ class SubCategoryChildrenPanel extends StatelessWidget {
       final itemCount =
           data.length + (loaded.isFetchingMore ? _crossAxisCount(context) : 0);
 
-      return GridView.builder(
-        controller: controller,
+      final grid = GridView.builder(
+        controller: pager?.controller,
         padding: _gridPadding,
         gridDelegate: _gridDelegate(context),
         itemCount: itemCount,
@@ -91,6 +92,7 @@ class SubCategoryChildrenPanel extends StatelessWidget {
           );
         },
       );
+      return pager == null ? grid : pager!.attach(grid);
     }
     return const SizedBox.shrink();
   }

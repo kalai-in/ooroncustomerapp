@@ -32,12 +32,17 @@ class CartFetchCubit extends Cubit<CartFetchState> {
   /// response of add/remove) — no Loading state, so the screen doesn't flicker.
   void setCart(Cart cart) => emit(CartFetchLoaded(cart));
 
-  Future<void> fetchCart({String? latitude, String? longitude}) async {
+  Future<void> fetchCart({
+    String? latitude,
+    String? longitude,
+    String? addressId,
+  }) async {
     try {
       emit(CartFetchLoading());
       final result = await _repository.getCart(
         latitude: latitude,
         longitude: longitude,
+        addressId: addressId,
       );
       emit(CartFetchLoaded(result));
     } on ApiException catch (e) {

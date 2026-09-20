@@ -16,7 +16,7 @@ class OrderListSkeletonLoader extends StatelessWidget {
   Widget _card(Color color) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsetsDirectional.all(14),
+      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
       decoration: AppDecorations.box(
         color: color.withValues(alpha: 0.25),
         borderRadius: AppRadius.r12,
@@ -35,7 +35,7 @@ class OrderListSkeletonLoader extends StatelessWidget {
           ShimmerBox(color, width: 130, height: 11),
           AppSpacing.h12,
           Row(
-            spacing: 8,
+            spacing: ThemeConstants.spaceS,
             children: [
               ShimmerBox(color, width: 48, height: 48, radius: AppRadius.r8),
               ShimmerBox(color, width: 48, height: 48, radius: AppRadius.r8),
@@ -43,7 +43,7 @@ class OrderListSkeletonLoader extends StatelessWidget {
           ),
           AppSpacing.h12,
           Row(
-            spacing: 8,
+            spacing: ThemeConstants.spaceS,
             children: [
               Expanded(
                 child: ShimmerBox(color, height: 36, radius: AppRadius.r8),

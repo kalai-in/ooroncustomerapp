@@ -10,6 +10,7 @@ import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class CheckoutWalletSection extends StatelessWidget {
   const CheckoutWalletSection({
@@ -43,7 +44,7 @@ class CheckoutWalletSection extends StatelessWidget {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsetsDirectional.all(14),
+          padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
           decoration: AppDecorations.box(
             color: context.cs.surface,
             borderRadius: AppRadius.r14,
@@ -57,7 +58,7 @@ class CheckoutWalletSection extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: .start,
-            spacing: 8,
+            spacing: ThemeConstants.spaceS,
             children: [
               Row(
                 crossAxisAlignment: .center,
@@ -70,7 +71,7 @@ class CheckoutWalletSection extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: .start,
-                      spacing: 2,
+                      spacing: ThemeConstants. spaceXXS,
                       children: [
                         AppText(
                           '${AppConfig.appName} ${context.translate(LanguageLabelKeys.wallet)}',
@@ -120,7 +121,7 @@ class CheckoutWalletSection extends StatelessWidget {
                   else
                     AppSvgIcon(
                       AssetsConstants.walletIcon,
-                      size: 32,
+                      size: ThemeConstants.iconXL,
                       color: context.cs.onSurfaceVariant,
                     ),
                 ],
@@ -158,7 +159,7 @@ class _WalletCheckbox extends StatelessWidget {
         child: selected
             ? AppSvgIcon(
                 AssetsConstants.checkIcon,
-                size: 15,
+                size: ThemeConstants.iconXS,
                 color: context.cs.onPrimary,
               )
             : null,

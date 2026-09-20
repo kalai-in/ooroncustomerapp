@@ -73,7 +73,7 @@ class BlogCard extends StatelessWidget {
                   if ((categoryName != null && categoryName.isNotEmpty) ||
                       (blog.createdAt ?? '').isNotEmpty)
                     Padding(
-                      padding: const EdgeInsetsDirectional.only(bottom: 6),
+                      padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingXS),
                       child: Row(
                         mainAxisAlignment: .spaceBetween,
                         children: [
@@ -82,7 +82,7 @@ class BlogCard extends StatelessWidget {
                               child: Container(
                                 padding: const EdgeInsetsDirectional.symmetric(
                                   horizontal: ThemeConstants.paddingS,
-                                  vertical: 3,
+                                  vertical: ThemeConstants.paddingXS,
                                 ),
                                 decoration: AppDecorations.box(
                                   color: context.cs.primary.withValues(

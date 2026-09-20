@@ -1,3 +1,4 @@
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/commons/widgets/api_country_phone_field.dart';
@@ -33,7 +34,7 @@ class ContactDetailsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      spacing: 14,
+      spacing: ThemeConstants.spaceL,
       children: [
         AppTextField(
           controller: nameCtrl,

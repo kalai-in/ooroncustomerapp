@@ -63,6 +63,7 @@ import 'package:customer/features/wallet/cubit/transaction_cubit.dart';
 import 'package:customer/features/wallet/cubit/wallet_transaction_cubit.dart';
 import 'package:customer/features/wallet/screens/transactions_screen.dart';
 import 'package:customer/features/wallet/screens/wallet_transactions_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:customer/core/constants/navigation_service.dart';
@@ -343,6 +344,7 @@ class AppRouter {
             child: OrderDetailScreen(
               orderId: orderArgs.orderId,
               isOngoing: orderArgs.isOngoing,
+              highlightRating: orderArgs.highlightRating,
             ),
           ),
         );
@@ -365,9 +367,34 @@ class AppRouter {
         );
 
       case RouteNames.orderTracking:
-        final order = settings.arguments;
-        if (order is! OrderData) return _invalidArgsRoute(settings);
-        return _materialRoute(OrderTrackingScreen(order: order));
+        final trackingArgs = settings.arguments;
+        if (trackingArgs is OrderData) {
+          return _materialRoute(OrderTrackingScreen(order: trackingArgs));
+        }
+        if (trackingArgs is String) {
+          // Called right after checkout with only the id (e.g. order-success
+          // screen) — load the order first, then hand it to the tracking screen.
+          return _materialRoute(
+            BlocProvider(
+              create: (_) =>
+                  OrderDetailCubit()..loadOrderDetail(trackingArgs),
+              child: BlocBuilder<OrderDetailCubit, OrderDetailState>(
+                builder: (context, state) {
+                  if (state is OrderDetailLoaded) {
+                    return OrderTrackingScreen(order: state.orderDetail);
+                  }
+                  if (state is OrderDetailError) {
+                    return Scaffold(body: Center(child: Text(state.message)));
+                  }
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                },
+              ),
+            ),
+          );
+        }
+        return _invalidArgsRoute(settings);
 
       case RouteNames.paymentMethods:
         final paymentArgs = settings.arguments;
@@ -488,7 +515,7 @@ class AppRouter {
   // whose required arguments are missing/wrong-typed (a stray deep link, a
   // caller refactor) — rather than crashing with an uncaught TypeError on an
   // unguarded `as` cast, self-replaces with MainScreen right after building.
-  static MaterialPageRoute _invalidArgsRoute(RouteSettings settings) {
+  static CupertinoPageRoute _invalidArgsRoute(RouteSettings settings) {
     return _materialRoute(
       AppScaffold(
         body: Builder(
@@ -508,10 +535,7 @@ class AppRouter {
     );
   }
 
-  static MaterialPageRoute _materialRoute(
-    Widget child, {
-    RouteSettings? settings,
-  }) {
-    return MaterialPageRoute(builder: (_) => child, settings: settings);
+  static CupertinoPageRoute _materialRoute(Widget child, {RouteSettings? settings}) {
+    return CupertinoPageRoute(builder: (_) => child, settings: settings);
   }
 }

@@ -14,7 +14,6 @@ import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:customer/features/payment_method/models/enums/transaction_type.dart';
 import 'package:customer/features/payment_method/screens/payment_methods_screen.dart';
-import 'package:customer/commons/cubit/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,7 +25,7 @@ import 'package:customer/commons/animations/slide_animation.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
 void showAddMoneySheet(BuildContext context, {VoidCallback? onSuccess}) {
-  final settingsCubit = context.read<SettingsCubit>();
+  final countrySettingsCubit = context.read<CountrySettingsCubit>();
 
   showAppBottomSheet(
     context,
@@ -37,10 +36,8 @@ void showAddMoneySheet(BuildContext context, {VoidCallback? onSuccess}) {
         bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
       ),
       child: _AddMoneySheet(
-        currencySymbol: context
-            .read<CountrySettingsCubit>()
-            .getCurrencySymbol(),
-        decimalPoint: settingsCubit.getDecimalPoint(),
+        currencySymbol: countrySettingsCubit.getCurrencySymbol(),
+        decimalPoint: countrySettingsCubit.getDecimalPoint(),
         onSuccess: onSuccess ?? () {},
       ),
     ),
@@ -163,7 +160,7 @@ class _AddMoneySheetState extends State<_AddMoneySheet> {
           ),
           AppSpacing.h24,
           Row(
-            spacing: 12,
+            spacing: ThemeConstants.spaceM,
             children: [
               Expanded(
                 child: AppButton(
@@ -173,7 +170,7 @@ class _AddMoneySheetState extends State<_AddMoneySheet> {
                   color: context.cs.onSurfaceVariant,
                   height: 48,
                   contentPadding: const EdgeInsetsDirectional.symmetric(
-                    vertical: 14,
+                    vertical: ThemeConstants.paddingM,
                   ),
                 ),
               ),

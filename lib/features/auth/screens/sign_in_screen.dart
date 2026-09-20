@@ -52,6 +52,7 @@ class _SignInScreenState extends State<SignInScreen>
   final _emailPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
   final _phonePasswordController = TextEditingController();
+  final _scrollController = ScrollController();
 
   SignInMode _mode = SignInMode.email;
   bool _modeInitialized = false;
@@ -70,6 +71,7 @@ class _SignInScreenState extends State<SignInScreen>
     _phoneController.dispose();
     _phonePasswordController.dispose();
     _tabController?.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -297,6 +299,7 @@ class _SignInScreenState extends State<SignInScreen>
             appBar: CustomAppBar(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               showBackButton: false,
+              scrollController: _scrollController,
               actions: [_buildSkipButton()],
             ),
             bottomNavigationBar: const AuthTermsBar(),
@@ -311,6 +314,7 @@ class _SignInScreenState extends State<SignInScreen>
                         signInState is SignInLoading ||
                         customSmsState is CustomSmsSendPhoneOtpLoading;
                     return SingleChildScrollView(
+                      controller: _scrollController,
                       padding: const EdgeInsetsDirectional.symmetric(
                         horizontal: ThemeConstants.paddingXXL,
                       ),

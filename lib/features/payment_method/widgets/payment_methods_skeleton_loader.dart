@@ -15,8 +15,8 @@ class PaymentMethodsSkeletonLoader extends StatelessWidget {
   Widget _tile(Color color) {
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: 10,
-        vertical: 10,
+        horizontal: ThemeConstants.paddingS,
+        vertical: ThemeConstants.paddingS,
       ),
       decoration: AppDecorations.box(
         borderRadius: AppRadius.r12,

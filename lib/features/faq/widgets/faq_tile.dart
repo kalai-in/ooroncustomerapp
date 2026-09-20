@@ -6,6 +6,7 @@ import 'package:customer/features/faq/models/faq_model.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class FaqTile extends StatefulWidget {
   final FaqData faq;
@@ -21,7 +22,7 @@ class _FaqTileState extends State<FaqTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsetsDirectional.only(bottom: 10),
+      margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
       decoration: AppDecorations.box(
         color: context.cs.surface,
         borderRadius: AppRadius.r8,
@@ -31,10 +32,10 @@ class _FaqTileState extends State<FaqTile> {
         onTap: () => setState(() => _expanded = !_expanded),
         borderRadius: AppRadius.r8,
         child: Padding(
-          padding: const EdgeInsetsDirectional.all(14),
+          padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
           child: Column(
             crossAxisAlignment: .start,
-            spacing: 10,
+            spacing: ThemeConstants.spaceM,
             children: [
               Row(
                 children: [
@@ -52,7 +53,7 @@ class _FaqTileState extends State<FaqTile> {
                         ? AssetsConstants.arrowUpIcon
                         : AssetsConstants.arrowDownIcon,
                     color: context.cs.onSurfaceVariant,
-                    size: 24,
+                    size: ThemeConstants.iconL,
                   ),
                 ],
               ),

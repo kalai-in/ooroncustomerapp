@@ -42,7 +42,9 @@ class EcommerceOrderCard extends StatelessWidget {
       _isDelivered &&
       !(order.isCancellable ?? false) &&
       !(order.isReturnable ?? false) &&
+      !((order.returnRequested ?? 0) != 0) &&
       !_isRated;
+  bool get _hasRatingBanner => _showRate || _isRated;
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +55,16 @@ class EcommerceOrderCard extends StatelessWidget {
     final variant =
         VariantAttributesFormatter.format(order.variantAttributes) ?? '';
     final hasImage = order.image.hasValue;
+    final orderCreatedAt = AppDateFormatter.parse(order.date);
+    final returnDeadline = (orderCreatedAt != null && order.returnDays != null)
+        ? orderCreatedAt.add(Duration(days: order.returnDays!))
+        : null;
     final hasReturnWindow =
-        (order.isReturnable ?? false) && order.returnDays != null;
-    final hasRatingBanner = _isDelivered && (_showRate || _isRated);
+        (order.isReturnable ?? false) &&
+        order.returnDays != null &&
+        returnDeadline != null &&
+        DateTime.now().isBefore(returnDeadline);
+    final hasRatingBanner = _hasRatingBanner;
 
     return Container(
       margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingM),
@@ -69,13 +78,13 @@ class EcommerceOrderCard extends StatelessWidget {
         children: [
           Row(
             crossAxisAlignment: .center,
-            spacing: 10,
+            spacing: ThemeConstants.spaceM,
             children: [
               _StatusIcon(color: statusColor, icon: statusIcon),
               Expanded(
                 child: Column(
                   crossAxisAlignment: .start,
-                  spacing: 2,
+                  spacing: ThemeConstants. spaceXXS,
                   children: [
                     AppText(
                       order.orderItemStatus ??
@@ -106,7 +115,7 @@ class EcommerceOrderCard extends StatelessWidget {
             onTap: onTap,
             borderRadius: AppRadius.r12,
             child: Container(
-              padding: const EdgeInsetsDirectional.all(10),
+              padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
               decoration: AppDecorations.box(
                 border: hasRatingBanner
                     ? Border(
@@ -143,7 +152,7 @@ class EcommerceOrderCard extends StatelessWidget {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: .start,
-                          spacing: 2,
+                          spacing: ThemeConstants. spaceXXS,
                           children: [
                             AppText(
                               order.productName ?? '',
@@ -178,7 +187,7 @@ class EcommerceOrderCard extends StatelessWidget {
                         child: AppSvgIcon(
                           AssetsConstants.arrowRightIcon,
                           color: context.cs.onSurfaceVariant,
-                          size: 24,
+                          size: ThemeConstants.iconL,
                         ),
                       ),
                     ],
@@ -186,11 +195,11 @@ class EcommerceOrderCard extends StatelessWidget {
                   if (hasReturnWindow) ...[
                     AppSpacing.h8,
                     Row(
-                      spacing: 6,
+                      spacing: ThemeConstants.spaceS,
                       children: [
                         AppSvgIcon(
                           AssetsConstants.closeCircleIcon,
-                          size: 16,
+                          size: ThemeConstants.iconXS,
                           color: context.cs.onSurfaceVariant,
                         ),
                         Expanded(
@@ -218,7 +227,7 @@ class EcommerceOrderCard extends StatelessWidget {
             AppSpacing.h10,
             Row(
               mainAxisAlignment: .end,
-              spacing: 10,
+              spacing: ThemeConstants.spaceM,
               children: [
                 if (_isActive && _hasTimeline)
                   AppButton(
@@ -231,11 +240,11 @@ class EcommerceOrderCard extends StatelessWidget {
                     fontSize: 13,
                     contentPadding: const EdgeInsetsDirectional.symmetric(
                       horizontal: ThemeConstants.paddingL,
-                      vertical: 6,
+                      vertical: ThemeConstants.paddingXS,
                     ),
                     prefixIcon: AppSvgIcon(
                       AssetsConstants.addressIcon,
-                      size: 18,
+                      size: ThemeConstants.iconS,
                       color: context.cs.primary,
                     ),
                   ),
@@ -248,11 +257,11 @@ class EcommerceOrderCard extends StatelessWidget {
                     fontSize: 13,
                     contentPadding: const EdgeInsetsDirectional.symmetric(
                       horizontal: ThemeConstants.paddingL,
-                      vertical: 6,
+                      vertical: ThemeConstants.paddingXS,
                     ),
                     prefixIcon: AppSvgIcon(
                       AssetsConstants.refreshIcon,
-                      size: 18,
+                      size: ThemeConstants.iconS,
                       color: context.cs.onPrimary,
                     ),
                   ),
@@ -288,7 +297,7 @@ class _StatusIcon extends StatelessWidget {
                 shape: .circle,
               ),
               alignment: Alignment.center,
-              child: AppSvgIcon(AssetsConstants.orderIcon, size: 24),
+              child: AppSvgIcon(AssetsConstants.orderIcon, size: ThemeConstants.iconL,),
             ),
           ),
           PositionedDirectional(
@@ -305,10 +314,10 @@ class _StatusIcon extends StatelessWidget {
                   width: 2,
                 ),
               ),
-              padding: const EdgeInsetsDirectional.all(2),
+              padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
               child: AppSvgIcon(
                 icon,
-                size: 10,
+                size: ThemeConstants.iconXXS,
                 color: context.cs.onPrimary,
                 fit: BoxFit.scaleDown,
               ),

@@ -7,6 +7,7 @@ import 'package:customer/commons/widgets/custom_app_bar.dart';
 import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/core/local_storage/auth_hive_box.dart';
 import 'package:customer/core/theme/app_decorations.dart';
+import 'package:customer/features/main/screens/main_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:customer/features/chat/models/chat_message.dart';
 import 'package:customer/features/chat/services/chat_conversation_resolver.dart';
@@ -33,8 +34,21 @@ import '../../../commons/widgets/app_text.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +60,11 @@ class ProfileScreen extends StatelessWidget {
       appBar: CustomAppBar(
         title: context.translate(LanguageLabelKeys.profile),
         showBackButton: false,
+        scrollController: _scrollController,
+        /* actions: const [_ThemeToggleAction()], */
       ),
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           SliverToBoxAdapter(child: _ProfileHeader()),
           SliverToBoxAdapter(
@@ -77,11 +94,13 @@ class ProfileScreen extends StatelessWidget {
                       title: context.translate(LanguageLabelKeys.personalData),
                       items: [
                         MenuItemData(
-                          iconPath: AssetsConstants.orderIcon,
-                          label: context.translate(LanguageLabelKeys.myOrders),
+                          iconPath: AssetsConstants.favouriteIcon,
+                          label: context.translate(
+                            LanguageLabelKeys.shoppingList,
+                          ),
                           onTap: () => AppNavigator.pushNamed(
                             context,
-                            RouteNames.myOrders,
+                            RouteNames.favourite,
                           ),
                         ),
                         MenuItemData(
@@ -130,61 +149,39 @@ class ProfileScreen extends StatelessWidget {
                       },
                     ),
                   if (AuthHiveBox.instance.isLoggedIn) AppSpacing.h12,
-                  BlocBuilder<ThemeCubit, ThemeState>(
-                    builder: (context, themeState) {
-                      /* final themeLabel = switch (themeState.themeMode) {
-                        ThemeMode.light => context.translate(
-                          LanguageLabelKeys.light,
-                        ),
-                        ThemeMode.dark => context.translate(
-                          LanguageLabelKeys.dark,
-                        ),
-                        _ => context.translate(LanguageLabelKeys.systemDefault),
-                      }; */
-                      return BlocBuilder<LanguageCubit, LanguageState>(
-                        builder: (context, langState) {
-                          String langName;
-                          if (langState is LanguageLoaded) {
-                            final lang = langState.languages
-                                .where(
-                                  (LanguageJsonData l) =>
-                                      l.id == langState.selectedId,
-                                )
-                                .firstOrNull;
-                            final name = lang?.name ?? '';
-                            final code =
-                                (lang?.code ??
-                                        SettingsHiveBox.instance.languageCode)
-                                    .toUpperCase();
-                            langName = name.isNotEmpty ? '$name ($code)' : code;
-                          } else {
-                            langName = SettingsHiveBox.instance.languageCode
+                  BlocBuilder<LanguageCubit, LanguageState>(
+                    builder: (context, langState) {
+                      String langName;
+                      if (langState is LanguageLoaded) {
+                        final lang = langState.languages
+                            .where(
+                              (LanguageJsonData l) =>
+                                  l.id == langState.selectedId,
+                            )
+                            .firstOrNull;
+                        final name = lang?.name ?? '';
+                        final code =
+                            (lang?.code ?? SettingsHiveBox.instance.languageCode)
                                 .toUpperCase();
-                          }
-                          return MenuCard(
-                            title: context.translate(
-                              LanguageLabelKeys.preferences,
+                        langName = name.isNotEmpty ? '$name ($code)' : code;
+                      } else {
+                        langName = SettingsHiveBox.instance.languageCode
+                            .toUpperCase();
+                      }
+                      return MenuCard(
+                        title: context.translate(
+                          LanguageLabelKeys.preferences,
+                        ),
+                        items: [
+                          MenuItemData(
+                            iconPath: AssetsConstants.languageIcon,
+                            label: context.translate(
+                              LanguageLabelKeys.changeLanguage,
                             ),
-                            items: [
-                              MenuItemData(
-                                iconPath: AssetsConstants.languageIcon,
-                                label: context.translate(
-                                  LanguageLabelKeys.changeLanguage,
-                                ),
-                                trailing: langName,
-                                onTap: () => showLanguageSheet(context),
-                              ),/* 
-                              MenuItemData(
-                                iconPath: AssetsConstants.themeIcon,
-                                label: context.translate(
-                                  LanguageLabelKeys.changeTheme,
-                                ),
-                                trailing: themeLabel,
-                                onTap: () => showAppearanceSheet(context),
-                              ), */
-                            ],
-                          );
-                        },
+                            trailing: langName,
+                            onTap: () => showLanguageSheet(context),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -209,8 +206,8 @@ class ProfileScreen extends StatelessWidget {
                           final settings = context.read<SettingsCubit>().state;
                           if (settings is SettingsLoaded) {
                             final url = Platform.isIOS
-                                ? (settings.settings.data?.iosAppUrl ?? '')
-                                : (settings.settings.data?.androidAppUrl ?? '');
+                                ? (settings.settings.data?.appstoreUrl ?? '')
+                                : (settings.settings.data?.playstoreUrl ?? '');
                             if (url.isNotEmpty) {
                               SharePlus.instance.share(ShareParams(text: url));
                             }
@@ -243,6 +240,7 @@ class ProfileScreen extends StatelessWidget {
                                 ),
                                 recipientId: AuthHiveBox.instance.userId,
                                 conversationId: conversationId,
+                                sendLocation: true,
                               ),
                             );
                           },
@@ -260,8 +258,8 @@ class ProfileScreen extends StatelessWidget {
                           final settings = context.read<SettingsCubit>().state;
                           if (settings is SettingsLoaded) {
                             final url = Platform.isIOS
-                                ? (settings.settings.data?.iosAppUrl ?? '')
-                                : (settings.settings.data?.androidAppUrl ?? '');
+                                ? (settings.settings.data?.appstoreUrl ?? '')
+                                : (settings.settings.data?.playstoreUrl ?? '');
                             if (url.isNotEmpty) {
                               launchUrl(
                                 Uri.parse(url),
@@ -398,6 +396,86 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
+// ── Theme Toggle Action ────────────────────────────────────────────────────────
+
+class _ThemeToggleAction extends StatefulWidget {
+  const _ThemeToggleAction();
+
+  @override
+  State<_ThemeToggleAction> createState() => _ThemeToggleActionState();
+}
+
+class _ThemeToggleActionState extends State<_ThemeToggleAction> {
+  // Shows the flipped icon immediately, ahead of the actual cubit switch —
+  // the reveal circle starts growing from this icon's exact center, so it
+  // covers the icon instantly and the rotate would otherwise never be seen.
+  bool? _previewDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ThemeCubit, ThemeState>(
+      builder: (context, themeState) {
+        final cubitIsDark = themeState.themeMode == ThemeMode.dark;
+        final isDark = (_previewDark != null && _previewDark != cubitIsDark) ? _previewDark! : cubitIsDark;
+        return Builder(
+          builder: (buttonContext) {
+            return GestureDetector(
+              // Without this, only the icon's actual painted pixels are
+              // tappable (GestureDetector defers hit-testing to the child by
+              // default) — the surrounding padding looked tappable but
+              // wasn't. Opaque makes the whole padded box respond.
+              behavior: HitTestBehavior.opaque,
+              onTap: () async {
+                final RenderBox box = buttonContext.findRenderObject() as RenderBox;
+
+                final position = box.localToGlobal(box.size.center(Offset.zero));
+                final newTheme = cubitIsDark ? ThemeMode.light : ThemeMode.dark;
+
+                // Wait for the theme switch's heavy tab rebuild to get its
+                // first frame painted before starting the rotate. Starting
+                // it immediately used to race that rebuild's jank and freeze
+                // the icon mid-spin; this keeps the rotate and the reveal
+                // circle starting together, both past the jank window.
+                await MainScreen.changeTheme(context, newTheme: newTheme, position: position);
+                if (!mounted) return;
+                setState(() => _previewDark = !cubitIsDark);
+              },
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  ThemeConstants.paddingS,
+                  ThemeConstants.paddingS,
+                  ThemeConstants.paddingL,
+                  ThemeConstants.paddingS,
+                ),
+                child: AnimatedSwitcher(
+                  // Long enough for the 360° spin to actually read as a
+                  // rotation rather than a near-instant pop — 150ms was too
+                  // fast to perceive as anything but a fade. Cross-dissolve
+                  // via opacity, not scale: scaling from 0 hides the icon
+                  // right when it's most tilted (mid-turn), so the rotation
+                  // was invisible by the time it grew big enough to see.
+                  // Fading keeps it full-size the whole time.
+                  duration: const Duration(milliseconds: 350),
+                  transitionBuilder: (child, animation) => RotationTransition(
+                    turns: animation,
+                    child: FadeTransition(opacity: animation, child: child),
+                  ),
+                  child: AppSvgIcon(
+                    isDark ? AssetsConstants.darkThemeIcon : AssetsConstants.lightThemeIcon,
+                    key: ValueKey(isDark),
+                    size: ThemeConstants.iconM,
+                    color: context.cs.onSurface,
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
 // ── Profile Header ─────────────────────────────────────────────────────────────
 
 class _ProfileHeader extends StatelessWidget {
@@ -442,19 +520,19 @@ class _ProfileHeader extends StatelessWidget {
                           url: imageUrl,
                           placeholder: AppSvgIcon(
                             AssetsConstants.userIcon,
-                            size: 34,
+                            size: ThemeConstants.iconXL,
                             color: context.cs.onSurfaceVariant,
                             fit: BoxFit.scaleDown,
                           ),
                           errorWidget: AppSvgIcon(
                             AssetsConstants.userIcon,
-                            size: 34,
+                            size: ThemeConstants.iconXL,
                             color: context.cs.onSurfaceVariant, fit: BoxFit.scaleDown,
                           ),
                         )
                       : AppSvgIcon(
                           AssetsConstants.userIcon,
-                          size: 24,
+                          size: ThemeConstants.iconL,
                           color: context.cs.onSurfaceVariant,
                           fit: BoxFit.scaleDown,
                         ),
@@ -464,7 +542,7 @@ class _ProfileHeader extends StatelessWidget {
                   child: isLoggedIn
                       ? Column(
                           crossAxisAlignment: .start,
-                          spacing: 3,
+                          spacing: ThemeConstants.spaceXS,
                           children: [
                             AppText(
                               name,
@@ -488,7 +566,7 @@ class _ProfileHeader extends StatelessWidget {
                         )
                       : Column(
                           crossAxisAlignment: .start,
-                          spacing: 3,
+                          spacing: ThemeConstants.spaceXS,
                           children: [
                             AppText(
                               context.translate(LanguageLabelKeys.guest),
@@ -522,7 +600,7 @@ class _ProfileHeader extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsetsDirectional.symmetric(
                         horizontal: ThemeConstants.paddingM,
-                        vertical: 6,
+                        vertical: ThemeConstants.paddingXS,
                       ),
                       decoration: AppDecorations.box(
                         color: context.cs.surfaceContainerHigh,
@@ -530,11 +608,11 @@ class _ProfileHeader extends StatelessWidget {
                       ),
                       child: Row(
                         mainAxisSize: .min,
-                        spacing: 4,
+                        spacing: ThemeConstants.spaceXS,
                         children: [
                           AppSvgIcon(
                             AssetsConstants.editIcon,
-                            size: 16,
+                            size: ThemeConstants.iconXS,
                             color: context.cs.onSurface,
                           ),
                           AppText(
@@ -563,13 +641,15 @@ class _ProfileHeader extends StatelessWidget {
 class _ExpandableMenuSection extends StatefulWidget {
   final String iconPath;
   final String label;
+  final String? trailing;
   final List<MenuItemData> children;
+  final bool useRadioIndicator;
 
   const _ExpandableMenuSection({
     required this.iconPath,
     required this.label,
     required this.children,
-  });
+  }) : useRadioIndicator = false, trailing = null;
 
   @override
   State<_ExpandableMenuSection> createState() => _ExpandableMenuSectionState();
@@ -584,17 +664,18 @@ class _ExpandableMenuSectionState extends State<_ExpandableMenuSection> {
       children: [
         InkWell(
           onTap: () => setState(() => _expanded = !_expanded),
+          borderRadius: _expanded ? null : AppRadius.bottom16,
           child: Padding(
             padding: const EdgeInsetsDirectional.symmetric(
               horizontal: ThemeConstants.paddingL,
-              vertical: 13,
+              vertical: ThemeConstants.paddingM,
             ),
             child: Row(
-              spacing: 14,
+              spacing: ThemeConstants.spaceL,
               children: [
                 AppSvgIcon(
                   widget.iconPath,
-                  size: 22,
+                  size: ThemeConstants.iconM,
                   color: context.cs.onSurfaceVariant,
                 ),
                 Expanded(
@@ -606,13 +687,23 @@ class _ExpandableMenuSectionState extends State<_ExpandableMenuSection> {
                     ),
                   ),
                 ),
+                if (widget.trailing != null) ...[
+                  AppText(
+                    widget.trailing!,
+                    style: context.tt.bodySmall?.copyWith(
+                      fontSize: 13,
+                      color: context.cs.onSurfaceVariant,
+                    ),
+                  ),
+                  AppSpacing.w4,
+                ],
                 AnimatedRotation(
                   turns: _expanded ? 0.5 : 0,
                   duration: const Duration(milliseconds: 250),
                   child: AppSvgIcon(
                     AssetsConstants.arrowDownIcon,
                     color: context.cs.onSurfaceVariant,
-                    size: 18,
+                    size: ThemeConstants.iconS,
                   ),
                 ),
               ],
@@ -637,15 +728,24 @@ class _ExpandableMenuSectionState extends State<_ExpandableMenuSection> {
                   ),
                   InkWell(
                     onTap: child.onTap,
+                    borderRadius: i == widget.children.length - 1
+                        ? AppRadius.bottom16
+                        : null,
                     child: Padding(
-                      padding: const EdgeInsetsDirectional.only(
-                        start: 52,
-                        end: ThemeConstants.paddingL,
-                        top: ThemeConstants.paddingM,
-                        bottom: ThemeConstants.paddingM,
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        ThemeConstants.paddingL,
+                        ThemeConstants.paddingM,
+                        ThemeConstants.paddingL,
+                        ThemeConstants.paddingM,
                       ),
                       child: Row(
+                        spacing: ThemeConstants.spaceL,
                         children: [
+                          AppSvgIcon(
+                            child.iconPath,
+                            size: ThemeConstants.iconS,
+                            color: context.cs.onSurfaceVariant,
+                          ),
                           Expanded(
                             child: AppText(
                               child.label,
@@ -654,16 +754,19 @@ class _ExpandableMenuSectionState extends State<_ExpandableMenuSection> {
                               ),
                             ),
                           ),
-                          Transform.flip(
-                            flipX:
-                                Directionality.of(context) ==
-                                TextDirection.rtl,
-                            child: AppSvgIcon(
-                              AssetsConstants.arrowRightIcon,
-                              color: context.cs.onSurfaceVariant,
-                              size: 18,
+                          if (widget.useRadioIndicator)
+                            _RadioDot(selected: child.selected)
+                          else
+                            Transform.flip(
+                              flipX:
+                                  Directionality.of(context) ==
+                                  TextDirection.rtl,
+                              child: AppSvgIcon(
+                                AssetsConstants.arrowRightIcon,
+                                color: context.cs.onSurfaceVariant,
+                                size: ThemeConstants.iconS,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -674,6 +777,38 @@ class _ExpandableMenuSectionState extends State<_ExpandableMenuSection> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _RadioDot extends StatelessWidget {
+  final bool selected;
+
+  const _RadioDot({required this.selected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: ThemeConstants.iconS,
+      height: ThemeConstants.iconS,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: selected ? context.cs.primary : context.cs.onSurfaceVariant,
+          width: 1.5,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: selected
+          ? Container(
+              width: ThemeConstants.iconS / 2,
+              height: ThemeConstants.iconS / 2,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: context.cs.primary,
+              ),
+            )
+          : null,
     );
   }
 }

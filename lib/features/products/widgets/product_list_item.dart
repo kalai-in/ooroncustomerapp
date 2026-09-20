@@ -5,6 +5,7 @@ import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/local_storage/settings_hive_box.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_decorations.dart';
+import 'package:customer/core/theme/app_sizes.dart';
 import 'package:customer/utils/extensions/num_extensions.dart';
 import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/core/constants/navigation_service.dart';
@@ -16,10 +17,12 @@ import 'package:customer/commons/widgets/star_rating_row.dart';
 import 'package:customer/core/routes/product_detail_args.dart';
 import 'package:customer/core/routes/route_names.dart';
 import 'package:customer/features/products/models/product_model.dart';
+import 'package:customer/features/products/widgets/product_card_details.dart';
 import 'package:customer/features/products/widgets/product_card_pagination_dots.dart';
 import 'package:customer/features/products/widgets/product_variant_sheet.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
+import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:customer/utils/variant_attributes_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -83,6 +86,20 @@ class _ProductListItemState extends State<ProductListItem> {
     final subColor = context.cs.onSurfaceVariant;
     final imageBg = context.cs.surfaceContainerHigh;
 
+    // Phone stays on ProductCardDetails' compact scale; tablet switches to
+    // its non-compact scale and a bigger image, same as ProductCard does.
+    final isTablet = AppSizes.isTablet(context);
+    final isCompact = !isTablet;
+    final imageSize = context.widthFraction(0.33).clamp(130.0, 200.0);
+    final nameFontSize = ProductCardDetails.nameFontSize(isCompact);
+    final priceFontSize = ProductCardDetails.priceFontSize(isCompact);
+    final strikeFontSize = ProductCardDetails.strikeFontSize(isCompact);
+    final discountFontSize = ProductCardDetails.discountFontSize(isCompact);
+    final starSize = ProductCardDetails.starSize(isCompact);
+    final ratingFontSize = ProductCardDetails.ratingFontSize(isCompact);
+    final timeFontSize = ProductCardDetails.timeFontSize(isCompact);
+    final timeIconSize = ProductCardDetails.timeIconSize(isCompact);
+
     final variants = product.variants ?? [];
     final images = product.images ?? [];
     final pageCount = images.isNotEmpty ? images.length : 1;
@@ -135,7 +152,7 @@ class _ProductListItemState extends State<ProductListItem> {
           },
       child: Container(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: 10,
+          horizontal: ThemeConstants.paddingS,
           vertical: ThemeConstants.paddingS,
         ),
         decoration: AppDecorations.box(
@@ -150,7 +167,9 @@ class _ProductListItemState extends State<ProductListItem> {
             child: Row(
               crossAxisAlignment: .center,
               children: [
-                // Left: details
+                // Left: details — font scale mirrors ProductCardDetails,
+                // keyed off screen width, so list rows and grid cards
+                // (phone or tablet) land on the same type scale.
                 Expanded(
                   child: Column(
                     mainAxisAlignment: .start,
@@ -159,7 +178,7 @@ class _ProductListItemState extends State<ProductListItem> {
                       AppText(
                         product.productName ?? '',
                         style: context.tt.labelMedium?.copyWith(
-                          fontSize: 13.5,
+                          fontSize: nameFontSize,
                           fontWeight: FontWeight.w500,
                           color: textColor,
                         ),
@@ -172,7 +191,7 @@ class _ProductListItemState extends State<ProductListItem> {
                           AppText(
                             '${product.currency}${displayPrice.formatPrice(product.decimalPoint ?? 2)}',
                             style: context.tt.headlineMedium?.copyWith(
-                              fontSize: 17,
+                              fontSize: priceFontSize,
                               fontWeight: FontWeight.w800,
                               color: textColor,
                             ),
@@ -183,7 +202,7 @@ class _ProductListItemState extends State<ProductListItem> {
                               child: AppText(
                                 '${product.currency}${rawPrice.formatPrice(product.decimalPoint ?? 2)}',
                                 style: context.tt.labelMedium?.copyWith(
-                                  fontSize: 12,
+                                  fontSize: strikeFontSize,
                                   fontWeight: FontWeight.w500,
                                   color: subColor,
                                   decoration: TextDecoration.lineThrough,
@@ -201,7 +220,7 @@ class _ProductListItemState extends State<ProductListItem> {
                         AppText(
                           '$discountPct${AppConstants.percentSymbol}  ${context.translate(LanguageLabelKeys.off).toUpperCase()}',
                           style: context.tt.headlineMedium?.copyWith(
-                            fontSize: 13,
+                            fontSize: discountFontSize,
                             fontWeight: FontWeight.w800,
                             color: context.cs.primary,
                           ),
@@ -214,13 +233,13 @@ class _ProductListItemState extends State<ProductListItem> {
                         AppSpacing.h4,
                         Row(
                           children: [
-                            StarRatingRow(rating: avgRating, size: 16),
+                            StarRatingRow(rating: avgRating, size: starSize),
                             AppSpacing.w4,
                             if (ratingCount > 0)
                               AppText(
                                 '($ratingCount)',
                                 style: context.tt.labelMedium?.copyWith(
-                                  fontSize: 11.5,
+                                  fontSize: ratingFontSize,
                                   fontWeight: FontWeight.w500,
                                   color: subColor,
                                 ),
@@ -233,7 +252,7 @@ class _ProductListItemState extends State<ProductListItem> {
                         AppText(
                           measurement,
                           style: context.tt.labelSmall?.copyWith(
-                            fontSize: 10.5,
+                            fontSize: isCompact ? 9.5 : 10.5,
                             color: subColor,
                           ),
                           maxLines: 1,
@@ -247,7 +266,7 @@ class _ProductListItemState extends State<ProductListItem> {
                         AppText(
                           '$stockVal ${context.translate(LanguageLabelKeys.leftInStock)}',
                           style: context.tt.displayMedium?.copyWith(
-                            fontSize: 11,
+                            fontSize: timeFontSize,
                             fontWeight: FontWeight.w700,
                             color: isDark
                                 ? context.cs.onSurfaceVariant
@@ -263,7 +282,7 @@ class _ProductListItemState extends State<ProductListItem> {
                           children: [
                             AppSvgIcon(
                               AssetsConstants.timeIcon,
-                              size: 12,
+                              size: timeIconSize,
                               color: isDark
                                   ? context.cs.onSurfaceVariant
                                   : context.cs.onSurfaceVariant,
@@ -275,7 +294,7 @@ class _ProductListItemState extends State<ProductListItem> {
                                 maxLines: 1,
                                 overflow: .ellipsis,
                                 style: context.tt.displayMedium?.copyWith(
-                                  fontSize: 11,
+                                  fontSize: timeFontSize,
                                   fontWeight: FontWeight.w700,
                                   color: isDark
                                       ? context.cs.onSurfaceVariant
@@ -302,8 +321,8 @@ class _ProductListItemState extends State<ProductListItem> {
                           child: ClipRRect(
                             borderRadius: AppRadius.r8,
                             child: SizedBox(
-                              width: 130,
-                              height: 130,
+                              width: imageSize,
+                              height: imageSize,
                               child: Stack(
                                 children: [
                                   // PageView of images
@@ -337,11 +356,11 @@ class _ProductListItemState extends State<ProductListItem> {
                                       ),
                                     ),
                                   PositionedDirectional(
-                                    bottom: 6,
+                                    bottom: context.heightFraction(0.0415),
                                     end: 6,
                                     child: ProductTypeIcon(
                                       productType: product.productType,
-                                      size: 16,
+                                      size: ThemeConstants.iconXS,
                                     ),
                                   ),
                                   // Favorite button
@@ -370,8 +389,10 @@ class _ProductListItemState extends State<ProductListItem> {
                                         ),
                                         padding:
                                             const EdgeInsetsDirectional.symmetric(
-                                              horizontal: 6,
-                                              vertical: 3,
+                                              horizontal:
+                                                  ThemeConstants.paddingXS,
+                                              vertical:
+                                                  ThemeConstants.paddingXS,
                                             ),
                                         child: AppText(
                                           context.translate(

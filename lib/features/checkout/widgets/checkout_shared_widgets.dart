@@ -8,6 +8,7 @@ import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class CheckoutCard extends StatelessWidget {
   const CheckoutCard({super.key, required this.child});
@@ -18,7 +19,7 @@ class CheckoutCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsetsDirectional.all(14),
+      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
       decoration: AppDecorations.box(
         color: context.cs.surface,
         borderRadius: AppRadius.r12,
@@ -51,15 +52,15 @@ class CheckoutSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      spacing: 8,
+      spacing: ThemeConstants.spaceS,
       children: [
         icon.isNotEmpty
-            ? AppSvgIcon(icon, color: context.cs.onSurfaceVariant, size: 24)
+            ? AppSvgIcon(icon, color: context.cs.onSurfaceVariant, size: ThemeConstants.iconL,)
             : const SizedBox(),
         Expanded(
           child: Column(
             crossAxisAlignment: .start,
-            spacing: 2,
+            spacing: ThemeConstants. spaceXXS,
             children: [
               AppText(
                 title,
@@ -104,7 +105,7 @@ class CheckoutNotDeliverableNotice extends StatelessWidget {
             ),
             child: AppSvgIcon(
               AssetsConstants.locationOffIcon,
-              size: 22,
+              size: ThemeConstants.iconM,
               color: context.cs.error,
             ),
           ),

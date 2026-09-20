@@ -46,6 +46,7 @@ class SaveAddressCubit extends Cubit<SaveAddressState>
     String latitude = '0',
     String longitude = '0',
     bool isDefault = false,
+    int? regionId,
   }) async {
     emit(SaveAddressLoading());
     await guard(() async {
@@ -67,6 +68,7 @@ class SaveAddressCubit extends Cubit<SaveAddressState>
           latitude: latitude,
           longitude: longitude,
           isDefault: isDefault ? '1' : '0',
+          regionId: regionId,
         ),
       );
       emit(SaveAddressSuccess(address: saved, isEdit: false));
@@ -91,6 +93,7 @@ class SaveAddressCubit extends Cubit<SaveAddressState>
     String latitude = '0',
     String longitude = '0',
     bool isDefault = false,
+    int? regionId,
   }) async {
     emit(SaveAddressLoading());
     await guard(() async {
@@ -113,6 +116,7 @@ class SaveAddressCubit extends Cubit<SaveAddressState>
           latitude: latitude,
           longitude: longitude,
           isDefault: isDefault ? '1' : '0',
+          regionId: regionId,
         ),
         isEdit: true,
       );

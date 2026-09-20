@@ -21,6 +21,10 @@ import 'package:customer/features/profile/cubit/profile_update_cubit.dart';
 import 'package:customer/commons/cubit/settings_cubit.dart';
 import 'package:customer/commons/cubit/country_settings_cubit.dart';
 import 'package:customer/features/home/services/maintenance_socket_service.dart';
+import 'package:customer/features/orders/cubit/completed_ecommerce_order_cubit.dart';
+import 'package:customer/features/orders/cubit/completed_order_cubit.dart';
+import 'package:customer/features/orders/cubit/ongoing_ecommerce_order_cubit.dart';
+import 'package:customer/features/orders/cubit/ongoing_order_cubit.dart';
 import 'package:customer/commons/widgets/maintenance_scheduled_dialog.dart';
 import 'package:customer/firebase_options.dart';
 import 'dart:ui';
@@ -29,6 +33,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'commons/cubit/connectivity_cubit.dart';
 import 'commons/cubit/location_cubit.dart';
 import 'core/constants/navigation_service.dart';
@@ -147,6 +152,13 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => UpdateFcmTokenCubit()),
         BlocProvider(create: (_) => CustomSmsSendPhoneOtpCubit()),
         BlocProvider(create: (_) => CustomSmsVerifyPhoneOtpCubit()),
+        // App-wide (not screen-scoped) so an "order" push can refetch the
+        // listing even when OrdersScreen isn't open — see
+        // NotificationService._refreshOrderLists.
+        BlocProvider(create: (_) => OngoingOrderCubit()),
+        BlocProvider(create: (_) => CompletedOrderCubit()),
+        BlocProvider(create: (_) => OngoingEcommerceOrderCubit()),
+        BlocProvider(create: (_) => CompletedEcommerceOrderCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {
@@ -206,11 +218,28 @@ class MyApp extends StatelessWidget {
                       settingsCubit.getDarkPrimaryColor(),
                     ),
                     themeMode: themeState.themeMode,
+                    // Disabled: MaterialApp's own theme cross-fade otherwise
+                    // plays underneath our circular-reveal overlay, washing
+                    // out its colors while both animate at once. Our reveal
+                    // is the only theme transition that should be visible.
+                    themeAnimationDuration: Duration.zero,
                     locale: locale,
+                    supportedLocales: [locale],
+                    localeResolutionCallback: (_, _) => locale,
+                    localizationsDelegates: const [
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
                     initialRoute: RouteNames.splash,
                     onGenerateRoute: AppRouter.generateRoute,
-                    builder: (_, child) =>
-                        Directionality(textDirection: direction, child: child!),
+                    builder: (_, child) => LocalizationScope(
+                      notifier: LocalizationService.instance,
+                      child: Directionality(
+                        textDirection: direction,
+                        child: child!,
+                      ),
+                    ),
                   );
                 },
               );

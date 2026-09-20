@@ -51,6 +51,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen>
   // branch doesn't pop a second time for cashfree only. Other gateways pop
   // themselves before emitting, so this screen's own pop stays their only one.
   PaymentGatewayType? _pendingGateway;
+  final _scrollController = ScrollController();
 
   @override
   PaymentArgs get launcherArgs => widget.args;
@@ -65,6 +66,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen>
   @override
   void dispose() {
     disposeRazorpay();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -86,6 +88,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen>
         appBar: CustomAppBar(
           title: context.translate(LanguageLabelKeys.paymentMethod),
           showBackButton: true,
+          scrollController: _scrollController,
         ),
         bottomNavigationBar: BlocBuilder<ConnectivityCubit, ConnectivityState>(
           builder: (context, connectivity) {
@@ -166,6 +169,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen>
                     methods: methods,
                     methodsData: state.data,
                     selectedMethod: _selectedMethod,
+                    scrollController: _scrollController,
                     onMethodSelected: (m) =>
                         setState(() => _selectedMethod = m),
                   );
@@ -276,17 +280,20 @@ class _Body extends StatelessWidget {
     required this.methods,
     required this.methodsData,
     required this.selectedMethod,
+    required this.scrollController,
     required this.onMethodSelected,
   });
 
   final List<PaymentMethodItem> methods;
   final PaymentMethodsData methodsData;
   final PaymentMethodItem? selectedMethod;
+  final ScrollController scrollController;
   final ValueChanged<PaymentMethodItem> onMethodSelected;
 
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      controller: scrollController,
       padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingL),
       itemCount: methods.length,
       separatorBuilder: (_, _) => AppSpacing.h10,
@@ -326,7 +333,7 @@ class _BottomBar extends StatelessWidget {
     return Container(
       padding: EdgeInsetsDirectional.fromSTEB(
         ThemeConstants.paddingL,
-        14,
+        ThemeConstants.paddingM,
         ThemeConstants.paddingL,
         MediaQuery.paddingOf(context).bottom + ThemeConstants.paddingL,
       ),
@@ -343,7 +350,7 @@ class _BottomBar extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: .min,
-        spacing: 12,
+        spacing: ThemeConstants.spaceM,
         children: [
           Row(
             mainAxisAlignment: .spaceBetween,

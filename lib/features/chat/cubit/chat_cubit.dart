@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:customer/core/api/api_exception.dart';
 import 'package:customer/core/local_storage/auth_hive_box.dart';
+import 'package:customer/core/local_storage/settings_hive_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/chat_message.dart';
 import '../repositories/chat_repository.dart';
@@ -45,6 +46,7 @@ class ChatCubit extends Cubit<ChatState> {
   late final int _myId;
   static const String _senderType = 'customer';
   String? _conversationId;
+  final bool _sendLocation;
 
   /// The `ChatCubit` backing whichever `ChatScreen` is currently open, if
   /// any — at most one chat screen is on-screen at a time. Lets
@@ -57,8 +59,9 @@ class ChatCubit extends Cubit<ChatState> {
   String? get conversationId => _conversationId;
   bool get isSocketConnected => _socket.state == SocketConnectionState.connected;
 
-  ChatCubit({ChatRepository? repository})
+  ChatCubit({ChatRepository? repository, bool sendLocation = false})
     : _repository = repository ?? ChatRepository(),
+      _sendLocation = sendLocation,
       super(ChatInitial()) {
     _myId = AuthHiveBox.instance.userId;
     _socket = ChatSocketService(repository: _repository);
@@ -172,6 +175,10 @@ class ChatCubit extends Cubit<ChatState> {
         filePaths:
             attachmentPath != null && attachmentType == AttachmentType.file
             ? [attachmentPath]
+            : null,
+        latitude: _sendLocation ? SettingsHiveBox.instance.userLatitude : null,
+        longitude: _sendLocation
+            ? SettingsHiveBox.instance.userLongitude
             : null,
       );
       final idx = _messages.indexWhere((m) => m.id == optimistic.id);

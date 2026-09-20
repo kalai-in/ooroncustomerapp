@@ -1,5 +1,7 @@
 import 'package:customer/commons/models/additional_charges_model.dart';
+import 'package:customer/commons/models/delivery_charges_model.dart';
 import 'package:customer/commons/models/surge_charges_model.dart';
+import 'package:customer/commons/models/tax_charges_model.dart';
 import 'package:customer/features/orders/models/order_address_model.dart';
 import 'package:customer/features/orders/models/order_model.dart'
     show ItemRating, VariantAttributes;
@@ -56,8 +58,9 @@ class EcommerceOrderDataModel {
   double? taxAmount;
   double? taxPercentage;
   double? subTotal;
-  double? deliveryCharge;
+  DeliveryCharges? deliveryCharge;
   List<AdditionalCharges>? additionalCharges;
+  List<TaxCharges>? taxBreakdown;
   List<SurgeCharges>? surgeCharges;
   double? promoDiscount;
   double? walletBalance;
@@ -72,6 +75,7 @@ class EcommerceOrderDataModel {
   String? paymentMethod;
   String? currency;
   String? currencyCode;
+  int? decimalPoint;
   int? variantId;
   String? name;
   int? productId;
@@ -122,6 +126,7 @@ class EcommerceOrderDataModel {
     this.subTotal,
     this.deliveryCharge,
     this.additionalCharges,
+    this.taxBreakdown,
     this.surgeCharges,
     this.promoDiscount,
     this.walletBalance,
@@ -136,6 +141,7 @@ class EcommerceOrderDataModel {
     this.paymentMethod,
     this.currency,
     this.currencyCode,
+    this.decimalPoint,
     this.variantId,
     this.name,
     this.productId,
@@ -195,11 +201,19 @@ class EcommerceOrderDataModel {
     taxAmount = parseDouble(json['tax_amount']);
     taxPercentage = parseDouble(json['tax_percentage']);
     subTotal = parseDouble(json['sub_total']);
-    deliveryCharge = parseDouble(json['delivery_charge']);
+    deliveryCharge = json['delivery_charges'] is Map<String, dynamic>
+        ? DeliveryCharges.fromJson(json['delivery_charges'] as Map<String, dynamic>)
+        : null;
     final rawAdditionalCharges = json['additional_charges'];
     if (rawAdditionalCharges is List) {
       additionalCharges = rawAdditionalCharges
           .map((v) => AdditionalCharges.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+    final rawTaxBreakdown = json['tax_breakdown'];
+    if (rawTaxBreakdown is List) {
+      taxBreakdown = rawTaxBreakdown
+          .map((v) => TaxCharges.fromJson(v as Map<String, dynamic>))
           .toList();
     }
     final rawSurgeCharges = json['surge_charges'];
@@ -221,6 +235,7 @@ class EcommerceOrderDataModel {
     paymentMethod = parseString(json['payment_method']);
     currency = parseString(json['currency']);
     currencyCode = parseString(json['currency_code']);
+    decimalPoint = parseInt(json['decimal_point']);
     variantId = parseInt(json['variant_id']);
     name = parseString(json['name']);
     productId = parseInt(json['product_id']);
@@ -295,11 +310,14 @@ class EcommerceOrderDataModel {
     data['tax_amount'] = taxAmount;
     data['tax_percentage'] = taxPercentage;
     data['sub_total'] = subTotal;
-    data['delivery_charge'] = deliveryCharge;
+    data['delivery_charges'] = deliveryCharge?.toJson();
     if (additionalCharges != null) {
       data['additional_charges'] = additionalCharges!
           .map((v) => v.toJson())
           .toList();
+    }
+    if (taxBreakdown != null) {
+      data['tax_breakdown'] = taxBreakdown!.map((v) => v.toJson()).toList();
     }
     if (surgeCharges != null) {
       data['surge_charges'] = surgeCharges!.map((v) => v.toJson()).toList();
@@ -317,6 +335,7 @@ class EcommerceOrderDataModel {
     data['payment_method'] = paymentMethod;
     data['currency'] = currency;
     data['currency_code'] = currencyCode;
+    data['decimal_point'] = decimalPoint;
     data['variant_id'] = variantId;
     data['name'] = name;
     data['product_id'] = productId;
@@ -391,13 +410,23 @@ class Timeline {
   int? status;
   String? statusName;
   String? datetime;
+  bool? isDone;
+  bool? isCurrent;
 
-  Timeline({this.status, this.statusName, this.datetime});
+  Timeline({
+    this.status,
+    this.statusName,
+    this.datetime,
+    this.isDone,
+    this.isCurrent,
+  });
 
   Timeline.fromJson(Map<String, dynamic> json) {
     status = parseInt(json['status']);
     statusName = parseString(json['status_name']);
     datetime = parseString(json['datetime']);
+    isDone = parseBool(json['is_done']);
+    isCurrent = parseBool(json['is_current']);
   }
 
   Map<String, dynamic> toJson() {
@@ -405,6 +434,8 @@ class Timeline {
     data['status'] = status;
     data['status_name'] = statusName;
     data['datetime'] = datetime;
+    data['is_done'] = isDone;
+    data['is_current'] = isCurrent;
     return data;
   }
 }

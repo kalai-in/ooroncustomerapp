@@ -34,7 +34,7 @@ class OnboardingBottomContent extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: .min,
-        spacing: 20,
+        spacing: ThemeConstants.spaceXL,
         children: [
           OnboardingDots(
             count: pageCount,

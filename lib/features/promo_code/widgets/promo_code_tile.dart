@@ -104,7 +104,7 @@ class _PromoCodeTileWidgetState extends State<PromoCodeTileWidget> {
               ? AppNetworkImage(url: item.imageUrl, borderRadius: AppRadius.r10)
               : AppSvgIcon(
                   AssetsConstants.offerIcon,
-                  size: 24,
+                  size: ThemeConstants.iconL,
                   color: context.cs.onSurfaceVariant.withValues(alpha: 0.4),
                   fit: BoxFit.scaleDown,
                 ),
@@ -113,7 +113,7 @@ class _PromoCodeTileWidgetState extends State<PromoCodeTileWidget> {
         Expanded(
           child: Column(
             crossAxisAlignment: .start,
-            spacing: 3,
+            spacing: ThemeConstants.spaceXS,
             children: [
               AppText(
                 title,
@@ -172,7 +172,7 @@ class _PromoCodeTileWidgetState extends State<PromoCodeTileWidget> {
                   shape: RoundedRectangleBorder(borderRadius: AppRadius.r8),
                 ),
                 child: isLoading
-                    ? LoadingWidget(size: 14)
+                    ? LoadingWidget(size: ThemeConstants.loaderSizeS)
                     : AppText(
                         context.translate(LanguageLabelKeys.apply),
                         style: context.tt.bodySmall?.copyWith(
@@ -193,7 +193,7 @@ class _PromoCodeTileWidgetState extends State<PromoCodeTileWidget> {
 
     final card = Container(
       key: _cardKey,
-      padding: const EdgeInsetsDirectional.all(14),
+      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
       decoration: AppDecorations.shadowedCard(
         color: context.cs.surface,
         shadowColor: context.theme.shadowColor.withValues(alpha: 0.06),
@@ -294,7 +294,7 @@ class _BulletLine extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingXS),
       child: Row(
         crossAxisAlignment: .center,
-        spacing: 5,
+        spacing: ThemeConstants.spaceXS,
         children: [
           Container(
             width: 5,

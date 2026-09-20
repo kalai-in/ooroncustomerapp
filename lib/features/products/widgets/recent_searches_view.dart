@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:customer/commons/widgets/app_svg_icon.dart';
+import 'package:customer/commons/widgets/wave_text.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_decorations.dart';
@@ -30,34 +33,45 @@ class RecentSearchesView extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(start: ThemeConstants.paddingL, end: ThemeConstants.paddingL),
       child: Column(
         crossAxisAlignment: .start,
-        spacing: 8,
+        spacing: ThemeConstants.paddingXS,
         children: [
-          Row(
-            mainAxisAlignment: .spaceBetween,
-            children: [
-              AppText(
-                context.translate(LanguageLabelKeys.recentSearches),
-                style: context.tt.bodyLarge?.copyWith(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: context.cs.onSurface,
+          Padding(
+            padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingL, bottom: ThemeConstants.paddingM),
+            child: Row(
+              mainAxisAlignment: .spaceBetween,
+              children: [
+                WaveText(
+                  context.translate(LanguageLabelKeys.recentSearches),
+                  style: context.tt.bodyLarge?.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: context.cs.onSurface,
+                  ),
                 ),
-              ),
-              TextButton(
-                onPressed: onClearAll,
-                child: AppText(context.translate(LanguageLabelKeys.clearAll)),
-              ),
-            ],
+                TextButton(
+                  onPressed: onClearAll,
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: AppText(context.translate(LanguageLabelKeys.clearAll)),
+                ),
+              ],
+            ),
           ),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: ThemeConstants.spaceS,
+            runSpacing: ThemeConstants.spaceS,
             children: recentSearches
+                .asMap()
+                .entries
                 .map(
-                  (query) => _RecentSearchChip(
-                    query: query,
-                    onTap: () => onTap(query),
-                    onRemove: () => onRemove(query),
+                  (e) => _RecentSearchChip(
+                    query: e.value,
+                    index: e.key,
+                    onTap: () => onTap(e.value),
+                    onRemove: () => onRemove(e.value),
                   ),
                 )
                 .toList(),
@@ -68,61 +82,98 @@ class RecentSearchesView extends StatelessWidget {
   }
 }
 
-class _RecentSearchChip extends StatelessWidget {
+class _RecentSearchChip extends StatefulWidget {
   final String query;
+  final int index;
   final VoidCallback onTap;
   final VoidCallback onRemove;
 
   const _RecentSearchChip({
     required this.query,
+    required this.index,
     required this.onTap,
     required this.onRemove,
   });
 
   @override
+  State<_RecentSearchChip> createState() => _RecentSearchChipState();
+}
+
+// Continuous gentle breathing pulse: each chip softly scales up/down
+// forever, phase staggered by index so they don't all move in lockstep.
+class _RecentSearchChipState extends State<_RecentSearchChip>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final double _phase;
+
+  @override
+  void initState() {
+    super.initState();
+    _phase = (widget.index % 4) * 0.25;
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadius.r20,
-      child: Container(
-        padding: const EdgeInsetsDirectional.only(
-          start: ThemeConstants.paddingM,
-          end: 6,
-          top: 6,
-          bottom: 6,
-        ),
-        decoration: AppDecorations.box(
-          color: context.cs.surfaceContainer,
-          borderRadius: AppRadius.r20,
-          border: Border.all(color: context.cs.outline),
-        ),
-        child: Row(
-          mainAxisSize: .min,
-          children: [
-            AppSvgIcon(
-              AssetsConstants.historyIcon,
-              size: 16,
-              color: context.cs.onSurfaceVariant,
-            ),
-            AppSpacing.w6,
-            AppText(
-              query,
-              style: context.tt.bodySmall?.copyWith(
-                fontSize: 13,
-                color: context.cs.onSurface,
-              ),
-            ),
-            AppSpacing.w4,
-            InkWell(
-              onTap: onRemove,
-              borderRadius: AppRadius.r20,
-              child: AppSvgIcon(
-                AssetsConstants.closeIcon,
-                size: 16,
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final angle = (_controller.value + _phase) * 2 * math.pi;
+        final scale = 1.0 + math.sin(angle) * 0.03;
+        return Transform.scale(scale: scale, child: child);
+      },
+      child: InkWell(
+        onTap: widget.onTap,
+        borderRadius: AppRadius.r20,
+        child: Container(
+          padding: const EdgeInsetsDirectional.only(
+            start: ThemeConstants.paddingM,
+            end: ThemeConstants.paddingXS,
+            top: ThemeConstants.paddingXS,
+            bottom: ThemeConstants.paddingXS,
+          ),
+          decoration: AppDecorations.box(
+            color: context.cs.surfaceContainer,
+            borderRadius: AppRadius.r20,
+            border: Border.all(color: context.cs.outline),
+          ),
+          child: Row(
+            mainAxisSize: .min,
+            children: [
+              AppSvgIcon(
+                AssetsConstants.historyIcon,
+                size: ThemeConstants.iconXS,
                 color: context.cs.onSurfaceVariant,
               ),
-            ),
-          ],
+              AppSpacing.w6,
+              AppText(
+                widget.query,
+                style: context.tt.bodySmall?.copyWith(
+                  fontSize: 13,
+                  color: context.cs.onSurface,
+                ),
+              ),
+              AppSpacing.w4,
+              InkWell(
+                onTap: widget.onRemove,
+                borderRadius: AppRadius.r20,
+                child: AppSvgIcon(
+                  AssetsConstants.closeIcon,
+                  size: ThemeConstants.iconXS,
+                  color: context.cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

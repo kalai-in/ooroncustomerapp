@@ -18,6 +18,7 @@ import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/string_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class HomeProductBlock extends StatelessWidget {
   final List<ProductDataModel> products;
@@ -114,7 +115,7 @@ class HomeProductBlock extends StatelessWidget {
             );
             return SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsetsDirectional.symmetric(horizontal: 10),
+              padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingS),
               child: Row(
                 crossAxisAlignment: .start,
                 mainAxisSize: .min,
@@ -266,7 +267,7 @@ class HomeProductBlock extends StatelessWidget {
         children: [
           Padding(
             padding: layout == ProductLayout.horizontal
-                ? const EdgeInsetsDirectional.symmetric(horizontal: 10)
+                ? const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingS)
                 : EdgeInsets.zero,
             child: AppText(
               sectionTitle!,

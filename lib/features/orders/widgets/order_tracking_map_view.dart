@@ -3,11 +3,12 @@ import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/core/configs/app_config.dart';
 import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/features/orders/cubit/road_route_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
@@ -25,6 +26,7 @@ class OrderTrackingMapView extends StatefulWidget {
   final void Function(gmap.GoogleMapController) onGoogleMapCreated;
   final LatLng deliveryAddressPoint;
   final LatLng? deliveryBoyPoint;
+  final LatLng? storePoint;
   final int? orderId;
   final Color primaryColor;
   final Color onPrimaryColor;
@@ -36,6 +38,7 @@ class OrderTrackingMapView extends StatefulWidget {
     required this.onGoogleMapCreated,
     required this.deliveryAddressPoint,
     required this.deliveryBoyPoint,
+    this.storePoint,
     required this.orderId,
     required this.primaryColor,
     required this.onPrimaryColor,
@@ -48,8 +51,8 @@ class OrderTrackingMapView extends StatefulWidget {
 class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
   gmap.BitmapDescriptor? _deliveryBoyIcon;
   gmap.BitmapDescriptor? _destinationIcon;
+  gmap.BitmapDescriptor? _storeIcon;
   gmap.GoogleMapController? _googleController;
-  final GlobalKey _destinationIconKey = GlobalKey();
 
   /// Fit-both-points runs once, the first time a delivery-boy location is
   /// available, so the opening frame already frames boy + destination. Left
@@ -88,15 +91,16 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _captureDestinationIcon(),
       );
+      WidgetsBinding.instance.addPostFrameCallback((_) => _captureStoreIcon());
     }
     _routeSub = context.read<RoadRouteCubit>().stream.listen((state) {
       if (state is RoadRouteLoaded && state.points != null && mounted) {
         setState(() => _routePoints = state.points);
       }
     });
-    final boyPoint = widget.deliveryBoyPoint;
-    if (boyPoint != null) {
-      _maybeFetchRoute(boyPoint);
+    final origin = widget.deliveryBoyPoint ?? widget.storePoint;
+    if (origin != null) {
+      _maybeFetchRoute(origin);
     }
   }
 
@@ -116,22 +120,71 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
     }
   }
 
-  /// Snapshots the offscreen destination SVG (built in [build], same asset
-  /// and tint as the OSM marker) into a bitmap so Google Maps shows the
-  /// matching pin instead of its default red marker.
+  /// Rasterizes the destination SVG (same asset used for the OSM marker)
+  /// straight from its picture data so Google Maps shows the matching pin
+  /// instead of its default red marker.
+  ///
+  /// Previously this snapshotted an offscreen `AppSvgIcon` via
+  /// `RepaintBoundary`, but `SvgPicture.asset` decodes asynchronously off
+  /// the build phase — the first post-frame callback fired before the
+  /// offscreen icon had actually painted, so the capture came out blank and
+  /// Google silently fell back to its default pin. Loading the vector
+  /// picture directly and drawing it onto our own canvas sidesteps that
+  /// widget-paint timing entirely.
   Future<void> _captureDestinationIcon() async {
-    final boundary =
-        _destinationIconKey.currentContext?.findRenderObject()
-            as RenderRepaintBoundary?;
-    if (boundary == null) return;
-    final image = await boundary.toImage(pixelRatio: 2.0);
+    final icon = await _rasterizeSvgIcon(AssetsConstants.destinationLocationIcon);
+    if (icon != null && mounted) setState(() => _destinationIcon = icon);
+  }
+
+  /// Same rasterization as [_captureDestinationIcon], for the store pin
+  /// shown at [OrderTrackingMapView.storePoint] (mirrors the OSM `AppSvgIcon`
+  /// store marker) — Google Maps has no vector-marker support, only bitmaps.
+  Future<void> _captureStoreIcon() async {
+    final icon = await _rasterizeSvgIcon(AssetsConstants.storePinIcon);
+    if (icon != null && mounted) setState(() => _storeIcon = icon);
+  }
+
+  /// Rasterizes an svg asset straight from its picture data so Google Maps
+  /// shows the matching pin instead of its default red marker.
+  ///
+  /// Previously this snapshotted an offscreen `AppSvgIcon` via
+  /// `RepaintBoundary`, but `SvgPicture.asset` decodes asynchronously off
+  /// the build phase — the first post-frame callback fired before the
+  /// offscreen icon had actually painted, so the capture came out blank and
+  /// Google silently fell back to its default pin. Loading the vector
+  /// picture directly and drawing it onto our own canvas sidesteps that
+  /// widget-paint timing entirely.
+  Future<gmap.BitmapDescriptor?> _rasterizeSvgIcon(String asset) async {
+    const displaySize = 35.0;
+    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final pictureInfo = await vg.loadPicture(SvgAssetLoader(asset), null);
+    final targetPx = (displaySize * pixelRatio).round();
+    // `BoxFit.contain` (used by AppSvgIcon on the OSM side) auto-centers a
+    // non-square viewBox inside its square box; drawing straight onto the
+    // canvas doesn't, so a non-square SVG landed in a corner of the bitmap
+    // instead of its center — anchor (0.5, 0.5) then pointed at empty
+    // padding next to the icon instead of the icon itself.
+    final scale =
+        targetPx / math.max(pictureInfo.size.width, pictureInfo.size.height);
+    final dx = (targetPx - pictureInfo.size.width * scale) / 2;
+    final dy = (targetPx - pictureInfo.size.height * scale) / 2;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    canvas.translate(dx, dy);
+    canvas.scale(scale);
+    canvas.drawPicture(pictureInfo.picture);
+    final image = await recorder.endRecording().toImage(targetPx, targetPx);
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (bytes == null || !mounted) return;
-    setState(() {
-      _destinationIcon = gmap.BitmapDescriptor.bytes(
-        bytes.buffer.asUint8List(),
-      );
-    });
+    pictureInfo.picture.dispose();
+    if (bytes == null) return null;
+    // Without `imagePixelRatio`, Google Maps treats the bitmap's raw pixel
+    // count as device-independent pixels — our 2x-supersampled bitmap then
+    // rendered at 2x the intended size, and got blurrier still once the
+    // device's own screen density stretched it further.
+    return gmap.BitmapDescriptor.bytes(
+      bytes.buffer.asUint8List(),
+      imagePixelRatio: pixelRatio,
+    );
   }
 
   @override
@@ -142,36 +195,50 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
         widget.deliveryBoyPoint != null) {
       _fitBounds();
     }
-    final boyPoint = widget.deliveryBoyPoint;
-    if (boyPoint != null) {
-      _maybeFetchRoute(boyPoint);
+    final origin = widget.deliveryBoyPoint ?? widget.storePoint;
+    if (origin != null) {
+      _maybeFetchRoute(origin);
     }
   }
 
-  /// Re-fetches the road route only if the delivery boy moved far enough
-  /// since the last fetch, so the free OSRM demo server isn't hammered on
-  /// every GPS tick. Google view skips OSRM entirely and uses the direct
-  /// line — no third-party routing dependency needed on that provider.
-  void _maybeFetchRoute(LatLng boyPoint) {
+  /// Re-fetches the road route — from the delivery boy once GPS is
+  /// available, else from the store as the pre-rider fallback line — only if
+  /// [origin] moved far enough since the last fetch, so the free OSRM demo
+  /// server isn't hammered on every GPS tick. Google view skips OSRM
+  /// entirely and uses the direct line — no third-party routing dependency
+  /// needed on that provider.
+  void _maybeFetchRoute(LatLng origin) {
     if (isGoogle) return;
     final routedFrom = _routedFrom;
     if (routedFrom != null &&
         Geolocator.distanceBetween(
               routedFrom.latitude,
               routedFrom.longitude,
-              boyPoint.latitude,
-              boyPoint.longitude,
+              origin.latitude,
+              origin.longitude,
             ) <
             _routeRefreshMeters) {
       return;
     }
-    _routedFrom = boyPoint;
-    context.read<RoadRouteCubit>().fetchRoute(boyPoint, deliveryAddressPoint);
+    _routedFrom = origin;
+    context.read<RoadRouteCubit>().fetchRoute(origin, deliveryAddressPoint);
   }
 
   /// Road-snapped points when available, else the direct line as fallback.
-  List<LatLng> _polylinePoints(LatLng boyPoint) =>
-      _routePoints ?? [boyPoint, deliveryAddressPoint];
+  List<LatLng> _polylinePoints(LatLng origin) =>
+      _routePoints ?? [origin, deliveryAddressPoint];
+
+  /// Tracking line to draw right now: the delivery boy's route once GPS is
+  /// available, otherwise the store-to-customer route as a pre-rider
+  /// fallback so the customer isn't looking at a bare map before the boy's
+  /// data arrives. Both are road-snapped on OSM (via [_polylinePoints] /
+  /// [_routePoints]) and a direct line on Google, same as the boy line
+  /// always was.
+  List<LatLng> _currentLinePoints() {
+    final origin = deliveryBoyPoint ?? widget.storePoint;
+    if (origin == null) return const [];
+    return _polylinePoints(origin);
+  }
 
   /// Height of the draggable bottom sheet's initial size, reserved as bottom
   /// padding so the fit doesn't tuck either marker behind it.
@@ -190,10 +257,10 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
         CameraFit.bounds(
           bounds: LatLngBounds(boyPoint, deliveryAddressPoint),
           padding: EdgeInsets.only(
-            top: 60,
-            left: 60,
-            right: 60,
-            bottom: _bottomSheetReserve + 40,
+            top: context.heightFraction(0.074),
+            left: context.heightFraction(0.074),
+            right: context.heightFraction(0.074),
+            bottom: _bottomSheetReserve + context.heightFraction(0.05),
           ),
         ),
       );
@@ -223,24 +290,7 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
   @override
   Widget build(BuildContext context) {
     if (!isGoogle) return _buildFlutterMap();
-    return Stack(
-      children: [
-        _buildGoogleMap(),
-        // Rendered off-screen once so it can be snapshotted into a
-        // BitmapDescriptor for the Google marker; never visible to the user.
-        Positioned(
-          left: -1000,
-          top: -1000,
-          child: RepaintBoundary(
-            key: _destinationIconKey,
-            child: AppSvgIcon(
-              AssetsConstants.destinationLocationIcon,
-              size: 36,
-            ),
-          ),
-        ),
-      ],
-    );
+    return _buildGoogleMap();
   }
 
   /// Compass bearing (degrees, 0-360) from [from] to [to], used to point the
@@ -259,6 +309,7 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
 
   Widget _buildFlutterMap() {
     final boyPoint = deliveryBoyPoint;
+    final linePoints = _currentLinePoints();
     return FlutterMap(
       mapController: osmController,
       options: MapOptions(
@@ -281,11 +332,11 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
           userAgentPackageName: AppConfig.appPackageName,
           subdomains: AppConstants.osmTileSubdomains,
         ),
-        if (boyPoint != null)
+        if (linePoints.isNotEmpty)
           PolylineLayer(
             polylines: [
               Polyline(
-                points: _polylinePoints(boyPoint),
+                points: linePoints,
                 color: primaryColor.withValues(alpha: 0.6),
                 strokeWidth: 3,
               ),
@@ -297,12 +348,21 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
               point: deliveryAddressPoint,
               width: 40,
               height: 40,
-              alignment: Alignment.topCenter,
               child: AppSvgIcon(
                 AssetsConstants.destinationLocationIcon,
-                size: 36,
+                size: ThemeConstants.iconXL,
               ),
             ),
+            if (widget.storePoint != null)
+              Marker(
+                point: widget.storePoint!,
+                width: 40,
+                height: 40,
+                child: AppSvgIcon(
+                  AssetsConstants.storePinIcon,
+                  size: ThemeConstants.iconXL,
+                ),
+              ),
             if (boyPoint != null)
               Marker(
                 point: boyPoint,
@@ -315,7 +375,7 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
                       180,
                   child: AppPngIcon(
                     AssetsConstants.deliveryBoyTrackingIcon,
-                    size: 40,
+                    size: ThemeConstants.iconXL,
                   ),
                 ),
               ),
@@ -327,6 +387,7 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
 
   Widget _buildGoogleMap() {
     final boyPoint = deliveryBoyPoint;
+    final linePoints = _currentLinePoints();
     return gmap.GoogleMap(
       initialCameraPosition: gmap.CameraPosition(
         target: gmap.LatLng(
@@ -366,6 +427,16 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
           anchor: const Offset(0.5, 1.0),
           icon: _destinationIcon ?? gmap.BitmapDescriptor.defaultMarker,
         ),
+        if (widget.storePoint != null)
+          gmap.Marker(
+            markerId: const gmap.MarkerId('store'),
+            position: gmap.LatLng(
+              widget.storePoint!.latitude,
+              widget.storePoint!.longitude,
+            ),
+            anchor: const Offset(0.5, 1.0),
+            icon: _storeIcon ?? gmap.BitmapDescriptor.defaultMarker,
+          ),
         if (boyPoint != null)
           gmap.Marker(
             markerId: const gmap.MarkerId('delivery_boy'),
@@ -381,10 +452,10 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
           ),
       },
       polylines: {
-        if (boyPoint != null)
+        if (linePoints.isNotEmpty)
           gmap.Polyline(
             polylineId: const gmap.PolylineId('route'),
-            points: _polylinePoints(boyPoint)
+            points: linePoints
                 .map((p) => gmap.LatLng(p.latitude, p.longitude))
                 .toList(),
             color: primaryColor.withValues(alpha: 0.6),

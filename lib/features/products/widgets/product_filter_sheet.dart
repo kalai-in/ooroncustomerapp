@@ -105,6 +105,8 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
   late AnimationController _railAnimationController;
   late AnimationController _contentAnimationController;
   int _activeGroup = 0;
+  static const double _kRailItemHeight = 56;
+  static const double _kRailVerticalPadding = ThemeConstants.paddingS;
 
   bool get _hasPriceRange => _totalMaxPrice > _totalMinPrice;
 
@@ -274,149 +276,200 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
                       // ── Left rail: filter categories ──
                       SizedBox(
                         width: 110,
-                        child: ListView.builder(
+                        child: SingleChildScrollView(
                           padding: const EdgeInsetsDirectional.symmetric(
-                            vertical: ThemeConstants.paddingS,
+                            vertical: _kRailVerticalPadding,
                           ),
-                          itemCount: _groups.length,
-                          itemBuilder: (context, i) {
-                            final group = _groups[i];
-                            final label = group.isBrand
-                                ? context.translate(LanguageLabelKeys.brand)
-                                : group.isPrice
-                                ? context.translate(
-                                    LanguageLabelKeys.priceRange,
-                                  )
-                                : group.label;
-                            final selected = i == _activeGroup;
-                            final count = group.isBrand
-                                ? _selectedBrandIds.length
-                                : group.isPrice
-                                ? 0
-                                : (group.attributeIndex != null
-                                      ? (_attributes[group.attributeIndex!]
-                                                    .values ??
-                                                [])
-                                            .where(
-                                              (v) => _selectedAttributeValueIds
-                                                  .contains(
-                                                    v.id?.toString() ?? '',
-                                                  ),
-                                            )
-                                            .length
-                                      : 0);
-                            return SlideAnimation(
-                              position: i,
-                              slideDirection: SlideDirection.fromBottom,
-                              itemCount: _groups.length,
-                              animationController: _railAnimationController,
-                              child: InkWell(
-                                onTap: () => _selectGroup(i),
+                          child: Stack(
+                            children: [
+                              // Sliding selection indicator — one shared
+                              // background + accent bar that moves between
+                              // items instead of each item toggling its own.
+                              AnimatedPositionedDirectional(
+                                duration: const Duration(milliseconds: 280),
+                                curve: Curves.easeOutCubic,
+                                top: _activeGroup * _kRailItemHeight,
+                                start: 0,
+                                end: 0,
+                                height: _kRailItemHeight,
                                 child: Stack(
                                   children: [
-                                    // Faded selection background — light on the
-                                    // left, fading in toward the right-edge
-                                    // accent bar.
                                     Container(
                                       decoration: AppDecorations.box(
-                                        gradient: selected
-                                            ? LinearGradient(
-                                                begin: AlignmentDirectional
-                                                    .centerStart,
-                                                end: AlignmentDirectional
-                                                    .centerEnd,
-                                                colors: [
-                                                  context.cs.primary.withValues(
-                                                    alpha: 0.02,
-                                                  ),
-                                                  context.cs.primary.withValues(
-                                                    alpha: 0.16,
-                                                  ),
-                                                ],
-                                              )
-                                            : null,
+                                        gradient: LinearGradient(
+                                          begin: AlignmentDirectional
+                                              .centerStart,
+                                          end: AlignmentDirectional.centerEnd,
+                                          colors: [
+                                            context.cs.primary.withValues(
+                                              alpha: 0.02,
+                                            ),
+                                            context.cs.primary.withValues(
+                                              alpha: 0.16,
+                                            ),
+                                          ],
+                                        ),
                                         borderRadius:
                                             const BorderRadiusDirectional.only(
                                               topStart: Radius.circular(5),
                                               bottomStart: Radius.circular(5),
                                             ),
                                       ),
-                                      padding:
-                                          const EdgeInsetsDirectional.symmetric(
-                                            horizontal: 14,
-                                            vertical: 14,
-                                          ),
-                                      child: Row(
-                                        spacing: 4,
-                                        children: [
-                                          Expanded(
-                                            child: AppText(
-                                              label,
-                                              style: context.tt.bodySmall
-                                                  ?.copyWith(
-                                                    fontWeight: selected
-                                                        ? FontWeight.w700
-                                                        : FontWeight.w500,
-                                                    color: selected
-                                                        ? context.cs.primary
-                                                        : context.cs.onSurface,
-                                                  ),
-                                            ),
-                                          ),
-                                          if (count > 0) ...[
-                                            Container(
-                                              padding:
-                                                  const EdgeInsetsDirectional.symmetric(
-                                                    horizontal: 6,
-                                                    vertical: 1,
-                                                  ),
-                                              decoration: AppDecorations.box(
-                                                color: context.cs.primary,
-                                                borderRadius: AppRadius.r20,
-                                              ),
-                                              child: AppText(
-                                                '$count',
-                                                style: context.tt.labelSmall
-                                                    ?.copyWith(
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      color:
-                                                          context.cs.onPrimary,
-                                                    ),
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
                                     ),
-                                    // Right-edge accent bar — separate from the
-                                    // faded background, marks the active category
-                                    // against the divider, like a section indicator.
-                                    if (selected)
-                                      PositionedDirectional(
-                                        top: 0,
-                                        bottom: 0,
-                                        end: 0,
-                                        child: Container(
-                                          width: 3,
-                                          decoration: AppDecorations.box(
-                                            color: context.cs.primary,
-                                            borderRadius:
-                                                const BorderRadiusDirectional.only(
-                                                  topStart: Radius.circular(16),
-                                                  bottomStart: Radius.circular(
-                                                    16,
-                                                  ),
+                                    PositionedDirectional(
+                                      top: 0,
+                                      bottom: 0,
+                                      end: 0,
+                                      child: Container(
+                                        width: 3,
+                                        decoration: AppDecorations.box(
+                                          color: context.cs.primary,
+                                          borderRadius:
+                                              const BorderRadiusDirectional.only(
+                                                topStart: Radius.circular(16),
+                                                bottomStart: Radius.circular(
+                                                  16,
                                                 ),
-                                          ),
+                                              ),
                                         ),
                                       ),
+                                    ),
                                   ],
                                 ),
                               ),
-                            );
-                          },
+                              Column(
+                                children: [
+                                  for (var i = 0; i < _groups.length; i++)
+                                    Builder(
+                                      builder: (context) {
+                                        final group = _groups[i];
+                                        final label = group.isBrand
+                                            ? context.translate(
+                                                LanguageLabelKeys.brand,
+                                              )
+                                            : group.isPrice
+                                            ? context.translate(
+                                                LanguageLabelKeys.priceRange,
+                                              )
+                                            : group.label;
+                                        final selected = i == _activeGroup;
+                                        final count = group.isBrand
+                                            ? _selectedBrandIds.length
+                                            : group.isPrice
+                                            ? 0
+                                            : (group.attributeIndex != null
+                                                  ? (_attributes[group
+                                                                    .attributeIndex!]
+                                                                .values ??
+                                                            [])
+                                                        .where(
+                                                          (v) =>
+                                                              _selectedAttributeValueIds
+                                                                  .contains(
+                                                                    v.id
+                                                                            ?.toString() ??
+                                                                        '',
+                                                                  ),
+                                                        )
+                                                        .length
+                                                  : 0);
+                                        return SlideAnimation(
+                                          position: i,
+                                          slideDirection:
+                                              SlideDirection.fromBottom,
+                                          itemCount: _groups.length,
+                                          animationController:
+                                              _railAnimationController,
+                                          child: SizedBox(
+                                            height: _kRailItemHeight,
+                                            child: InkWell(
+                                              onTap: () => _selectGroup(i),
+                                              splashFactory:
+                                                  NoSplash.splashFactory,
+                                              splashColor: Colors.transparent,
+                                              highlightColor:
+                                                  Colors.transparent,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsetsDirectional.symmetric(
+                                                      horizontal:
+                                                          ThemeConstants
+                                                              .paddingM,
+                                                    ),
+                                                child: Row(
+                                                  spacing:
+                                                      ThemeConstants.spaceXS,
+                                                  children: [
+                                                    Expanded(
+                                                      child: AppText(
+                                                        label,
+                                                        style: context
+                                                            .tt
+                                                            .bodySmall
+                                                            ?.copyWith(
+                                                              fontWeight:
+                                                                  selected
+                                                                  ? FontWeight
+                                                                        .w700
+                                                                  : FontWeight
+                                                                        .w500,
+                                                              color: selected
+                                                                  ? context
+                                                                        .cs
+                                                                        .primary
+                                                                  : context
+                                                                        .cs
+                                                                        .onSurface,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                    if (count > 0) ...[
+                                                      Container(
+                                                        padding:
+                                                            const EdgeInsetsDirectional.symmetric(
+                                                              horizontal:
+                                                                  ThemeConstants
+                                                                      .paddingXS,
+                                                              vertical: 1,
+                                                            ),
+                                                        decoration:
+                                                            AppDecorations.box(
+                                                              color: context
+                                                                  .cs
+                                                                  .primary,
+                                                              borderRadius:
+                                                                  AppRadius
+                                                                      .r20,
+                                                            ),
+                                                        child: AppText(
+                                                          '$count',
+                                                          style: context
+                                                              .tt
+                                                              .labelSmall
+                                                              ?.copyWith(
+                                                                fontSize: 10,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                                color: context
+                                                                    .cs
+                                                                    .onPrimary,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       VerticalDivider(
@@ -466,26 +519,32 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
           slideDirection: SlideDirection.fromBottom,
           itemCount: _brands.length,
           animationController: _contentAnimationController,
-          child: _FilterOptionTile(
-            selected: selected,
-            label: brand.name ?? '',
-            leading: (brand.imageUrl ?? '').isNotEmpty
-                ? ClipRRect(
-                    borderRadius: AppRadius.r6,
-                    child: AppNetworkImage(
-                      url: brand.imageUrl!,
-                      width: 32,
-                      height: 32,
-                    ),
-                  )
-                : null,
-            onTap: () => setState(() {
-              if (selected) {
-                _selectedBrandIds.remove(id);
-              } else {
-                _selectedBrandIds.add(id);
-              }
-            }),
+          child: Column(
+            children: [
+              _FilterOptionTile(
+                selected: selected,
+                label: brand.name ?? '',
+                leading: (brand.imageUrl ?? '').isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: AppRadius.r6,
+                        child: AppNetworkImage(
+                          url: brand.imageUrl!,
+                          width: 32,
+                          height: 32,
+                        ),
+                      )
+                    : null,
+                onTap: () => setState(() {
+                  if (selected) {
+                    _selectedBrandIds.remove(id);
+                  } else {
+                    _selectedBrandIds.add(id);
+                  }
+                }),
+              ),
+              if (i < _brands.length - 1)
+                Divider(height: 1, color: context.cs.outlineVariant),
+            ],
           ),
         );
       },
@@ -494,11 +553,9 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
 
   Widget _buildAttributeContent(BuildContext context, Attributes attribute) {
     final values = attribute.values ?? [];
-    return ListView.separated(
+    return ListView.builder(
       padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXS),
       itemCount: values.length,
-      separatorBuilder: (_, _) =>
-          Divider(height: 1, color: context.cs.outlineVariant),
       itemBuilder: (context, i) {
         final value = values[i];
         final id = value.id?.toString() ?? '';
@@ -508,16 +565,22 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
           slideDirection: SlideDirection.fromBottom,
           itemCount: values.length,
           animationController: _contentAnimationController,
-          child: _FilterOptionTile(
-            selected: selected,
-            label: value.value ?? '',
-            onTap: () => setState(() {
-              if (selected) {
-                _selectedAttributeValueIds.remove(id);
-              } else {
-                _selectedAttributeValueIds.add(id);
-              }
-            }),
+          child: Column(
+            children: [
+              _FilterOptionTile(
+                selected: selected,
+                label: value.value ?? '',
+                onTap: () => setState(() {
+                  if (selected) {
+                    _selectedAttributeValueIds.remove(id);
+                  } else {
+                    _selectedAttributeValueIds.add(id);
+                  }
+                }),
+              ),
+              if (i < values.length - 1)
+                Divider(height: 1, color: context.cs.outlineVariant),
+            ],
           ),
         );
       },
@@ -590,7 +653,7 @@ class _FilterOptionTile extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: 14,
+          horizontal: ThemeConstants.paddingM,
           vertical: ThemeConstants.paddingM,
         ),
         child: Row(
@@ -621,7 +684,7 @@ class _FilterOptionTile extends StatelessWidget {
               child: selected
                   ? AppSvgIcon(
                       AssetsConstants.checkIcon,
-                      size: 14,
+                      size: ThemeConstants.iconXS,
                       color: context.cs.onPrimary,
                     )
                   : null,
@@ -653,7 +716,7 @@ class _BottomActions extends StatelessWidget {
         borderColor: context.cs.outlineVariant,
       ),
       child: Row(
-        spacing: 12,
+        spacing: ThemeConstants.spaceM,
         children: [
           Expanded(
             child: AppButton(

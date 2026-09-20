@@ -70,7 +70,7 @@ class AssetsConstants {
   static const String infoCircleIcon = '$path/info_circle_icon.svg';
   static const String dangerIcon = '$path/danger_icon.svg';
   static const String phoneIcon = '$path/phone_icon.svg';
-  static const String storeIcon = '$path/store_icon.svg';
+  static const String storePinIcon = '$path/store_pin_icon.svg';
   static const String uploadIcon = '$path/upload_icon.svg';
   static const String warningIcon = '$path/warning_icon.svg';
   static const String openInNewRoundedIcon =
@@ -106,6 +106,7 @@ class AssetsConstants {
       '$path/order_payment_pending_icon.svg';
   static const String orderReceivedIcon = '$path/order_received_icon.svg';
   static const String arrowUpAndroidIcon = '$path/arrow_up_android_icon.svg';
+  static const String expectedDeliveryIcon = '$path/expected_delivery.svg';
 
   //Tracking icon
   static const String deliveryBoyTrackingIcon = '$pathPng/delivery_boy_tracking_icon.png'; 
@@ -126,6 +127,8 @@ class AssetsConstants {
       '$bottomNavIconPath/favourite_inactive.svg';
   static const String profileInActiveIcon =
       '$bottomNavIconPath/profile_inactive.svg';
+  static const String orderActiveIcon = '$bottomNavIconPath/order_active.svg';
+  static const String orderInActiveIcon = '$bottomNavIconPath/order_inactive.svg';
 
   // for payment getaway
   static const String paymentGatewayIconPath = '$path/payment_getaway';
@@ -165,7 +168,8 @@ class AssetsConstants {
   static const String giftIcon = '$path/gift_icon.svg';
   static const String languageIcon = '$path/language_icon.svg';
   static const String themeIcon = '$path/theme_icon.svg';
-  static const String lightThemeIcon = '$path/light_icon.svg';
+  static const String lightThemeIcon = '$path/light_theme_icon.svg';
+  static const String darkThemeIcon = '$path/dark_theme_icon.svg';
   static const String systemThemeIcon = '$path/system_theme_icon.svg';
   static const String notificationIcon = '$path/notification_icon.svg';
   static const String shareIcon = '$path/share_icon.svg';

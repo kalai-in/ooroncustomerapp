@@ -50,4 +50,10 @@ class CountrySettingsCubit extends Cubit<CountrySettingsState> {
     if (current is! CountrySettingsLoaded) return '';
     return current.settings.data?.currency ?? '';
   }
+
+  int getDecimalPoint() {
+    final current = state;
+    if (current is! CountrySettingsLoaded) return 2;
+    return current.settings.data?.decimalPoint ?? 2;
+  }
 }

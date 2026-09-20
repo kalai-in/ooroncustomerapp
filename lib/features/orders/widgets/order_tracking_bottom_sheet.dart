@@ -93,7 +93,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
         children: [
           Center(
             child: Container(
-              margin: const EdgeInsetsDirectional.only(top: 10, bottom: ThemeConstants.paddingXS),
+              margin: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingS, bottom: ThemeConstants.paddingXS),
               width: 40,
               height: 4,
               decoration: AppDecorations.dragHandle(
@@ -105,7 +105,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
             padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingXXL),
             child: Column(
               crossAxisAlignment: .start,
-              spacing: 10,
+              spacing: ThemeConstants.spaceM,
               children: [
                 if (_hasDeliveryPartner)
                   _SheetCard(
@@ -117,7 +117,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
                     ),
                   )
                 else if (order.otp != null && order.otp != 0)
-                  _SheetCard(
+                  /* _SheetCard(
                     child: Row(
                       mainAxisAlignment: .spaceBetween,
                       children: [
@@ -139,7 +139,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ),
+                  ) */AppSpacing.shrink,
                 _SheetCard(
                   child: Column(
                     crossAxisAlignment: .start,
@@ -147,7 +147,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
                       _SectionHeader(
                         icon: AppSvgIcon(
                           AssetsConstants.deliveryBikeIcon,
-                          size: 20,
+                          size: ThemeConstants.iconM,
                           color: textPrimary,
                         ),
                         title: context.translate(
@@ -233,7 +233,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
                           child: _SectionHeader(
                             icon: AppSvgIcon(
                               AssetsConstants.supportChatIcon,
-                              size: 20,
+                              size: ThemeConstants.iconM,
                               color: textPrimary,
                             ),
                             title: context.translate(
@@ -268,7 +268,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
                           Expanded(
                             child: Column(
                               crossAxisAlignment: .start,
-                              spacing: 2,
+                              spacing: ThemeConstants. spaceXXS,
                               children: [
                                 AppText(
                                   context.translate(
@@ -305,7 +305,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
                               },
                               child: AppSvgIcon(
                                 AssetsConstants.copyIcon,
-                                size: 16,
+                                size: ThemeConstants.iconXS,
                                 color: textSecondary,
                               ),
                             ),
@@ -320,7 +320,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
                             .map(
                               (item) => Padding(
                                 padding: const EdgeInsetsDirectional.only(
-                                  bottom: 10,
+                                  bottom: ThemeConstants.paddingS,
                                 ),
                                 child: _SummaryItemRow(item: item),
                               ),
@@ -378,7 +378,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      spacing: 12,
+      spacing: ThemeConstants.spaceM,
       children: [
         Container(
           width: 40,
@@ -430,7 +430,7 @@ class _SummaryItemRow extends StatelessWidget {
 
     return Row(
       crossAxisAlignment: .start,
-      spacing: 12,
+      spacing: ThemeConstants.spaceM,
       children: [
         hasImage
             ? AppNetworkImage(
@@ -489,7 +489,7 @@ class _SheetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsetsDirectional.all(14),
+      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
       decoration: AppDecorations.box(
         color: context.cs.surface,
         borderRadius: AppRadius.r14,

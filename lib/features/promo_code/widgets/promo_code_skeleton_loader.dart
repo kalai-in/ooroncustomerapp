@@ -17,7 +17,7 @@ class PromoCodeSkeletonLoader extends StatelessWidget {
   Widget _tile(BuildContext context, Color color) {
     return Container(
       margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingM),
-      padding: const EdgeInsetsDirectional.all(14),
+      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
       decoration: AppDecorations.shadowedCard(
         color: context.cs.surface,
         shadowColor: context.theme.shadowColor.withValues(alpha: 0.06),
@@ -36,7 +36,7 @@ class PromoCodeSkeletonLoader extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: .start,
-                  spacing: 6,
+                  spacing: ThemeConstants.spaceS,
                   children: [
                     ShimmerBox(color, width: 140, height: 15),
                     ShimmerBox(color, width: 100, height: 12),

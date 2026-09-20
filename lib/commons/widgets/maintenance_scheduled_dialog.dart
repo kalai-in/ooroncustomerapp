@@ -321,7 +321,7 @@ class _MaintenanceScheduledDialogState
                     ),
                     child: AppSvgIcon(
                       AssetsConstants.warningIcon,
-                      size: 30,
+                      size: ThemeConstants.iconXL,
                       color: context.cs.onPrimary,
                     ),
                   ),
@@ -375,7 +375,7 @@ class _CountdownPill extends StatelessWidget {
     final accent = context.cs.primary;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: ThemeConstants.paddingXL, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: ThemeConstants.paddingXL, vertical: ThemeConstants.paddingM),
       decoration: AppDecorations.box(
         color: accent.withValues(alpha: 0.1),
         borderRadius: AppRadius.r16,

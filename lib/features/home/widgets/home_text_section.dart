@@ -5,6 +5,7 @@ import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/string_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class HomeTextSection extends StatelessWidget {
   final Blocks block;
@@ -38,10 +39,10 @@ class HomeTextSection extends StatelessWidget {
 
     Widget content = Container(
       width: double.infinity,
-      padding: EdgeInsetsDirectional.all(10),
+      padding: EdgeInsetsDirectional.all(ThemeConstants.paddingS),
       child: Column(
         crossAxisAlignment: _crossAxisAlign(align),
-        spacing: 4,
+        spacing: ThemeConstants.spaceXS,
         children: [
           if (title?.isNotEmpty == true)
             AppText(

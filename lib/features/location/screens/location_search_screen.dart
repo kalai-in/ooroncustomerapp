@@ -120,7 +120,7 @@ class _LocationSearchViewState extends State<_LocationSearchView> {
                 ),
                 prefixIcon: AppSvgIcon(
                   AssetsConstants.searchIcon,
-                  size: 18,
+                  size: ThemeConstants.iconS,
                   color: context.cs.onSurfaceVariant,
                   fit: BoxFit.scaleDown,
                 ),
@@ -134,7 +134,7 @@ class _LocationSearchViewState extends State<_LocationSearchView> {
                       ? IconButton(
                           icon: AppSvgIcon(
                             AssetsConstants.closeIcon,
-                            size: 18,
+                            size: ThemeConstants.iconS,
                             color: context.cs.onSurfaceVariant,
                           ),
                           onPressed: _onClear,

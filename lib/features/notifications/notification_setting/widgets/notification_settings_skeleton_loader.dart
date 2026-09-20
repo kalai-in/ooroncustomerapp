@@ -13,7 +13,7 @@ class NotificationSettingsSkeletonLoader extends StatelessWidget {
 
   Widget _tile(BuildContext context, Color color) {
     return Container(
-      margin: const EdgeInsetsDirectional.only(bottom: 10),
+      margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
       decoration: AppDecorations.shadowedCard(
         color: Theme.of(context).cardColor,
         shadowColor: Theme.of(context).shadowColor.withValues(alpha: 0.06),
@@ -24,10 +24,10 @@ class NotificationSettingsSkeletonLoader extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingL,
-          vertical: 14,
+          vertical: ThemeConstants.paddingM,
         ),
         child: Row(
-          spacing: 10,
+          spacing: ThemeConstants.spaceM,
           children: [
             Expanded(child: ShimmerBox(color, width: 140, height: 14)),
             ShimmerBox(color, width: 40, height: 22, radius: AppRadius.r16),

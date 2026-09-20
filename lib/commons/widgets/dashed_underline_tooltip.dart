@@ -15,6 +15,8 @@ class DashedUnderlineTooltip extends StatelessWidget {
     required this.message,
     this.style,
     this.dashColor,
+    this.sheetTitle,
+    this.contentBuilder,
   });
 
   final String text;
@@ -22,20 +24,29 @@ class DashedUnderlineTooltip extends StatelessWidget {
   final TextStyle? style;
   final Color? dashColor;
 
+  /// Overrides [text] as the bottom sheet's title, when set.
+  final String? sheetTitle;
+
+  /// Overrides the default plain-message body with custom sheet content.
+  final WidgetBuilder? contentBuilder;
+
   void _showInfoSheet(BuildContext context) {
     showAppBottomSheet(
       context,
       isScrollControlled: false,
-      title: text,
+      title: sheetTitle ?? text,
       padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.spaceXXXL),
       builder: (sheetContext) => SlideAnimationList(
         children: [
-          AppText(
-            message,
-            style: sheetContext.tt.bodySmall?.copyWith(
-              color: sheetContext.cs.onSurfaceVariant,
+          if (contentBuilder != null)
+            contentBuilder!(sheetContext)
+          else
+            AppText(
+              message,
+              style: sheetContext.tt.bodySmall?.copyWith(
+                color: sheetContext.cs.onSurfaceVariant,
+              ),
             ),
-          ),
         ],
       ),
     );

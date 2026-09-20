@@ -161,7 +161,7 @@ final class AppTheme {
         fillColor: AppColors.white,
         contentPadding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingL,
-          vertical: 15,
+          vertical: ThemeConstants.paddingM,
         ),
         border: OutlineInputBorder(
           borderRadius: AppRadius.r10,
@@ -320,7 +320,7 @@ final class AppTheme {
         fillColor: AppColors.surfaceDark,
         contentPadding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingL,
-          vertical: 15,
+          vertical: ThemeConstants.paddingM,
         ),
         border: OutlineInputBorder(
           borderRadius: AppRadius.r10,

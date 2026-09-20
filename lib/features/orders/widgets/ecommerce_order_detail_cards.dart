@@ -2,6 +2,7 @@ import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/commons/widgets/app_snack_bar.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/commons/widgets/product_image_placeholder.dart';
+import 'package:customer/commons/widgets/tax_breakdown_sheet.dart';
 import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/constants/navigation_service.dart';
@@ -30,6 +31,7 @@ import 'package:customer/features/orders/widgets/order_detail_shared_widgets.dar
 import 'package:customer/utils/app_date_formatter.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
+import 'package:customer/utils/extensions/num_extensions.dart';
 import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:customer/utils/extensions/string_extensions.dart';
 import 'package:customer/utils/order_status_labels.dart';
@@ -68,7 +70,7 @@ class EcommerceOrderDetailReturnRejectCard extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: .start,
-        spacing: 10,
+        spacing: ThemeConstants.spaceM,
         children: [
           Container(
             width: 36,
@@ -93,7 +95,7 @@ class EcommerceOrderDetailReturnRejectCard extends StatelessWidget {
             ),
             child: AppSvgIcon(
               AssetsConstants.dangerIcon,
-              size: 18,
+              size: ThemeConstants.iconS,
               color: context.cs.onError,
               fit: BoxFit.scaleDown,
             ),
@@ -101,7 +103,7 @@ class EcommerceOrderDetailReturnRejectCard extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: .start,
-              spacing: 2,
+              spacing: ThemeConstants.spaceXXS,
               children: [
                 AppText(
                   context.translate(LanguageLabelKeys.returnRejectReason),
@@ -153,7 +155,7 @@ class EcommerceOrderDetailCustomerInfoCard extends StatelessWidget {
                 },
                 child: AppSvgIcon(
                   AssetsConstants.copyIcon,
-                  size: 16,
+                  size: ThemeConstants.iconXS,
                   color: context.cs.onSurfaceVariant,
                 ),
               ),
@@ -173,6 +175,13 @@ class EcommerceOrderDetailCustomerInfoCard extends StatelessWidget {
           label: context.translate(LanguageLabelKeys.deliveryAddress),
           value: fullAddress,
           maxLines: 2,
+        ),
+      if (order.address?.billingSameAsShipping == 0 &&
+          order.address?.billing != null)
+        OrderDetailLabelValueRow(
+          label: context.translate(LanguageLabelKeys.billingAddress),
+          value: formatBillingAddress(order.address!.billing!),
+          maxLines: 3,
         ),
       if (order.date.hasValue)
         OrderDetailLabelValueRow(
@@ -214,12 +223,12 @@ class EcommerceOrderDetailItemsCard extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: .start,
-      spacing: 12,
+      spacing: ThemeConstants.spaceM,
       children: [
         OrderDetailCard(
           child: Column(
             crossAxisAlignment: .start,
-            spacing: 12,
+            spacing: ThemeConstants.spaceM,
             children: [
               OrderDetailSectionTitle(
                 title: context.translate(LanguageLabelKeys.items),
@@ -253,7 +262,8 @@ class EcommerceOrderDetailItemsCard extends StatelessWidget {
                       _OtherItemRow(
                         item: item,
                         currency: order.currency ?? '',
-                        isOngoing: order.activeStatus == OrderStatus.paymentPending,
+                        isOngoing:
+                            order.activeStatus == OrderStatus.paymentPending,
                       ),
                       if (i < otherItems.length - 1) ...[
                         AppSpacing.h10,
@@ -285,23 +295,31 @@ class EcommerceOrderDetailItemRow extends StatelessWidget {
     final dividerColor = context.cs.outlineVariant;
 
     final showCancel = order.isCancellable ?? false;
-    final returnEligible = order.isReturnable ?? false;
+    final orderCreatedAt = AppDateFormatter.parse(order.date);
+    final returnDeadline = (orderCreatedAt != null && order.returnDays != null)
+        ? orderCreatedAt.add(Duration(days: order.returnDays!))
+        : null;
+    final returnEligible =
+        (order.isReturnable ?? false) &&
+        returnDeadline != null &&
+        DateTime.now().isBefore(returnDeadline);
+    final returnRequested = (order.returnRequested ?? 0) != 0;
     final isRated =
         order.productRating == true &&
-        order.activeStatus == OrderStatus.delivered &&
         (order.itemRating?.isNotEmpty ?? false);
     final showRate =
         order.productRating == true &&
         order.activeStatus == OrderStatus.delivered &&
         !showCancel &&
         !returnEligible &&
+        !returnRequested &&
         !isRated;
 
     return Column(
       crossAxisAlignment: .start,
       children: [
         Container(
-          padding: const EdgeInsetsDirectional.all(10),
+          padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
           decoration: AppDecorations.box(
             border: (showRate || isRated)
                 ? Border(
@@ -332,7 +350,7 @@ class EcommerceOrderDetailItemRow extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: .start,
-                  spacing: 2,
+                  spacing: ThemeConstants.spaceXXS,
                   children: [
                     AppText(
                       '${order.quantity ?? 1} × ${order.productName ?? ''}',
@@ -395,7 +413,7 @@ class EcommerceOrderDetailItemRow extends StatelessWidget {
                     Wrap(
                       alignment: WrapAlignment.end,
                       crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 10,
+                      spacing: ThemeConstants.spaceM,
                       runSpacing: 8,
                       children: [
                         if (showCancel) _cancelButton(context),
@@ -420,7 +438,7 @@ class EcommerceOrderDetailItemRow extends StatelessWidget {
       height: 28,
       fontSize: 13,
       contentPadding: const EdgeInsetsDirectional.symmetric(
-        horizontal: 14,
+        horizontal: ThemeConstants.paddingM,
         vertical: ThemeConstants.paddingXS,
       ),
       onPressed: () async {
@@ -479,7 +497,7 @@ class EcommerceOrderDetailItemRow extends StatelessWidget {
       height: 28,
       fontSize: 13,
       contentPadding: const EdgeInsetsDirectional.symmetric(
-        horizontal: 14,
+        horizontal: ThemeConstants.paddingM,
         vertical: ThemeConstants.paddingXS,
       ),
       onPressed: () async {
@@ -564,7 +582,7 @@ class _OtherItemRow extends StatelessWidget {
                 if (item.finalTotal != null) ...[
                   AppSpacing.h2,
                   AppText(
-                    '$currency${item.finalTotal}',
+                    '$currency${item.finalTotal!.formatPrice()}',
                     style: context.tt.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: context.cs.onSurfaceVariant,
@@ -579,7 +597,7 @@ class _OtherItemRow extends StatelessWidget {
               flipX: Directionality.of(context) == TextDirection.rtl,
               child: AppSvgIcon(
                 AssetsConstants.arrowRightIcon,
-                size: 18,
+                size: ThemeConstants.iconS,
                 color: context.cs.onSurfaceVariant,
               ),
             ),
@@ -616,6 +634,11 @@ class EcommerceOrderDetailPriceSummaryCard extends StatelessWidget {
         order.additionalCharges != null && order.additionalCharges!.isNotEmpty;
     final hasSurge =
         order.surgeCharges != null && order.surgeCharges!.isNotEmpty;
+    final hasTax =
+        order.taxBreakdown?.any(
+          (tax) => tax.amount != null && tax.amount != 0,
+        ) ??
+        false;
     final saved = (order.savedAmount ?? 0) > 0
         ? order.savedAmount!
         : (order.promoDiscount ?? 0);
@@ -629,11 +652,17 @@ class EcommerceOrderDetailPriceSummaryCard extends StatelessWidget {
       walletValue: (hasWallet && !paymentInfo.isFullyPaidByWallet)
           ? '${order.walletBalance}'
           : null,
+      remainingLabel: paymentInfo.isCombined
+          ? paymentInfo.remainingRowLabel
+          : null,
+      remainingValue: paymentInfo.isCombined
+          ? (order.finalTotal ?? 0).formatPrice()
+          : null,
       totalRowLabel: paymentInfo.totalRowLabel,
-      totalRowValue: '$currency${paymentInfo.totalRowAmount}',
+      totalRowValue: '$currency${paymentInfo.totalRowAmount.formatPrice()}',
       saved: saved,
       cashbackText: hasCashback
-          ? '${context.translate(LanguageLabelKeys.cashback)} $currency${order.cashbackAmount!.toStringAsFixed(2)}'
+          ? '${context.translate(LanguageLabelKeys.cashback)} $currency${order.cashbackAmount!.formatPrice()}'
           : null,
       cashbackSubtitle: hasCashback
           ? context.translate(LanguageLabelKeys.cashbackCreditedToWallet)
@@ -642,38 +671,110 @@ class EcommerceOrderDetailPriceSummaryCard extends StatelessWidget {
         OrderDetailPriceRow(
           label: context.translate(LanguageLabelKeys.subtotal),
           value: '$currency${order.subTotal ?? 0}',
-          suffixLabel: (order.taxAmount != null && order.taxAmount != 0)
+          suffixLabel: hasTax
               ? context.translate(LanguageLabelKeys.inclTax)
               : null,
+          suffixTooltipMessage: hasTax
+              ? taxBreakdownMessage(
+                  context,
+                  order.taxBreakdown!,
+                  (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                )
+              : null,
+          suffixSheetTitle: hasTax
+              ? context.translate(LanguageLabelKeys.taxBreakdown)
+              : null,
+          suffixContentBuilder: hasTax
+              ? (sheetContext) => taxBreakdownSheet(
+                  sheetContext,
+                  order.taxBreakdown!,
+                  (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                )
+              : null,
         ),
-        OrderDetailPriceRow(
-          label: context.translate(LanguageLabelKeys.deliveryCharge),
-          value: '$currency${order.deliveryCharge ?? 0}',
-        ),
+        if ((order.deliveryCharge?.amount ?? 0) > 0)
+          OrderDetailPriceRow(
+            label: context.translate(LanguageLabelKeys.deliveryCharge),
+            value: '$currency${order.deliveryCharge?.amount ?? 0}',
+            detailContentBuilder:
+                hasChargeTaxDetail(
+                  taxName: order.deliveryCharge?.taxName,
+                  taxAmount: order.deliveryCharge?.taxAmount,
+                  taxableAmount: order.deliveryCharge?.taxableAmount,
+                  taxRate: order.deliveryCharge?.taxRate,
+                )
+                ? (sheetContext) => additionalChargeDetailSheet(
+                    sheetContext,
+                    (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                    label: context.translate(LanguageLabelKeys.deliveryCharge),
+                    totalAmount: order.deliveryCharge?.amount ?? 0,
+                    taxName: order.deliveryCharge?.taxName,
+                    taxAmount: order.deliveryCharge?.taxAmount,
+                    taxRate: order.deliveryCharge?.taxRate,
+                  )
+                : null,
+          ),
         if (hasPromo)
           OrderDetailPriceRow(
             label: context.translate(LanguageLabelKeys.discount),
-            value: '- $currency${order.promoDiscount}',
+            value: '- $currency${(order.promoDiscount ?? 0).formatPrice()}',
             valueColor: context.cs.onSecondaryContainer,
           ),
         if (hasAdditional)
-          ...order.additionalCharges!.map(
-            (charge) => OrderDetailPriceRow(
-              label:
-                  charge.name ??
-                  context.translate(LanguageLabelKeys.additional),
+          ...order.additionalCharges!.map((charge) {
+            final hasTaxDetail = hasChargeTaxDetail(
+              taxName: charge.taxName,
+              taxAmount: charge.taxAmount,
+              taxableAmount: charge.taxableAmount,
+              taxRate: charge.taxRate,
+            );
+            final label =
+                charge.name ?? context.translate(LanguageLabelKeys.additional);
+            return OrderDetailPriceRow(
+              label: label,
               value: '$currency${charge.amount ?? 0}',
-              isRefundable: charge.isRefundable,
-            ),
-          ),
+              isRefundable: hasTaxDetail ? null : charge.isRefundable,
+              detailContentBuilder: hasTaxDetail
+                  ? (sheetContext) => additionalChargeDetailSheet(
+                      sheetContext,
+                      (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                      label: label,
+                      totalAmount: charge.amount ?? 0,
+                      isRefundable: charge.isRefundable,
+                      taxName: charge.taxName,
+                      taxAmount: charge.taxAmount,
+                      taxRate: charge.taxRate,
+                    )
+                  : null,
+            );
+          }),
         if (hasSurge)
-          ...order.surgeCharges!.map(
-            (surge) => OrderDetailPriceRow(
-              label: surge.label ?? '',
+          ...order.surgeCharges!.map((surge) {
+            final hasTaxDetail = hasChargeTaxDetail(
+              taxName: surge.taxName,
+              taxAmount: surge.taxAmount,
+              taxableAmount: surge.taxableAmount,
+              taxRate: surge.taxRate,
+            );
+            final label = surge.label ?? '';
+            return OrderDetailPriceRow(
+              label: label,
               value: '$currency${surge.charge ?? 0}',
-              isRefundable: surge.isRefundable,
-            ),
-          ),
+              isRefundable: hasTaxDetail ? null : surge.isRefundable,
+              detailContentBuilder: hasTaxDetail
+                  ? (sheetContext) => additionalChargeDetailSheet(
+                      sheetContext,
+                      (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                      label: label,
+                      totalAmount: surge.charge ?? 0,
+                      isRefundable: surge.isRefundable,
+                      taxName: surge.taxName,
+                      taxAmount: surge.taxAmount,
+                      taxRate: surge.taxRate,
+                    )
+                  : null,
+            );
+          }),
       ],
     );
   }
@@ -705,24 +806,24 @@ class EcommerceOrderDetailTrackingCard extends StatelessWidget {
     return OrderDetailCard(
       child: Column(
         crossAxisAlignment: .start,
-        spacing: 12,
+        spacing: ThemeConstants.spaceM,
         children: [
           OrderDetailSectionTitle(
             title: context.translate(LanguageLabelKeys.trackingDetails),
           ),
           Row(
             crossAxisAlignment: .center,
-            spacing: 12,
+            spacing: ThemeConstants.spaceM,
             children: [
               CircleAvatar(
                 radius: 22,
                 backgroundColor: context.cs.surfaceContainerHighest,
-                child: AppSvgIcon(AssetsConstants.deliveryBikeIcon, size: 22),
+                child: AppSvgIcon(AssetsConstants.deliveryBikeIcon, size: ThemeConstants.iconM),
               ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: .start,
-                  spacing: 3,
+                  spacing: ThemeConstants.spaceXS,
                   children: [
                     AppText(
                       context.translate(LanguageLabelKeys.courierAgency),
@@ -750,7 +851,7 @@ class EcommerceOrderDetailTrackingCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: .start,
-                  spacing: 3,
+                  spacing: ThemeConstants.spaceXS,
                   children: [
                     AppText(
                       context.translate(LanguageLabelKeys.trackingId),
@@ -774,10 +875,12 @@ class EcommerceOrderDetailTrackingCard extends StatelessWidget {
                 borderRadius: AppRadius.r8,
                 onTap: () => _copyTrackingId(context),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.all(6),
+                  padding: const EdgeInsetsDirectional.all(
+                    ThemeConstants.paddingXS,
+                  ),
                   child: AppSvgIcon(
                     AssetsConstants.copyIcon,
-                    size: 18,
+                    size: ThemeConstants.iconS,
                     color: context.cs.primary,
                   ),
                 ),
@@ -794,7 +897,7 @@ class EcommerceOrderDetailTrackingCard extends StatelessWidget {
               ),
               icon: const AppSvgIcon(
                 AssetsConstants.openInNewRoundedIcon,
-                size: 16,
+                size: ThemeConstants.iconXS,
               ),
               label: AppText(
                 context.translate(LanguageLabelKeys.trackShipment),

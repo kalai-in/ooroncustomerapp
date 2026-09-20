@@ -5,25 +5,24 @@ import 'package:customer/commons/cubit/base_pagination_cubit.dart';
 import 'package:customer/commons/utils/pagination_scroll_controller.dart';
 import 'package:customer/commons/widgets/app_search_filter_bar.dart';
 import 'package:customer/commons/widgets/empty_state_widget.dart';
-import 'package:customer/commons/widgets/grid_list_toggle.dart';
 import 'package:customer/commons/widgets/product_listing_view.dart';
+import 'package:customer/commons/widgets/wave_text.dart';
 import 'package:customer/core/constants/navigation_service.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/routes/route_names.dart';
 import 'package:customer/features/main/widgets/floating_cart_bar.dart';
 import 'package:customer/features/products/cubit/search_product_cubit.dart';
 import 'package:customer/features/products/models/product_model.dart';
-import 'package:customer/features/products/models/product_sort_type.dart';
 import 'package:customer/features/products/widgets/product_card_skeleton.dart';
-import 'package:customer/features/products/widgets/product_sort_sheet.dart';
 import 'package:customer/features/products/widgets/recent_searches_view.dart';
 import 'package:customer/features/products/widgets/voice_search_sheet.dart';
+import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:customer/commons/widgets/app_scaffold.dart';
 import 'package:customer/commons/widgets/custom_app_bar.dart';
-import 'package:customer/core/theme/app_spacing.dart';
 
 typedef _SearchState = PaginationState<ProductDataModel>;
 typedef _SearchLoaded = PaginationLoaded<ProductDataModel>;
@@ -32,14 +31,18 @@ typedef _SearchLoading = PaginationLoading<ProductDataModel>;
 typedef _SearchInitial = PaginationInitial<ProductDataModel>;
 
 class ProductSearchScreen extends StatefulWidget {
-  const ProductSearchScreen({super.key});
+  const ProductSearchScreen({super.key, this.searchSuggestions});
+
+  // Rotating placeholder words, same ones the home search bar shows.
+  // Null/empty (no API data) falls back to the static hint — no hardcoding.
+  final List<String>? searchSuggestions;
 
   @override
   State<ProductSearchScreen> createState() => _ProductSearchScreenState();
 }
 
 class _ProductSearchScreenState extends State<ProductSearchScreen> {
-  bool _isGrid = true;
+  final bool _isGrid = true;
 
   bool _isTablet(BuildContext context) =>
       MediaQuery.of(context).size.shortestSide >= 600;
@@ -51,11 +54,45 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     onLoadMore: () => context.read<SearchProductCubit>().fetchMore(),
   );
   Timer? _debounce;
+  // context is unsafe to read() from inside dispose() (widget may already be
+  // deactivated) — grab the cubit while the tree is still stable instead.
+  late final SearchProductCubit _searchCubit = context.read<SearchProductCubit>();
+
+  // Bumped to remount (and thus replay) the title's WaveText — once on
+  // first open, then again whenever the list is scrolled down and back up.
+  int _titleWaveTrigger = 0;
+  bool _scrolledAwayFromTop = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Force the late field to evaluate now, while context is safe to read.
+    _searchCubit;
+    // Load the unfiltered product list on open (no search param) — recent
+    // searches render alongside it rather than replacing it.
+    _searchCubit.fetchInitial();
+    _pager.controller.addListener(_onTitleWaveScroll);
+  }
+
+  void _onTitleWaveScroll() {
+    if (!_pager.controller.hasClients) return;
+    final offset = _pager.controller.offset;
+    if (offset > 80) {
+      _scrolledAwayFromTop = true;
+    } else if (offset <= 4 && _scrolledAwayFromTop) {
+      _scrolledAwayFromTop = false;
+      setState(() => _titleWaveTrigger++);
+    }
+  }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    // Leaving with a typed-but-never-submitted query still counts as intent
+    // — save it, mirroring Blinkit/Zomato-style implicit history capture.
+    _searchCubit.saveImplicitSearch(_searchController.text);
     _searchController.dispose();
+    _pager.controller.removeListener(_onTitleWaveScroll);
     _pager.dispose();
     super.dispose();
   }
@@ -73,10 +110,24 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     );
   }
 
+  static const int _minSearchLength = 3;
+
   void _onQueryChanged(String query) {
     _debounce?.cancel();
+    final trimmed = query.trim();
+    // Below 3 chars: don't hit the API or save history, just wait for more
+    // input (empty query is the exception — it resets to the recent list).
+    if (trimmed.isNotEmpty && trimmed.length < _minSearchLength) {
+      setState(() {});
+      return;
+    }
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      context.read<SearchProductCubit>().search(query);
+      final cubit = context.read<SearchProductCubit>();
+      cubit.search(query);
+      // Save as soon as the debounce settles on this query, not deferred to
+      // dispose() — otherwise clearing the box (e.g. after a no-results
+      // search) before leaving wipes the text and the term never gets saved.
+      cubit.saveImplicitSearch(query);
     });
     setState(() {});
   }
@@ -103,52 +154,25 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     return AppScaffold(
       backgroundColor: bg,
       appBar: CustomAppBar(
-        title: context.translate(LanguageLabelKeys.search),
-        actions: [
-          GridListToggle(
-            isGrid: _isGrid,
-            onToggle: (val) {
-              setState(() => _isGrid = val);
-              context.read<SearchProductCubit>().setGridView(val);
-              if (_pager.controller.hasClients) {
-                _pager.controller.jumpTo(0);
-              }
-            },
+        showBackButton: false,
+        scrollController: _pager.controller,
+        titleWidget: Padding(
+          padding: const EdgeInsetsDirectional.only(start: ThemeConstants.paddingS, end: ThemeConstants.paddingS, top: ThemeConstants.paddingXS, bottom: ThemeConstants.paddingXS),
+          child: AppSearchFilterBar(
+            searchController: _searchController,
+            onSearchChanged: _onQueryChanged,
+            onSubmitted: _onQuerySubmitted,
+            hintText: context.translate(LanguageLabelKeys.searchProductsHint),
+            hintSuggestions: widget.searchSuggestions,
+            onMicTap: _openVoiceSearch,
+            prefixIconAsset: AssetsConstants.arrowLeftIcon,
+            onPrefixTap: () => AppNavigator.pop(context),
+            autofocus: true,
           ),
-          AppSpacing.w12,
-        ],
+        ),
       ),
       body: Column(
         children: [
-          BlocBuilder<SearchProductCubit, _SearchState>(
-            buildWhen: (prev, curr) =>
-                prev is _SearchLoaded || curr is _SearchLoaded,
-            builder: (context, state) {
-              final cubit = context.read<SearchProductCubit>();
-              final sort = cubit.currentFilters.sort;
-              final hasActiveSort = sort != ProductSortType.defaultSort;
-              return AppSearchFilterBar(
-                searchController: _searchController,
-                onSearchChanged: _onQueryChanged,
-                onSubmitted: _onQuerySubmitted,
-                hintText: context.translate(
-                  LanguageLabelKeys.searchProductsHint,
-                ),
-                filterIcon: AssetsConstants.filterSettingIcon,
-                hasDateFilter: hasActiveSort,
-                dateRangeLabel: context.translate(LanguageLabelKeys.sortBy),
-                onDateRange: () => showProductSortSheet(
-                  context,
-                  sort,
-                  onSelect: cubit.applySort,
-                ),
-                hasActiveFilters: hasActiveSort,
-                onClearFilters: () =>
-                    cubit.applySort(ProductSortType.defaultSort),
-                onMicTap: _openVoiceSearch,
-              );
-            },
-          ),
           Expanded(
             child: Stack(
               children: [
@@ -182,33 +206,15 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     return BlocBuilder<SearchProductCubit, _SearchState>(
       builder: (context, state) {
         if (state is _SearchInitial) {
-          final recentSearches = context
-              .read<SearchProductCubit>()
-              .recentSearches;
-          if (recentSearches.isNotEmpty) {
-            return RecentSearchesView(
-              recentSearches: recentSearches,
-              onTap: _onRecentSearchTap,
-              onRemove: (q) =>
-                  context.read<SearchProductCubit>().removeRecentSearch(q),
-              onClearAll: () =>
-                  context.read<SearchProductCubit>().clearRecentSearches(),
-            );
-          }
-          return EmptyStateWidget(
-            imagePath: AssetsConstants.noSearchFound,
-            title: context.translate(LanguageLabelKeys.startTypingToSearch),
-            subtitle: context.translate(
-              LanguageLabelKeys.startTypingToSearchSubtitle,
-            ),
-          );
+          return const SizedBox.shrink();
         }
         if (state is _SearchLoading) {
           return _isGrid
               ? ProductGridSkeleton(
                   crossAxisCount: _crossAxisCount(context),
                   edgePad: 32,
-                  spacing: 10 * (_isTablet(context) ? 1.75 : 1.0),
+                  spacing:
+                      ThemeConstants.spaceM * (_isTablet(context) ? 1.75 : 1.0),
                   mainAxisSpacing: 16 * (_isTablet(context) ? 1.75 : 1.0),
                 )
               : const ProductListSkeleton();
@@ -233,11 +239,61 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
               ),
             );
           }
-          return ProductListingView(
+          final cubit = context.read<SearchProductCubit>();
+          final isUnfiltered = cubit.currentFilters.query.isEmpty;
+          final showRecent = isUnfiltered && cubit.recentSearches.isNotEmpty;
+          final listingView = ProductListingView(
             products: state.data,
             isGrid: _isGrid,
-            controller: _pager.controller,
             isFetchingMore: state.isFetchingMore,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            onProductTap: (_) => cubit.saveImplicitSearch(
+              _searchController.text,
+            ),
+          );
+          return _pager.attach(
+            SingleChildScrollView(
+              controller: _pager.controller,
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  if (showRecent)
+                    RecentSearchesView(
+                      key: ValueKey(_titleWaveTrigger),
+                      recentSearches: cubit.recentSearches,
+                      onTap: _onRecentSearchTap,
+                      onRemove: (q) => cubit.removeRecentSearch(q),
+                      onClearAll: () => cubit.clearRecentSearches(),
+                    ),
+                  if (isUnfiltered)
+                    Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        start: ThemeConstants.paddingL,
+                        end: ThemeConstants.paddingL,
+                        top: showRecent
+                            ? ThemeConstants.paddingXL
+                            : ThemeConstants.paddingXL,
+                      ),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: WaveText(
+                          key: ValueKey(_titleWaveTrigger),
+                          context.translate(
+                            LanguageLabelKeys.whatsOnYourMind,
+                          ),
+                          style: context.tt.bodyLarge?.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: context.cs.onSurface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  listingView,
+                ],
+              ),
+            ),
           );
         }
         return const SizedBox.shrink();

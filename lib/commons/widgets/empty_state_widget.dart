@@ -51,7 +51,7 @@ class EmptyStateWidget extends StatelessWidget {
           children: [
             AppSvgIcon(
               imagePath,
-              size: 140,
+              size: context.widthFraction(0.373),
               color: context.cs.primary,
               useColorMapper: true,
             ),

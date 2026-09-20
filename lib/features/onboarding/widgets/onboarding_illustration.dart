@@ -1,4 +1,5 @@
 import 'package:customer/features/onboarding/models/onboarding_page_data.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/commons/animations/slide_animation.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,12 @@ class OnboardingIllustration extends StatelessWidget {
     return Align(
       alignment: const AlignmentDirectional(0, 0.85),
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(48, 0, 48, 0),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingXXL * 2,
+          0,
+          ThemeConstants.paddingXXL * 2,
+          0,
+        ),
         child: SlideAnimation(
           position: 0,
           itemCount: 2,

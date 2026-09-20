@@ -35,68 +35,68 @@ const _dedicatedPolicyTypes = {
   PoliciesType.returnsAndExchangesPolicy,
 };
 
+String _title(BuildContext context, PoliciesType type) {
+  switch (type) {
+    case PoliciesType.privacyPolicy:
+      return context.translate(LanguageLabelKeys.privacyPolicy);
+    case PoliciesType.termsConditions:
+      return context.translate(LanguageLabelKeys.termsAndConditions);
+    case PoliciesType.aboutUs:
+      return context.translate(LanguageLabelKeys.aboutUs);
+    case PoliciesType.contactUs:
+      return context.translate(LanguageLabelKeys.contactUs);
+    case PoliciesType.returnPolicy:
+      return context.translate(LanguageLabelKeys.returnPolicy);
+    case PoliciesType.shippingPolicy:
+      return context.translate(LanguageLabelKeys.shippingPolicy);
+    case PoliciesType.returnsAndExchangesPolicy:
+      return context.translate(LanguageLabelKeys.cancellationPolicy);
+  }
+}
+
+String? _contentFromSettings(SettingsLoaded state, PoliciesType type) {
+  switch (type) {
+    case PoliciesType.aboutUs:
+      return state.settings.data?.aboutUs;
+    case PoliciesType.contactUs:
+      return state.settings.data?.contactUs;
+    default:
+      return null;
+  }
+}
+
+String? _contentFromPolicies(CountrySettingsLoaded state, PoliciesType type) {
+  switch (type) {
+    case PoliciesType.privacyPolicy:
+      return state.settings.data?.privacyPolicy;
+    case PoliciesType.termsConditions:
+      return state.settings.data?.termsConditions;
+    case PoliciesType.returnPolicy:
+      return state.settings.data?.returnPolicy;
+    case PoliciesType.shippingPolicy:
+      return state.settings.data?.shippingPolicy;
+    case PoliciesType.returnsAndExchangesPolicy:
+      return state.settings.data?.cancellationPolicy;
+    default:
+      return null;
+  }
+}
+
+Widget _getPolicyEmptyContent(BuildContext context, PoliciesType type) {
+  return EmptyStateWidget(
+    imagePath: AssetsConstants.noSearchFound,
+    title:
+        '${_title(context, type)} ${context.translate(LanguageLabelKeys.contentNotAvailable)}',
+    subtitle: context.translate(
+      LanguageLabelKeys.contentCurrentlyUnavailable,
+    ),
+  );
+}
+
 class PoliciesScreen extends StatelessWidget {
   final PoliciesType type;
 
   const PoliciesScreen({super.key, required this.type});
-
-  String _title(BuildContext context) {
-    switch (type) {
-      case PoliciesType.privacyPolicy:
-        return context.translate(LanguageLabelKeys.privacyPolicy);
-      case PoliciesType.termsConditions:
-        return context.translate(LanguageLabelKeys.termsAndConditions);
-      case PoliciesType.aboutUs:
-        return context.translate(LanguageLabelKeys.aboutUs);
-      case PoliciesType.contactUs:
-        return context.translate(LanguageLabelKeys.contactUs);
-      case PoliciesType.returnPolicy:
-        return context.translate(LanguageLabelKeys.returnPolicy);
-      case PoliciesType.shippingPolicy:
-        return context.translate(LanguageLabelKeys.shippingPolicy);
-      case PoliciesType.returnsAndExchangesPolicy:
-        return context.translate(LanguageLabelKeys.cancellationPolicy);
-    }
-  }
-
-  String? _contentFromSettings(SettingsLoaded state) {
-    switch (type) {
-      case PoliciesType.aboutUs:
-        return state.settings.data?.aboutUs;
-      case PoliciesType.contactUs:
-        return state.settings.data?.contactUs;
-      default:
-        return null;
-    }
-  }
-
-  String? _contentFromPolicies(CountrySettingsLoaded state) {
-    switch (type) {
-      case PoliciesType.privacyPolicy:
-        return state.settings.data?.privacyPolicy;
-      case PoliciesType.termsConditions:
-        return state.settings.data?.termsConditions;
-      case PoliciesType.returnPolicy:
-        return state.settings.data?.returnPolicy;
-      case PoliciesType.shippingPolicy:
-        return state.settings.data?.shippingPolicy;
-      case PoliciesType.returnsAndExchangesPolicy:
-        return state.settings.data?.cancellationPolicy;
-      default:
-        return null;
-    }
-  }
-
-  Widget getPolicyEmptyContent(BuildContext context, PoliciesType type) {
-    return EmptyStateWidget(
-      imagePath: AssetsConstants.noSearchFound,
-      title:
-          '${_title(context)} ${context.translate(LanguageLabelKeys.contentNotAvailable)}',
-      subtitle: context.translate(
-        LanguageLabelKeys.contentCurrentlyUnavailable,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,9 +105,32 @@ class PoliciesScreen extends StatelessWidget {
       if (cubit.state is CountrySettingsInitial) {
         cubit.loadCountrySettings();
       }
-      return _PoliciesDedicatedView(type: type, screen: this);
+      return _PoliciesDedicatedView(type: type);
     }
+    return _PoliciesGeneralView(type: type);
+  }
+}
 
+class _PoliciesGeneralView extends StatefulWidget {
+  final PoliciesType type;
+
+  const _PoliciesGeneralView({required this.type});
+
+  @override
+  State<_PoliciesGeneralView> createState() => _PoliciesGeneralViewState();
+}
+
+class _PoliciesGeneralViewState extends State<_PoliciesGeneralView> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocConsumer<ConnectivityCubit, ConnectivityState>(
       listener: (context, state) {
         if (state is ConnectivityConnected) {
@@ -117,7 +140,10 @@ class PoliciesScreen extends StatelessWidget {
       builder: (context, connectivityState) {
         return AppScaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: CustomAppBar(title: _title(context)),
+          appBar: CustomAppBar(
+            title: _title(context, widget.type),
+            scrollController: _scrollController,
+          ),
           // Offline replaces the body only, so the app bar's back button
           // keeps working.
           body: connectivityState is ConnectivityDisconnected
@@ -146,12 +172,13 @@ class PoliciesScreen extends StatelessWidget {
                     }
 
                     if (state is SettingsLoaded) {
-                      final html = _contentFromSettings(state);
+                      final html = _contentFromSettings(state, widget.type);
                       if (html == null || html.isEmpty) {
-                        return getPolicyEmptyContent(context, type);
+                        return _getPolicyEmptyContent(context, widget.type);
                       }
 
                       return SingleChildScrollView(
+                        controller: _scrollController,
                         padding: const EdgeInsetsDirectional.symmetric(
                           horizontal: ThemeConstants.paddingM,
                           vertical: ThemeConstants.paddingS,
@@ -169,11 +196,24 @@ class PoliciesScreen extends StatelessWidget {
   }
 }
 
-class _PoliciesDedicatedView extends StatelessWidget {
+class _PoliciesDedicatedView extends StatefulWidget {
   final PoliciesType type;
-  final PoliciesScreen screen;
 
-  const _PoliciesDedicatedView({required this.type, required this.screen});
+  const _PoliciesDedicatedView({required this.type});
+
+  @override
+  State<_PoliciesDedicatedView> createState() =>
+      _PoliciesDedicatedViewState();
+}
+
+class _PoliciesDedicatedViewState extends State<_PoliciesDedicatedView> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -186,7 +226,10 @@ class _PoliciesDedicatedView extends StatelessWidget {
       builder: (context, connectivityState) {
         return AppScaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: CustomAppBar(title: screen._title(context)),
+          appBar: CustomAppBar(
+            title: _title(context, widget.type),
+            scrollController: _scrollController,
+          ),
           // Offline replaces the body only, so the app bar's back button
           // keeps working.
           body: connectivityState is ConnectivityDisconnected
@@ -212,12 +255,13 @@ class _PoliciesDedicatedView extends StatelessWidget {
                     }
 
                     if (state is CountrySettingsLoaded) {
-                      final html = screen._contentFromPolicies(state);
+                      final html = _contentFromPolicies(state, widget.type);
                       if (html == null || html.isEmpty) {
-                        return screen.getPolicyEmptyContent(context, type);
+                        return _getPolicyEmptyContent(context, widget.type);
                       }
 
                       return SingleChildScrollView(
+                        controller: _scrollController,
                         padding: const EdgeInsetsDirectional.symmetric(
                           horizontal: ThemeConstants.paddingM,
                           vertical: ThemeConstants.paddingS,

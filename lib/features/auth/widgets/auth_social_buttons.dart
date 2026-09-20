@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:customer/core/constants/theme_constants.dart';
+
 import '../../../commons/widgets/app_button.dart';
 
 import 'package:customer/core/constants/assets_constants.dart';
@@ -31,7 +33,7 @@ class AuthSocialButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      spacing: 12,
+      spacing: ThemeConstants.spaceM,
       children: [
         if (isGoogleEnabled)
           _SocialButton(

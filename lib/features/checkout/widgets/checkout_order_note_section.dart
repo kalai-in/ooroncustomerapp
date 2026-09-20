@@ -57,7 +57,7 @@ class _CheckoutOrderNoteSectionState extends State<CheckoutOrderNoteSection> {
         onTap: _openNoteSheet,
         child: Row(
           crossAxisAlignment: .start,
-          spacing: 8,
+          spacing: ThemeConstants.spaceS,
           children: [
             Expanded(
               child: CheckoutSectionHeader(
@@ -75,7 +75,7 @@ class _CheckoutOrderNoteSectionState extends State<CheckoutOrderNoteSection> {
               child: AppSvgIcon(
                 AssetsConstants.arrowRightIcon,
                 color: context.cs.onSurfaceVariant,
-                size: 24,
+                size: ThemeConstants.iconL,
               ),
             ),
           ],
@@ -121,7 +121,7 @@ class _OrderNoteSheetState extends State<_OrderNoteSheet> {
         children: [
           Column(
             crossAxisAlignment: .start,
-            spacing: 4,
+            spacing: ThemeConstants.spaceXS,
             children: [
               AppText(
                 context.translate(LanguageLabelKeys.deliveryInstruction),
@@ -150,7 +150,7 @@ class _OrderNoteSheetState extends State<_OrderNoteSheet> {
           ),
           AppSpacing.h16,
           Row(
-            spacing: 12,
+            spacing: ThemeConstants.spaceM,
             children: [
               Expanded(
                 child: AppButton(

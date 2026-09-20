@@ -34,7 +34,7 @@ class CategoryFilterBar extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsetsDirectional.symmetric(
                   horizontal: ThemeConstants.paddingL,
-                  vertical: 10,
+                  vertical: ThemeConstants.paddingS,
                 ),
                 children: [
                   CategoryChip(
@@ -81,7 +81,7 @@ class CategoryChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsetsDirectional.only(end: ThemeConstants.paddingS),
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: 14,
+          horizontal: ThemeConstants.paddingM,
           vertical: ThemeConstants.paddingXS,
         ),
         alignment: AlignmentDirectional.center,

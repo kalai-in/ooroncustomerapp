@@ -1,3 +1,4 @@
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/theme/app_sizes.dart';
 import 'package:customer/features/onboarding/models/onboarding_page_data.dart';
 import 'package:customer/features/onboarding/widgets/onboarding_illustration.dart';
@@ -46,7 +47,7 @@ class OnboardingPageContent extends StatelessWidget {
                 animationController: animationController,
                 child: Column(
                   crossAxisAlignment: .center,
-                  spacing: 8,
+                  spacing: ThemeConstants.spaceS,
                   children: [
                     AppText(
                       page.title,

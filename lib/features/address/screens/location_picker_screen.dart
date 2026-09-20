@@ -381,7 +381,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen>
                         ),
                         child: AppSvgIcon(
                           AssetsConstants.searchIcon,
-                          size: 18,
+                          size: ThemeConstants.iconS,
                           color: context.cs.onSurfaceVariant,
                         ),
                       ),

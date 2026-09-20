@@ -1,3 +1,4 @@
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
@@ -19,7 +20,7 @@ class AuthResendSection extends StatelessWidget {
     final canResend = resendTimer.inSeconds == 0;
     return Center(
       child: Column(
-        spacing: 8,
+        spacing: ThemeConstants.spaceS,
         children: [
           AppText(
             context.translate(LanguageLabelKeys.didNotReceiveCode),

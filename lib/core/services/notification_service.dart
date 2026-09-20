@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -14,6 +15,10 @@ import 'package:customer/features/auth/repositories/auth_repository.dart';
 import 'package:customer/features/chat/cubit/chat_cubit.dart';
 import 'package:customer/features/chat/models/chat_message.dart';
 import 'package:customer/features/notifications/notification/models/enums/notification_type.dart';
+import 'package:customer/features/orders/cubit/completed_ecommerce_order_cubit.dart';
+import 'package:customer/features/orders/cubit/completed_order_cubit.dart';
+import 'package:customer/features/orders/cubit/ongoing_ecommerce_order_cubit.dart';
+import 'package:customer/features/orders/cubit/ongoing_order_cubit.dart';
 import 'package:customer/firebase_options.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/json_parsers.dart';
@@ -22,6 +27,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart'
     show consolidateHttpClientResponseBytes;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -52,6 +58,15 @@ class NotificationService {
 
   /// Attach to MaterialApp.navigatorKey so we can navigate without context.
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  final _orderPushController = StreamController<String>.broadcast();
+
+  /// Emits the order id whenever a foreground "order" push arrives. Lets a
+  /// currently-open [OrderTrackingScreen] refetch that specific order (via
+  /// `OrderTrackingDetailCubit`) without relying on `context.read`, which
+  /// can't reach a cubit that lives inside a pushed route from this
+  /// service's root [navigatorKey] context.
+  Stream<String> get orderPushStream => _orderPushController.stream;
 
   static const _androidChannel = AndroidNotificationChannel(
     'high_importance_channel',
@@ -164,9 +179,31 @@ class NotificationService {
 
   void _setupForegroundHandler() {
     FirebaseMessaging.onMessage.listen((message) async {
+      _refreshOrderListsIfOrderPush(message.data);
       if (await _handleChatForegroundMessage(message)) return;
       showLocalNotification(message);
     });
+  }
+
+  /// "order" pushes refetch the 4 app-wide order-listing cubits (ongoing +
+  /// completed, quick + ecommerce — provided in main.dart, not owned by
+  /// OrdersScreen) unconditionally, whether or not the orders screen is
+  /// currently open, so the list is already fresh whenever the user next
+  /// opens it. No-op if the widget tree isn't up yet (e.g. very early
+  /// background isolate).
+  void _refreshOrderListsIfOrderPush(Map<String, dynamic> data) {
+    if (NotificationType.fromRaw(data['type'] as String?) !=
+        NotificationType.order) {
+      return;
+    }
+    final id = data['id'] as String?;
+    if (id != null && id.isNotEmpty) _orderPushController.add(id);
+    final context = navigatorKey.currentContext;
+    if (context == null) return;
+    context.read<OngoingOrderCubit>().refresh();
+    context.read<CompletedOrderCubit>().refresh();
+    context.read<OngoingEcommerceOrderCubit>().refresh();
+    context.read<CompletedEcommerceOrderCubit>().refresh();
   }
 
   /// Chat pushes for the conversation the user already has open: the
@@ -352,6 +389,8 @@ class NotificationService {
   void _navigateFromData(Map<String, dynamic> data, {String? contentUrl}) {
     final navigator = navigatorKey.currentState;
     if (navigator == null) return;
+
+    _refreshOrderListsIfOrderPush(data);
 
     final type = NotificationType.fromRaw(data['type'] as String?);
     final id = data['id'] as String?;

@@ -48,7 +48,7 @@ class CashbackBanner extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: .center,
-        spacing: 10,
+        spacing: ThemeConstants.spaceM,
         children: [
           Container(
             width: 36,
@@ -70,7 +70,7 @@ class CashbackBanner extends StatelessWidget {
             ),
             child: AppSvgIcon(
               icon,
-              size: 18,
+              size: ThemeConstants.iconS,
               color: context.cs.onPrimary,
               fit: BoxFit.scaleDown,
             ),
@@ -78,7 +78,7 @@ class CashbackBanner extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: .start,
-              spacing: 2,
+              spacing: ThemeConstants. spaceXXS,
               children: [
                 AppText(
                   amountText,

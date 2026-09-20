@@ -11,6 +11,7 @@ class CountryDropdownField extends StatelessWidget {
   final String hintText;
   final ValueChanged<CountriesData> onChanged;
   final String? Function(String?)? validator;
+  final bool isRequired;
 
   const CountryDropdownField({
     super.key,
@@ -19,6 +20,7 @@ class CountryDropdownField extends StatelessWidget {
     required this.hintText,
     required this.onChanged,
     this.validator,
+    this.isRequired = false,
   });
 
   @override
@@ -27,6 +29,7 @@ class CountryDropdownField extends StatelessWidget {
       value: selected?.name,
       labelText: labelText,
       hintText: hintText,
+      isRequired: isRequired,
       validator: validator,
       onTap: () async {
         final country = await showCountryPickerSheet(

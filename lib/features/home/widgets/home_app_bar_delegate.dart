@@ -247,14 +247,14 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                           child: Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                               ThemeConstants.paddingL,
-                              2,
+                              ThemeConstants.paddingXS,
                               ThemeConstants.paddingL,
                               0,
                             ),
                             child: Column(
                               crossAxisAlignment: .start,
                               mainAxisSize: .min,
-                              spacing: 10,
+                              spacing: ThemeConstants.spaceM,
                               children: [
                                 if (LayoutModeType.fromRaw(layoutMode) ==
                                     LayoutModeType.both)
@@ -280,7 +280,7 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                 Row(
                                   mainAxisSize: .max,
                                   crossAxisAlignment: .center,
-                                  spacing: 8,
+                                  spacing: ThemeConstants.spaceS,
                                   children: [
                                     Expanded(
                                       child: GestureDetector(
@@ -319,7 +319,7 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                               Row(
                                                 mainAxisSize: .min,
                                                 crossAxisAlignment: .center,
-                                                spacing: 8,
+                                                spacing: ThemeConstants.spaceS,
                                                 children: [
                                                   Flexible(
                                                     child: AppText(
@@ -366,13 +366,13 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                                           ),
                                                       child: Row(
                                                         mainAxisSize: .min,
-                                                        spacing: 2,
+                                                        spacing: ThemeConstants. spaceXXS,
                                                         children: [
                                                           AppSvgIcon(
                                                             AssetsConstants
                                                                 .directionsWalkIcon,
                                                             color: contentColor,
-                                                            size: 13,
+                                                            size: ThemeConstants.iconXS,
                                                           ),
                                                           AppText(
                                                             '$distance ${context.translate(LanguageLabelKeys.away)}',
@@ -395,7 +395,7 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                             ] else
                                               Row(
                                                 mainAxisSize: .min,
-                                                spacing: 2,
+                                                spacing: ThemeConstants. spaceXXS,
                                                 children: [
                                                   Flexible(
                                                     child: AppText(
@@ -418,14 +418,14 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                                     AssetsConstants
                                                         .arrowDownIcon,
                                                     color: contentColor,
-                                                    size: 20,
+                                                    size: ThemeConstants.iconM,
                                                   ),
                                                 ],
                                               ),
                                             if (locationAddress.isNotEmpty)
                                               Row(
                                                 mainAxisSize: .min,
-                                                spacing: 2,
+                                                spacing: ThemeConstants. spaceXXS,
                                                 children: [
                                                   Flexible(
                                                     child: AppText(
@@ -458,7 +458,7 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                                           .withValues(
                                                             alpha: 0.8,
                                                           ),
-                                                      size: 16,
+                                                      size: ThemeConstants.iconXS,
                                                     ),
                                                 ],
                                               ),
@@ -481,7 +481,7 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                         child: AppSvgIcon(
                                           AssetsConstants.notificationIcon,
                                           color: context.cs.onSurface,
-                                          size: 20,
+                                          size: ThemeConstants.iconM,
                                           fit: BoxFit.scaleDown,
                                         ),
                                       ),
@@ -501,10 +501,10 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                     children: [
                       Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                          14,
+                          ThemeConstants.paddingM,
                           ThemeConstants.paddingS,
-                          14,
-                          14,
+                          ThemeConstants.paddingM,
+                          ThemeConstants.paddingM,
                         ),
                         child: HomeSearchBar(
                           searchSuggestions: searchSuggestions,

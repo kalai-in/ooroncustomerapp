@@ -16,7 +16,7 @@ import 'package:customer/commons/widgets/app_scaffold.dart';
 import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
-class CheckoutPaymentPickerScreen extends StatelessWidget {
+class CheckoutPaymentPickerScreen extends StatefulWidget {
   const CheckoutPaymentPickerScreen({
     super.key,
     required this.selected,
@@ -27,10 +27,26 @@ class CheckoutPaymentPickerScreen extends StatelessWidget {
   final bool codAllowed;
 
   @override
+  State<CheckoutPaymentPickerScreen> createState() =>
+      _CheckoutPaymentPickerScreenState();
+}
+
+class _CheckoutPaymentPickerScreenState
+    extends State<CheckoutPaymentPickerScreen> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: CustomAppBar(
         title: context.translate(LanguageLabelKeys.paymentMethod),
+        scrollController: _scrollController,
       ),
       body: BlocBuilder<PaymentMethodsCubit, PaymentMethodsState>(
         builder: (ctx, state) {
@@ -48,7 +64,7 @@ class CheckoutPaymentPickerScreen extends StatelessWidget {
                   AppSvgIcon(
                     AssetsConstants.dangerIcon,
                     color: ctx.cs.error,
-                    size: 18,
+                    size: ThemeConstants.iconS,
                   ),
                   AppSpacing.w8,
                   Expanded(
@@ -66,9 +82,10 @@ class CheckoutPaymentPickerScreen extends StatelessWidget {
           }
           if (state is PaymentMethodsLoaded) {
             final methods = state.methods
-                .where((m) => m.type != PaymentGatewayType.cod || codAllowed)
+                .where((m) => m.type != PaymentGatewayType.cod || widget.codAllowed)
                 .toList();
             return ListView.separated(
+              controller: _scrollController,
               padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingL, ThemeConstants.paddingXL, ThemeConstants.paddingXL),
               itemCount: methods.length,
               separatorBuilder: (_, _) => AppSpacing.h8,
@@ -76,7 +93,7 @@ class CheckoutPaymentPickerScreen extends StatelessWidget {
                 final method = methods[i];
                 return PaymentMethodTile(
                   method: method,
-                  isSelected: selected?.type == method.type,
+                  isSelected: widget.selected?.type == method.type,
                   onTap: () => AppNavigator.pop(context, method),
                 );
               },

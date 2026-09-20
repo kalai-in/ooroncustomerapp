@@ -63,6 +63,7 @@ class RegisterOtpScreen extends StatefulWidget {
 
 class _RegisterOtpScreenState extends State<RegisterOtpScreen> {
   final _otpController = TextEditingController();
+  final _scrollController = ScrollController();
 
   late String _verificationId;
   Duration _resendTimer = Duration(seconds: AppConfig.otpResendTimerSeconds);
@@ -78,6 +79,7 @@ class _RegisterOtpScreenState extends State<RegisterOtpScreen> {
   @override
   void dispose() {
     _otpController.dispose();
+    _scrollController.dispose();
     _timer?.cancel();
     super.dispose();
   }
@@ -286,9 +288,11 @@ class _RegisterOtpScreenState extends State<RegisterOtpScreen> {
         appBar: CustomAppBar(
           title: context.translate(LanguageLabelKeys.verifyOtp),
           showBackButton: true,
+          scrollController: _scrollController,
         ),
         body: SafeArea(
           child: SingleChildScrollView(
+            controller: _scrollController,
             padding: const EdgeInsetsDirectional.symmetric(
               horizontal: ThemeConstants.paddingXXL,
               vertical: ThemeConstants.paddingL,

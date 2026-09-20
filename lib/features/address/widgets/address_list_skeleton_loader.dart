@@ -23,19 +23,19 @@ class AddressListSkeletonLoader extends StatelessWidget {
         offset: const Offset(0, 3),
       ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(14),
+        padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
         child: Row(
           crossAxisAlignment: .start,
-          spacing: 12,
+          spacing: ThemeConstants.spaceM,
           children: [
             ShimmerBox(color, width: 40, height: 40, radius: AppRadius.r8),
             Expanded(
               child: Column(
                 crossAxisAlignment: .start,
-                spacing: 8,
+                spacing: ThemeConstants.spaceS,
                 children: [
                   Row(
-                    spacing: 6,
+                    spacing: ThemeConstants.spaceS,
                     children: [
                       ShimmerBox(color, width: 60, height: 14),
                       ShimmerBox(

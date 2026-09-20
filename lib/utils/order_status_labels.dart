@@ -79,8 +79,8 @@ class OrderStatusLabels {
   static Color color(BuildContext context, int? code) {
     return switch (code) {
       OrderStatus.delivered => context.cs.onSecondaryContainer,
+      OrderStatus.returned => context.cs.onSecondaryContainer,
       OrderStatus.cancelled => context.cs.error,
-      OrderStatus.returned => context.cs.error,
       _ => context.cs.errorContainer,
     };
   }

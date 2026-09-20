@@ -1,5 +1,7 @@
 import 'package:customer/commons/models/additional_charges_model.dart';
+import 'package:customer/commons/models/delivery_charges_model.dart';
 import 'package:customer/commons/models/surge_charges_model.dart';
+import 'package:customer/commons/models/tax_charges_model.dart';
 import 'package:customer/features/products/models/product_model.dart';
 import 'package:customer/utils/json_parsers.dart';
 
@@ -38,11 +40,12 @@ class CartData {
   String? quantity;
   String? distance;
   String? timeToDeliver;
+  String? estimatedDeliveryDate;
   String? unlockMessage;
   String? unlockPromoCode;
   int? unlockPromoCodeId;
   int? isDeliverableAddress;
-  int? deliveryCharge;
+  DeliveryCharges? deliveryCharges;
   List<SurgeCharges>? surgeCharges;
   List<AdditionalCharges>? zoneAdditionalCharges;
   double? totalAmount;
@@ -52,6 +55,7 @@ class CartData {
   double? minimumOrderAmount;
   List<ProductDataModel>? cart;
   List<AdditionalCharges>? additionalCharges;
+  List<TaxCharges>? taxBreakdown;
   String? currency;
   int? decimalPoint;
 
@@ -61,11 +65,12 @@ class CartData {
     this.quantity,
     this.distance,
     this.timeToDeliver,
+    this.estimatedDeliveryDate,
     this.unlockMessage,
     this.unlockPromoCode,
     this.unlockPromoCodeId,
     this.isDeliverableAddress,
-    this.deliveryCharge,
+    this.deliveryCharges,
     this.surgeCharges,
     this.zoneAdditionalCharges,
     this.totalAmount,
@@ -75,6 +80,7 @@ class CartData {
     this.minimumOrderAmount,
     this.cart,
     this.additionalCharges,
+    this.taxBreakdown,
     this.currency,
     this.decimalPoint,
   });
@@ -85,11 +91,14 @@ class CartData {
     quantity = parseString(json['quantity']);
     distance = parseString(json['distance']);
     timeToDeliver = parseString(json['time_to_deliver']);
+    estimatedDeliveryDate = parseString(json['estimated_delivery_date']);
     unlockMessage = parseString(json['unlock_message']);
     unlockPromoCode = parseString(json['unlock_promo_code']);
     unlockPromoCodeId = parseInt(json['unlock_promo_code_id']);
     isDeliverableAddress = parseInt(json['is_deliverable_address']);
-    deliveryCharge = parseInt(json['delivery_charge']);
+    deliveryCharges = json['delivery_charges'] is Map<String, dynamic>
+        ? DeliveryCharges.fromJson(json['delivery_charges'] as Map<String, dynamic>)
+        : null;
     surgeCharges = json['surge_charges'] is List
         ? (json['surge_charges'] as List)
               .map((v) => SurgeCharges.fromJson(v as Map<String, dynamic>))
@@ -117,6 +126,13 @@ class CartData {
           .map((v) => AdditionalCharges.fromJson(v as Map<String, dynamic>))
           .toList();
     }
+    final rawTaxBreakdown = json['tax_breakdown'];
+    if (rawTaxBreakdown is List) {
+      taxBreakdown = rawTaxBreakdown
+          .map((v) => TaxCharges.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+
     currency = parseString(json['currency']);
     decimalPoint = parseInt(json['decimal_point']);
   }
@@ -128,11 +144,12 @@ class CartData {
     data['quantity'] = quantity;
     data['distance'] = distance;
     data['time_to_deliver'] = timeToDeliver;
+    data['estimated_delivery_date'] = estimatedDeliveryDate;
     data['unlock_message'] = unlockMessage;
     data['unlock_promo_code'] = unlockPromoCode;
     data['unlock_promo_code_id'] = unlockPromoCodeId;
     data['is_deliverable_address'] = isDeliverableAddress;
-    data['delivery_charge'] = deliveryCharge;
+    data['delivery_charges'] = deliveryCharges?.toJson();
     data['surge_charges'] = surgeCharges;
     data['zone_additional_charges'] = zoneAdditionalCharges;
     data['total_amount'] = totalAmount;
@@ -146,6 +163,9 @@ class CartData {
       data['additional_charges'] = additionalCharges!
           .map((v) => v.toJson())
           .toList();
+    }
+    if (taxBreakdown != null) {
+      data['tax_breakdown'] = taxBreakdown!.map((v) => v.toJson()).toList();
     }
     data['currency'] = currency;
     data['decimal_point'] = decimalPoint;

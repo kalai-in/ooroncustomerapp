@@ -24,19 +24,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Opens the bottom sheet for requesting a password reset via OTP (phone or email).
-void showForgotPasswordSheet(BuildContext context, {required String type}) {
+///
+/// [cubit] is a test-only seam (mirrors `ApiClient.httpClientAdapter`'s
+/// `@visibleForTesting` pattern elsewhere in this codebase): the sheet
+/// otherwise always builds its own `ForgotPasswordCubit()`, which — via
+/// `AuthRepository()`'s default constructor — touches `FirebaseAuth.instance`
+/// eagerly, before any OTP method is ever called. That throws under
+/// `flutter test` (no `Firebase.initializeApp()` in the widget/unit test
+/// binary), so a widget test has no way to even mount this sheet without
+/// supplying an already-constructed cubit here.
+void showForgotPasswordSheet(
+  BuildContext context, {
+  required String type,
+  @visibleForTesting ForgotPasswordCubit? cubit,
+}) {
   showAppBottomSheet(
     context,
-    padding: null,
-    builder: (sheetContext) => BlocProvider(
-      create: (_) => ForgotPasswordCubit(),
-      child: Padding(
-        padding: EdgeInsetsDirectional.only(
-          bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
-        ),
-        child: _ForgotPasswordSheet(type: type),
-      ),
-    ),
+    enableDrag: true,
+    builder: (sheetContext) => cubit != null
+        ? BlocProvider<ForgotPasswordCubit>.value(
+            value: cubit,
+            child: _ForgotPasswordSheet(type: type),
+          )
+        : BlocProvider(
+            create: (_) => ForgotPasswordCubit(),
+            child: _ForgotPasswordSheet(type: type),
+          ),
   );
 }
 
@@ -254,7 +267,6 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
           final (title, subtitle) = _headerTexts;
           return SingleChildScrollView(
             padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: ThemeConstants.paddingXL,
               vertical: ThemeConstants.paddingM,
             ),
             child: Form(

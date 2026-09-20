@@ -6,6 +6,7 @@ import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class PaymentMethodTile extends StatelessWidget {
   const PaymentMethodTile({
@@ -32,8 +33,8 @@ class PaymentMethodTile extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: 10,
-          vertical: 10,
+          horizontal: ThemeConstants.paddingS,
+          vertical: ThemeConstants.paddingS,
         ),
         decoration: AppDecorations.box(
           color: bgColor,
@@ -59,13 +60,13 @@ class PaymentMethodTile extends StatelessWidget {
                   ? Icon(
                       Icons.radio_button_checked_rounded,
                       color: cs.primary,
-                      size: 22,
+                      size: ThemeConstants.iconM,
                       key: const ValueKey('checked'),
                     )
                   : Icon(
                       Icons.radio_button_unchecked_rounded,
                       color: cs.outline,
-                      size: 22,
+                      size: ThemeConstants.iconM,
                       key: const ValueKey('unchecked'),
                     ),
             ),
@@ -87,7 +88,7 @@ class _PaymentIcon extends StatelessWidget {
     return Container(
       width: 44,
       height: 36,
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(ThemeConstants.paddingXS),
       decoration: AppDecorations.outlinedCard(
         color: cs.surfaceContainerHighest,
         borderColor: cs.outline.withValues(alpha: 0.5),

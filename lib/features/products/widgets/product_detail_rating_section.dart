@@ -86,7 +86,7 @@ class ProductDetailRatingSection extends StatelessWidget {
                           ),
                         ),
                         AppSpacing.h4,
-                        ProductDetailStarRow(rating: avgRating, size: 14),
+                        ProductDetailStarRow(rating: avgRating, size: ThemeConstants.iconXS),
                         AppSpacing.h4,
                         AppText(
                           '$total ${context.translate(LanguageLabelKeys.ratings)}',
@@ -192,7 +192,7 @@ class ProductDetailRatingSection extends StatelessWidget {
                         onPressed: () =>
                             context.read<RatingsListCubit>().loadMore(),
                         child: ratingsState.isFetchingMore
-                            ? LoadingWidget(size: 18)
+                            ? LoadingWidget(size: ThemeConstants.loaderSize)
                             : AppText(
                                 context.translate(
                                   LanguageLabelKeys.loadMoreReviews,
@@ -257,7 +257,7 @@ class ProductDetailRatingBar extends StatelessWidget {
           AppSpacing.w4,
           AppSvgIcon(
             AssetsConstants.starFillIcon,
-            size: 11,
+            size: ThemeConstants.iconXXS,
             color: context.cs.onPrimaryFixedVariant,
           ),
           AppSpacing.w6,
@@ -392,7 +392,7 @@ class ProductDetailReviewTile extends StatelessWidget {
                         AppSpacing.w3,
                         AppSvgIcon(
                           AssetsConstants.starFillIcon,
-                          size: 11,
+                          size: ThemeConstants.iconXXS,
                           color: context.cs.onPrimary,
                         ),
                       ],

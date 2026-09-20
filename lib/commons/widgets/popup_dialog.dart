@@ -1,16 +1,23 @@
 import 'package:customer/commons/models/app_settings_model.dart';
+import 'package:customer/commons/models/enums/popup_action_type.dart';
 import 'package:customer/commons/utils/url_launcher_helper.dart';
 import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/constants/navigation_service.dart';
 import 'package:customer/core/local_storage/settings_hive_box.dart';
+import 'package:customer/core/routes/category_redirect_args.dart';
 import 'package:customer/core/routes/product_detail_args.dart';
 import 'package:customer/core/routes/route_names.dart';
 import 'package:customer/core/theme/app_decorations.dart';
+import 'package:customer/features/products/cubit/product_cubit.dart';
+import 'package:customer/features/products/screens/product_screen.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
+import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
@@ -39,36 +46,79 @@ class PopupDialog extends StatelessWidget {
 
   void _handleTap(BuildContext context) {
     AppNavigator.pop(context);
-    final type = settings.popupType ?? '';
+    final type = PopupActionType.fromRaw(settings.popupType);
     final typeId = settings.popupTypeId ?? '';
     final url = settings.popupUrl ?? '';
 
-    if (type == 'product') {
-      final id = int.tryParse(typeId);
-      if (id != null) {
-        AppNavigator.pushNamed(
+    switch (type) {
+      case PopupActionType.product:
+        final id = int.tryParse(typeId);
+        if (id != null) {
+          AppNavigator.pushNamed(
+            context,
+            RouteNames.productDetail,
+            arguments: ProductDetailArgs(productId: id),
+          );
+        }
+        break;
+      case PopupActionType.category:
+        if (settings.popupHasChild ?? true) {
+          AppNavigator.pushNamed(
+            context,
+            RouteNames.categories,
+            arguments: CategoryRedirectArgs(
+              categoryId: typeId,
+              hasChild: settings.popupHasChild ?? true,
+            ),
+          );
+        } else {
+          AppNavigator.push(
+            context,
+            BlocProvider(
+              create: (_) => ProductCubit(),
+              child: ProductScreen(
+                title: settings.popupTypeName?.isNotEmpty == true
+                    ? settings.popupTypeName!
+                    : context.translate(LanguageLabelKeys.category),
+                categoryId: typeId,
+              ),
+            ),
+          );
+        }
+        break;
+      case PopupActionType.popupUrl:
+        if (url.isNotEmpty) openExternalUrl(url);
+        break;
+      case PopupActionType.brand:
+        AppNavigator.push(
           context,
-          RouteNames.productDetail,
-          arguments: ProductDetailArgs(productId: id),
+          BlocProvider(
+            create: (_) => ProductCubit(),
+            child: ProductScreen(
+              title: settings.popupTypeName?.isNotEmpty == true
+                  ? settings.popupTypeName!
+                  : context.translate(LanguageLabelKeys.brand),
+              brandId: typeId,
+            ),
+          ),
         );
-      }
-    } else if (type == 'category') {
-      AppNavigator.pushNamed(context, RouteNames.categories);
-    } else if (type == 'popup_url' && url.isNotEmpty) {
-      openExternalUrl(url);
+        break;
+      case PopupActionType.none:
+        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final sw = context.screenWidth;
-
     return Dialog(
       backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.transparent,
       elevation: 0,
-      insetPadding: const EdgeInsets.symmetric(horizontal: ThemeConstants.spaceXXXL, vertical: ThemeConstants.paddingXXL),
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: ThemeConstants.spaceXXXL,
+        vertical: ThemeConstants.paddingXXL,
+      ),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -77,16 +127,19 @@ class PopupDialog extends StatelessWidget {
             onTap: () => _handleTap(context),
             child: ClipRRect(
               borderRadius: AppRadius.r16,
-              child: SizedBox(
-                width: sw,
-                child: AppNetworkImage(
-                  url: settings.popupImage ?? '',
-                  fit: BoxFit.cover,
-                  placeholder: Container(
-                    height: 260,
-                    color: context.cs.surfaceContainerHighest,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: SizedBox(
+                  width: double.infinity,
+                  // Capped so the popup reads as a promo card, not a
+                  // full-screen takeover — source images vary in aspect
+                  // ratio and would otherwise stretch the dialog to fit.
+                  height: context.heightFraction(0.42),
+                  child: AppNetworkImage(
+                    url: settings.popupImage ?? '',
+                    fit: BoxFit.cover,
+                    errorWidget: const SizedBox.shrink(),
                   ),
-                  errorWidget: const SizedBox.shrink(),
                 ),
               ),
             ),
@@ -101,6 +154,7 @@ class PopupDialog extends StatelessWidget {
               child: Container(
                 width: 30,
                 height: 30,
+                padding: EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
                 decoration: AppDecorations.box(
                   color: context.cs.primary,
                   shape: .circle,
@@ -114,7 +168,7 @@ class PopupDialog extends StatelessWidget {
                 child: AppSvgIcon(
                   AssetsConstants.closeIcon,
                   color: context.cs.onInverseSurface,
-                  size: 24,
+                  size: ThemeConstants.iconL,
                   fit: BoxFit.scaleDown,
                 ),
               ),

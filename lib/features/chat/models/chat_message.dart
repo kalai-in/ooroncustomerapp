@@ -222,12 +222,19 @@ class ChatScreenArgs {
   /// before navigating — used to load REST message history.
   final String? conversationId;
 
+  /// True only when this chat was opened from the Profile screen's
+  /// "Chat with Support" entry — sends the device's current lat/lng with
+  /// each message. Order-opened chats (support or delivery-boy) never send
+  /// location.
+  final bool sendLocation;
+
   const ChatScreenArgs({
     required this.chatType,
     required this.recipientName,
     required this.recipientId,
     this.orderId,
     this.conversationId,
+    this.sendLocation = false,
   });
 
   String get roomId {

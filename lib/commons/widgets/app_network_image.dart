@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AppNetworkImage extends StatelessWidget {
   const AppNetworkImage({
@@ -34,6 +35,11 @@ class AppNetworkImage extends StatelessWidget {
   static bool _isValidUrl(String url) {
     final uri = Uri.tryParse(url);
     return uri != null && (uri.isScheme('HTTP') || uri.isScheme('HTTPS'));
+  }
+
+  static bool _isSvgUrl(String url) {
+    final uri = Uri.tryParse(url);
+    return uri != null && uri.path.toLowerCase().endsWith('.svg');
   }
 
   // Hard ceiling on decode dimension (logical px) so an oversized source
@@ -78,16 +84,25 @@ class AppNetworkImage extends StatelessWidget {
                 ? (logicalHeight.clamp(0, _maxCacheDimension) * dpr).round()
                 : (neitherKnown ? (_maxCacheDimension * dpr).round() : null));
 
-        final img = CachedNetworkImage(
-          imageUrl: url,
-          width: width,
-          height: height,
-          fit: fit,
-          memCacheWidth: resolvedMemCacheWidth,
-          memCacheHeight: resolvedMemCacheHeight,
-          placeholder: (_, _) => placeholder ?? _placeholder(context),
-          errorWidget: (_, _, _) => errorWidget ?? _placeholder(context),
-        );
+        final img = _isSvgUrl(url)
+            ? SvgPicture.network(
+                url,
+                width: width,
+                height: height,
+                fit: fit,
+                placeholderBuilder: (_) => placeholder ?? _placeholder(context),
+                errorBuilder: (_, _, _) => errorWidget ?? _placeholder(context),
+              )
+            : CachedNetworkImage(
+                imageUrl: url,
+                width: width,
+                height: height,
+                fit: fit,
+                memCacheWidth: resolvedMemCacheWidth,
+                memCacheHeight: resolvedMemCacheHeight,
+                placeholder: (_, _) => placeholder ?? _placeholder(context),
+                errorWidget: (_, _, _) => errorWidget ?? _placeholder(context),
+              );
 
         if (borderRadius != null) {
           return ClipRRect(borderRadius: borderRadius!, child: img);

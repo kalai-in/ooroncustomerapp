@@ -28,7 +28,7 @@ class AddNewAddressButton extends StatelessWidget {
         borderRadius: AppRadius.r12,
         child: Container(
           padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: 14,
+            horizontal: ThemeConstants.paddingM,
             vertical: ThemeConstants.paddingM,
           ),
           decoration: AppDecorations.box(
@@ -42,7 +42,7 @@ class AddNewAddressButton extends StatelessWidget {
               AppSvgIcon(
                 AssetsConstants.addIcon,
                 color: context.cs.primary,
-                size: 20,
+                size: ThemeConstants.iconM,
               ),
               AppSpacing.w10,
               Expanded(
@@ -59,7 +59,7 @@ class AddNewAddressButton extends StatelessWidget {
                 child: AppSvgIcon(
                   AssetsConstants.arrowRightIcon,
                   color: context.cs.onSurfaceVariant,
-                  size: 20,
+                  size: ThemeConstants.iconM,
                 ),
               ),
             ],

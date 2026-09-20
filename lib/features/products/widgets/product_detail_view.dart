@@ -1,6 +1,9 @@
 import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
+import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/local_storage/settings_hive_box.dart';
+import 'package:customer/utils/app_date_formatter.dart';
 import 'package:customer/core/constants/navigation_service.dart';
 import 'package:customer/commons/widgets/product_type_icon.dart';
 import 'package:customer/core/theme/app_radius.dart';
@@ -140,6 +143,12 @@ class _ProductDetailViewState extends State<ProductDetailView>
   @override
   Widget build(BuildContext context) {
     final sh = context.screenHeight;
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    // Fixed cache dims for the hero image, independent of the SliverAppBar's
+    // live collapse/expand constraints (which change every scroll frame and
+    // would otherwise trigger a decode-cache miss + placeholder flash).
+    final heroMemCacheWidth = (context.screenWidth * dpr).round();
+    final heroMemCacheHeight = (sh * 0.38 * dpr).round();
     final variants = widget.product.variants ?? [];
     final safeIndex = widget.selectedVariantIndex.clamp(
       0,
@@ -241,6 +250,8 @@ class _ProductDetailViewState extends State<ProductDetailView>
                               itemBuilder: (_, i) => AppNetworkImage(
                                 url: allImages[i],
                                 fit: BoxFit.contain,
+                                memCacheWidth: heroMemCacheWidth,
+                                memCacheHeight: heroMemCacheHeight,
                               ),
                             ),
                           )
@@ -256,7 +267,7 @@ class _ProductDetailViewState extends State<ProductDetailView>
                           decoration: AppDecorations.box(
                             color: context.cs.scrim.withValues(alpha: 0.75),
                           ),
-                          padding: const EdgeInsetsDirectional.all(14),
+                          padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
                           child: Column(
                             crossAxisAlignment: .start,
                             mainAxisAlignment: .end,
@@ -387,7 +398,7 @@ class _ProductDetailViewState extends State<ProductDetailView>
                                   ? AssetsConstants.arrowLeftIcon
                                   : AssetsConstants.arrowRightIcon,
                               color: Colors.white,
-                              size: 14,
+                              size: ThemeConstants.iconXS,
                             ),
                           ),
                         ),
@@ -440,12 +451,12 @@ class _ProductDetailViewState extends State<ProductDetailView>
                     children: [
                       Row(
                         crossAxisAlignment: .start,
-                        spacing: widget.product.productType != 0 ? 6 : 0,
+                        spacing: widget.product.productType != 0 ? ThemeConstants.spaceS : 0,
                         children: [
                           widget.product.productType != 0
                               ? ProductTypeIcon(
                                   productType: widget.product.productType,
-                                  size: 18,
+                                  size: ThemeConstants.iconS,
                                 )
                               : const SizedBox.shrink(),
                           Expanded(
@@ -508,7 +519,7 @@ class _ProductDetailViewState extends State<ProductDetailView>
                                         0)
                               : 0;
                           return Wrap(
-                            spacing: 8,
+                            spacing: ThemeConstants.spaceS,
                             runSpacing: 6,
                             crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
@@ -525,7 +536,7 @@ class _ProductDetailViewState extends State<ProductDetailView>
                                   ),
                                   child: Row(
                                     mainAxisSize: .min,
-                                    spacing: 3,
+                                    spacing: ThemeConstants.spaceXS,
                                     children: [
                                       AppText(
                                         avg.toStringAsFixed(1),
@@ -536,7 +547,7 @@ class _ProductDetailViewState extends State<ProductDetailView>
                                       ),
                                       AppSvgIcon(
                                         AssetsConstants.rateIcon,
-                                        size: 11,
+                                        size: ThemeConstants.iconXXS,
                                         color: context.cs.onInverseSurface,
                                       ),
                                     ],
@@ -548,7 +559,8 @@ class _ProductDetailViewState extends State<ProductDetailView>
                                     color: context.cs.onSurfaceVariant,
                                   ),
                                 ),
-                                Container(
+                                if (widget.product.timeToDeliver?.isNotEmpty == true)
+                                  Container(
                                   width: 1,
                                   height: 12,
                                   color: context.cs.outlineVariant,
@@ -558,11 +570,11 @@ class _ProductDetailViewState extends State<ProductDetailView>
                                   true)
                                 Row(
                                   mainAxisSize: .min,
-                                  spacing: 3,
+                                  spacing: ThemeConstants.spaceXS,
                                   children: [
                                     AppSvgIcon(
                                       AssetsConstants.timeIcon,
-                                      size: 13,
+                                      size: ThemeConstants.iconXS,
                                       color: context.cs.primary,
                                     ),
                                     AppText(
@@ -599,7 +611,7 @@ class _ProductDetailViewState extends State<ProductDetailView>
                     return Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                         ThemeConstants.paddingL,
-                        5,
+                        ThemeConstants.paddingXS,
                         0,
                         0,
                       ),
@@ -646,8 +658,8 @@ class _ProductDetailViewState extends State<ProductDetailView>
                                       ),
                                       padding:
                                           const EdgeInsetsDirectional.symmetric(
-                                            horizontal: 10,
-                                            vertical: 5,
+                                            horizontal: ThemeConstants.paddingS,
+                                            vertical: ThemeConstants.paddingXS,
                                           ),
                                       decoration: AppDecorations.box(
                                         color: isSel
@@ -701,6 +713,66 @@ class _ProductDetailViewState extends State<ProductDetailView>
                   child: ProductDetailPoliciesSection(product: widget.product),
                 ),
                 _ThinDivider(),
+
+                // ── Delivery by ──────────────────────────────────────────────
+                if (SettingsHiveBox.instance.channel !=
+                        AppConstants.quick &&
+                    (widget.product.estimatedDeliveryDate?.isNotEmpty ==
+                        true)) ...[
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      ThemeConstants.paddingL,
+                      ThemeConstants.paddingM,
+                      ThemeConstants.paddingL,
+                      ThemeConstants.paddingM,
+                    ),
+                    child: Container(width: double.infinity,
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: ThemeConstants.paddingM,
+                        vertical: ThemeConstants.paddingM,
+                      ),
+                      decoration: AppDecorations.box(
+                        color: context.cs.surfaceContainerHighest.withValues(
+                          alpha: 0.5,
+                        ),
+                        borderRadius: AppRadius.r12,
+                      ),
+                      child: Row(
+                        mainAxisSize: .min,
+                        spacing: ThemeConstants.spaceXS,
+                        children: [
+                          AppSvgIcon(
+                            AssetsConstants.expectedDeliveryIcon,
+                            size: ThemeConstants.iconS,
+                            color: context.cs.onSurfaceVariant,
+                          ),
+                          Text.rich(
+                            TextSpan(
+                              text:
+                                  '${context.translate(LanguageLabelKeys.deliveryBy)} ',
+                              style: context.tt.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w400,
+                                color: context.cs.onSurfaceVariant,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: AppDateFormatter.formatDate(
+                                    widget.product.estimatedDeliveryDate,
+                                  ),
+                                  style: context.tt.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: context.cs.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  _ThinDivider(),
+                ],
 
                 // ── Product Details / long description ──────────────────────────────────
                 if (displayDesc.isNotEmpty && displayDesc != 'null') ...[
@@ -805,7 +877,7 @@ class _ProductDetailViewState extends State<ProductDetailView>
                               Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                   ThemeConstants.paddingL,
-                                  14,
+                                  ThemeConstants.paddingM,
                                   ThemeConstants.paddingL,
                                   ThemeConstants.paddingXS,
                                 ),
@@ -932,7 +1004,8 @@ class _ExpandableSectionState extends State<_ExpandableSection> {
       margin: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingS),
       clipBehavior: Clip.antiAlias,
       decoration: AppDecorations.box(
-        color: context.cs.surfaceContainerLowest,
+        color: context.cs.surfaceContainerLow
+                                                  .withValues(alpha: 0.3),//context.cs.surfaceContainerLowest,
         borderRadius: AppRadius.r12,
         border: Border.all(
           color: context.cs.outlineVariant.withValues(alpha: 0.4),
@@ -945,8 +1018,8 @@ class _ExpandableSectionState extends State<_ExpandableSection> {
             onTap: () => setState(() => _expanded = !_expanded),
             child: Padding(
               padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: 14,
-                vertical: 14,
+                horizontal: ThemeConstants.paddingM,
+                vertical: ThemeConstants.paddingM,
               ),
               child: Row(
                 children: [
@@ -964,7 +1037,7 @@ class _ExpandableSectionState extends State<_ExpandableSection> {
                     duration: const Duration(milliseconds: 200),
                     child: AppSvgIcon(
                       AssetsConstants.arrowDownIcon,
-                      size: 22,
+                      size: ThemeConstants.iconM,
                       color: context.cs.onSurfaceVariant,
                     ),
                   ),
@@ -983,7 +1056,7 @@ class _ExpandableSectionState extends State<_ExpandableSection> {
                   color: context.cs.outlineVariant.withValues(alpha: 0.4),
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 14, ThemeConstants.paddingM),
+                  padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, ThemeConstants.paddingS, ThemeConstants.paddingM, ThemeConstants.paddingM),
                   child: widget.child,
                 ),
               ],
@@ -1008,7 +1081,7 @@ class _PrescriptionBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: ThemeConstants.paddingM,
-        vertical: 10,
+        vertical: ThemeConstants.paddingS,
       ),
       decoration: AppDecorations.box(
         color: context.cs.inversePrimary.withValues(alpha: 0.08),
@@ -1019,11 +1092,11 @@ class _PrescriptionBanner extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: .start,
-        spacing: 8,
+        spacing: ThemeConstants.spaceS,
         children: [
           AppSvgIcon(
             AssetsConstants.infoCircleIcon,
-            size: 15,
+            size: ThemeConstants.iconXS,
             color: context.cs.inversePrimary,
           ),
           Expanded(

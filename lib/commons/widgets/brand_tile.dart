@@ -1,5 +1,6 @@
 import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +67,7 @@ class BrandTile extends StatelessWidget {
       onTap: onTap,
       child: Column(
         mainAxisSize: .min,
-        spacing: 6,
+        spacing: ThemeConstants.spaceS,
         children: [
           imageWidget,
           (showName ?? true)

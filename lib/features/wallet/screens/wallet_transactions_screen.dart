@@ -151,11 +151,13 @@ class _WalletTransactionsScreenState extends State<WalletTransactionsScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: CustomAppBar(
             title: context.translate(LanguageLabelKeys.walletHistory),
+            scrollController: _pager.controller,
             isSearching: _isSearching,
             searchController: _searchController,
             onSearchChanged: _onSearchChanged,
             onSearchStart: _startSearch,
             onSearchCancel: _cancelSearch,
+            inlineSearchCancel: true,
             searchHint: context.translate(LanguageLabelKeys.searchTransactions),
             actions: [
               if (!_isSearching)
@@ -164,7 +166,7 @@ class _WalletTransactionsScreenState extends State<WalletTransactionsScreen> {
                     isLabelVisible: _selectedType != null,
                     child: AppSvgIcon(
                       AssetsConstants.filterIcon,
-                      size: 24,
+                      size: ThemeConstants.iconL,
                       color: context.cs.onSurfaceVariant,
                     ),
                   ),
@@ -282,20 +284,22 @@ class _WalletTransactionsScreenState extends State<WalletTransactionsScreen> {
       onRefresh: () async {
         context.read<WalletTransactionCubit>().fetchInitial();
       },
-      child: ListView.builder(
-        controller: _pager.controller,
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
-        itemCount: filtered.length + (state.isFetchingMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == filtered.length) {
-            return PaginatedListFooter(
-              isLoadingMore: state.isFetchingMore,
-              hasMore: state.hasMore,
-            );
-          }
-          return WalletTransactionItem(txn: filtered[index]);
-        },
+      child: _pager.attach(
+        ListView.builder(
+          controller: _pager.controller,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+          itemCount: filtered.length + (state.isFetchingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == filtered.length) {
+              return PaginatedListFooter(
+                isLoadingMore: state.isFetchingMore,
+                hasMore: state.hasMore,
+              );
+            }
+            return WalletTransactionItem(txn: filtered[index]);
+          },
+        ),
       ),
     );
   }

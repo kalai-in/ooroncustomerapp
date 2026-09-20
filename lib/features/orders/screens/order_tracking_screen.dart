@@ -4,10 +4,14 @@ import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/constants/navigation_service.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/local_storage/settings_hive_box.dart';
+import 'package:customer/core/routes/order_detail_args.dart';
+import 'package:customer/core/routes/route_names.dart';
 import 'package:customer/utils/order_status_labels.dart';
 import 'package:customer/utils/extensions/string_extensions.dart';
 import 'package:customer/features/orders/cubit/order_live_tracking_cubit.dart';
+import 'package:customer/features/orders/cubit/order_tracking_detail_cubit.dart';
 import 'package:customer/features/orders/cubit/road_route_cubit.dart';
 import 'package:customer/features/orders/models/order_model.dart';
 import 'package:customer/features/orders/widgets/order_tracking_bottom_sheet.dart';
@@ -35,6 +39,8 @@ class OrderTrackingScreen extends StatefulWidget {
 class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   late final MapController _mapController;
   late final LatLng _deliveryAddressPoint;
+  late final LatLng? _storePoint;
+  late final OrderTrackingDetailCubit _detailCubit;
   late final OrderLiveTrackingCubit _liveTrackingCubit;
   late final RoadRouteCubit _roadRouteCubit;
   LatLng? _deliveryBoyPoint;
@@ -57,12 +63,26 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
       lat == 0.0 ? 20.5937 : lat,
       lng == 0.0 ? 78.9629 : lng,
     );
+    _storePoint = _resolveStorePoint(widget.order);
 
+    _detailCubit = OrderTrackingDetailCubit(widget.order);
     _liveTrackingCubit = OrderLiveTrackingCubit();
     _roadRouteCubit = RoadRouteCubit();
     if (_isOutForDelivery && widget.order.id != null) {
       _liveTrackingCubit.startTracking(widget.order.id!.toString());
     }
+  }
+
+  /// Store's location from the order's first item — used to draw a
+  /// store-to-customer tracking line before a delivery boy is assigned
+  /// (live rider GPS only exists once `activeStatus == 5`).
+  LatLng? _resolveStorePoint(OrderData order) {
+    final items = order.items;
+    final item = (items != null && items.isNotEmpty) ? items.first : null;
+    final lat = double.tryParse(item?.storeLatitude ?? '');
+    final lng = double.tryParse(item?.storeLongitude ?? '');
+    if (lat == null || lng == null || (lat == 0 && lng == 0)) return null;
+    return LatLng(lat, lng);
   }
 
   void _onGoogleMapCreated(gmap.GoogleMapController controller) {
@@ -87,13 +107,34 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
   @override
   void dispose() {
+    _detailCubit.close();
     _liveTrackingCubit.close();
     _roadRouteCubit.close();
     super.dispose();
   }
 
+  /// Called once when the order flips to delivered while this screen is
+  /// still open. Hands off to Order Detail — where per-item rating already
+  /// lives via the existing [showRateProductSheet] flow, nothing new here —
+  /// with every intermediate route cleared behind it except the main/
+  /// bottom-nav shell, so a single back tap from there lands on main/home
+  /// whether the customer rates or ignores it.
+  void _handleDelivered(BuildContext context, OrderData order) {
+    final orderId = order.id?.toString();
+    if (orderId == null) {
+      AppNavigator.popUntil(context, RouteNames.main);
+      return;
+    }
+    AppNavigator.pushNamedAndRemoveUntilRoute(
+      context,
+      RouteNames.orderDetail,
+      RouteNames.main,
+      arguments: OrderDetailArgs(orderId: orderId, highlightRating: true),
+    );
+  }
+
   Future<void> _callDeliveryBoy() async {
-    final number = widget.order.deliveryBoyMobile;
+    final number = _detailCubit.state.deliveryBoyMobile;
     if (!number.hasValue) return;
     final uri = Uri.parse('tel:$number');
     if (await canLaunchUrl(uri)) launchUrl(uri);
@@ -101,83 +142,130 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final order = widget.order;
-
     return MultiBlocProvider(
       providers: [
+        BlocProvider.value(value: _detailCubit),
         BlocProvider.value(value: _liveTrackingCubit),
         BlocProvider.value(value: _roadRouteCubit),
       ],
-      child: BlocListener<OrderLiveTrackingCubit, OrderLiveTrackingState>(
-        listenWhen: (previous, current) =>
-            current is! OrderLiveTrackingError ||
-            previous is! OrderLiveTrackingError,
-        listener: (context, state) {
-          if (state is OrderLiveTrackingLoaded && state.location.isValid) {
-            final point = LatLng(
-              state.location.latitude!,
-              state.location.longitude!,
-            );
-            setState(() => _deliveryBoyPoint = point);
-          } else if (state is OrderLiveTrackingError) {
-            AppSnackBar.show(
-              context: context,
-              message: state.message,
-              type: SnackBarType.error,
-            );
-          }
-        },
-        child: AppScaffold(
-          body: Column(
-            children: [
-              OrderTrackingTopBar(
-                orderId: order.id,
-                onBack: () => AppNavigator.pop(context),
-              ),
-              Expanded(
-                child: Stack(
-                  children: [
-                    OrderTrackingMapView(
-                      isGoogle: _isGoogle,
-                      osmController: _mapController,
-                      onGoogleMapCreated: _onGoogleMapCreated,
-                      deliveryAddressPoint: _deliveryAddressPoint,
-                      deliveryBoyPoint: _deliveryBoyPoint,
-                      orderId: order.id,
-                      primaryColor: context.cs.primary,
-                      onPrimaryColor: context.cs.onPrimary,
-                    ),
-                    PositionedDirectional(
-                      top: 12,
-                      end: 12,
-                      child: MapButton(
-                        onTap: _recenter,
-                        child: AppSvgIcon(
-                          AssetsConstants.enableLocationIcon,
-                          size: 20,
-                          color: context.cs.primary,
-                        ),
-                      ),
-                    ),
-                    DraggableScrollableSheet(
-                      initialChildSize: 0.42,
-                      minChildSize: 0.18,
-                      maxChildSize: 0.88,
-                      snap: true,
-                      snapSizes: const [0.18, 0.42, 0.88],
-                      builder: (context, scrollController) {
-                        return OrderTrackingBottomSheet(
-                          order: order,
-                          scrollController: scrollController,
-                          onCallDeliveryBoy: _callDeliveryBoy,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<OrderLiveTrackingCubit, OrderLiveTrackingState>(
+            listenWhen: (previous, current) =>
+                current is! OrderLiveTrackingError ||
+                previous is! OrderLiveTrackingError,
+            listener: (context, state) {
+              if (state is OrderLiveTrackingLoaded && state.location.isValid) {
+                final point = LatLng(
+                  state.location.latitude!,
+                  state.location.longitude!,
+                );
+                setState(() => _deliveryBoyPoint = point);
+              } else if (state is OrderLiveTrackingError) {
+                AppSnackBar.show(
+                  context: context,
+                  message: state.message,
+                  type: SnackBarType.error,
+                );
+              }
+            },
           ),
+          // A push/refresh-triggered status change can move the order into
+          // or out of "out for delivery" while the screen is already open —
+          // start/stop live GPS polling right then instead of only checking
+          // once at initState. `active_status == 5` remains the sole source
+          // of truth for whether the order is out for delivery; the live
+          // tracking API is never used to decide this.
+          BlocListener<OrderTrackingDetailCubit, OrderData>(
+            listenWhen: (previous, current) =>
+                previous.activeStatus != current.activeStatus,
+            listener: (context, order) {
+              if (order.activeStatus == OrderStatus.outForDelivery &&
+                  order.id != null) {
+                _liveTrackingCubit.startTracking(order.id!.toString());
+              } else {
+                _liveTrackingCubit.stopTracking();
+              }
+            },
+          ),
+          // Order delivered while this screen is still open — nothing left
+          // to track, so hand off to Order Detail (rating lives there, per
+          // item) instead of leaving the customer stranded on a dead map.
+          BlocListener<OrderTrackingDetailCubit, OrderData>(
+            listenWhen: (previous, current) =>
+                previous.activeStatus != OrderStatus.delivered &&
+                current.activeStatus == OrderStatus.delivered,
+            listener: (context, order) => _handleDelivered(context, order),
+          ),
+        ],
+        child: BlocBuilder<OrderTrackingDetailCubit, OrderData>(
+          builder: (context, order) {
+            return AppScaffold(
+              body: Column(
+                children: [
+                  BlocBuilder<OrderLiveTrackingCubit, OrderLiveTrackingState>(
+                    buildWhen: (previous, current) =>
+                        current is OrderLiveTrackingLoaded,
+                    builder: (context, liveState) => OrderTrackingTopBar(
+                      orderId: order.id,
+                      onBack: () => AppNavigator.pop(context),
+                      createdAt: order.createdAt,
+                      totalDeliverTime: order.totalDeliverTime,
+                      liveTimeToDeliver: liveState is OrderLiveTrackingLoaded
+                          ? liveState.location.timeToDeliver
+                          : null,
+                      statusLabel:
+                          order.orderStatusName ??
+                          OrderStatusLabels.name(context, order.activeStatus),
+                    ),
+                  ),
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        OrderTrackingMapView(
+                          isGoogle: _isGoogle,
+                          osmController: _mapController,
+                          onGoogleMapCreated: _onGoogleMapCreated,
+                          deliveryAddressPoint: _deliveryAddressPoint,
+                          deliveryBoyPoint: _deliveryBoyPoint,
+                          storePoint: _storePoint,
+                          orderId: order.id,
+                          primaryColor: context.cs.primary,
+                          onPrimaryColor: context.cs.onPrimary,
+                        ),
+                        PositionedDirectional(
+                          top: 12,
+                          end: 12,
+                          child: MapButton(
+                            onTap: _recenter,
+                            child: AppSvgIcon(
+                              AssetsConstants.enableLocationIcon,
+                              size: ThemeConstants.iconM,
+                              color: context.cs.primary,
+                            ),
+                          ),
+                        ),
+                        DraggableScrollableSheet(
+                          initialChildSize: 0.42,
+                          minChildSize: 0.18,
+                          maxChildSize: 0.88,
+                          snap: true,
+                          snapSizes: const [0.18, 0.42, 0.88],
+                          builder: (context, scrollController) {
+                            return OrderTrackingBottomSheet(
+                              order: order,
+                              scrollController: scrollController,
+                              onCallDeliveryBoy: _callDeliveryBoy,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

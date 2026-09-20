@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_decorations.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class OnboardingDots extends StatelessWidget {
   final int count;
@@ -26,7 +27,7 @@ class OnboardingDots extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          margin: const EdgeInsetsDirectional.only(end: 6),
+          margin: const EdgeInsetsDirectional.only(end: ThemeConstants.paddingXS),
           width: isActive ? 28 : 8,
           height: 8,
           decoration: AppDecorations.box(

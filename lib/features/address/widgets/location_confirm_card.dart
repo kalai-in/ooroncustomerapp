@@ -80,7 +80,7 @@ class LocationConfirmCard extends StatelessWidget {
                 child: Container(
                   width: 36,
                   height: 4,
-                  margin: const EdgeInsetsDirectional.only(bottom: 14),
+                  margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingM),
                   decoration: AppDecorations.dragHandle(
                     color: context.cs.outlineVariant,
                   ),
@@ -98,7 +98,7 @@ class LocationConfirmCard extends StatelessWidget {
                       child: AppSvgIcon(
                         AssetsConstants.addressIcon,
                         color: context.cs.primary,
-                        size: 22,
+                        size: ThemeConstants.iconM,
                         fit: BoxFit.scaleDown,
                       ),
                     ),
@@ -136,16 +136,16 @@ class LocationConfirmCard extends StatelessWidget {
                         borderRadius: AppRadius.r10,
                         onTap: isLocating ? null : onCurrentLocation,
                         child: Container(
-                          padding: const EdgeInsetsDirectional.all(10),
+                          padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
                           decoration: AppDecorations.outlinedCard(
                             borderColor: context.cs.outlineVariant,
                           ),
                           child: isLocating
-                              ? LoadingWidget(size: 20)
+                              ? LoadingWidget(size: ThemeConstants.loaderSize)
                               : AppSvgIcon(
                                   AssetsConstants.enableLocationIcon,
                                   color: context.cs.primary,
-                                  size: 20,
+                                  size: ThemeConstants.iconM,
                                 ),
                         ),
                       ),
@@ -163,7 +163,7 @@ class LocationConfirmCard extends StatelessWidget {
                   onPressed: onCurrentLocation,
                   prefixIcon: AppSvgIcon(
                     AssetsConstants.enableLocationIcon,
-                    size: 18,
+                    size: ThemeConstants.iconS,
                     color: context.cs.onPrimary,
                   ),
                 ),
@@ -191,7 +191,7 @@ class _ZoneUnavailableBanner extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     return Column(
-      spacing: 6,
+      spacing: ThemeConstants.spaceS,
       children: [
         AppText(
           ctx.translate(LanguageLabelKeys.zoneUnavailableTitle),

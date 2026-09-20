@@ -43,6 +43,7 @@ class LanguageLabelKeys {
   static const String search = "search";
   static const String filter = "filter";
   static const String searchProductsHint = "search_products_hint";
+  static const String whatsOnYourMind = "whats_on_your_mind";
   static const String startTypingToSearch = "start_typing_to_search";
   static const String startTypingToSearchSubtitle =
       "start_typing_to_search_subtitle";
@@ -111,6 +112,8 @@ class LanguageLabelKeys {
   static const String pullToRefresh = "pull_to_refresh";
   static const String tapRetry = "tap_retry";
   static const String backToTop = "back_to_top";
+  static const String demoDataDisclaimerTitle = "demo_data_disclaimer_title";
+  static const String demoDataDisclaimerBody = "demo_data_disclaimer_body";
 
   // ── Navigation / tabs ───────────────────────────────────────────────────────
   static const String home = "home";
@@ -224,6 +227,13 @@ class LanguageLabelKeys {
   static const String saveAddress = "save_address";
   static const String enterFullAddress = "enter_full_address";
 
+  // ── Billing address (checkout) ────────────────────────────────────────────
+  static const String billingAddress = "billing_address";
+  static const String billingSameAsShipping = "billing_same_as_shipping";
+  static const String addBillingAddress = "add_billing_address";
+  static const String saveBillingAddress = "save_billing_address";
+  static const String pleaseFillBillingAddress = "please_fill_billing_address";
+
   // ── Orders ──────────────────────────────────────────────────────────────────
   static const String myOrders = "my_orders";
   static const String orderDetail = "order_detail";
@@ -241,6 +251,8 @@ class LanguageLabelKeys {
   static const String yourOrder = "your_order";
   static const String isOnItsWay = "is_on_its_way";
   static const String reachingYouSoon = "reaching_you_soon";
+  static const String arrivingIn = "arriving_in";
+  static const String isText = "is_text";
   static const String iAm = "i_am";
   static const String yourDeliveryPartner = "your_delivery_partner";
   static const String reachingLocationSoonMessage =
@@ -259,6 +271,9 @@ class LanguageLabelKeys {
   static const String noOngoingOrders = "no_ongoing_orders";
   static const String noCompletedOrders = "no_completed_orders";
   static const String noOrdersYet = "no_orders_yet";
+  static const String notLoggedInOrdersTitle = "not_logged_in_orders_title";
+  static const String notLoggedInOrdersSubtitle =
+      "not_logged_in_orders_subtitle";
   static const String invoice = "invoice";
   static const String customerInfo = "customer_info";
   static const String deliveryPartner = "delivery_partner";
@@ -332,8 +347,12 @@ class LanguageLabelKeys {
   static const String deliveryCharge = "delivery_charge";
   static const String refundable = "refundable";
   static const String notRefundable = "not_refundable";
+  static const String taxableAmount = "taxable_amount";
+  static const String taxRate = "tax_rate";
   static const String subtotal = "subtotal";
   static const String inclTax = "incl_tax";
+  static const String taxBreakdown = "tax_breakdown";
+  static const String includes = "includes";
   static const String discount = "discount";
   static const String walletUsed = "wallet_used";
   static const String paidFullyByWallet = "paid_fully_by_wallet";
@@ -431,6 +450,8 @@ class LanguageLabelKeys {
       "delivery_instruction_subtitle";
   static const String deliveryIn = "delivery_in";
   static const String delivery = "delivery";
+  static const String estimatedDeliveryBy = "estimated_delivery_by";
+  static const String deliveryBy = "delivery_by";
   static const String shipmentOf = "shipment_of";
   static const String minutesShort = "minutes_short";
   static const String away = "away";
@@ -441,6 +462,9 @@ class LanguageLabelKeys {
   static const String filterOrders = "filter_orders";
   static const String filterByDate = "filter_by_date";
   static const String clearFilter = "clear_filter";
+  static const String dateRange = "date_range";
+  static const String startDateEndDate = "start_date_end_date";
+  static const String orderType = "order_type";
   static const String filterPending = "pending";
   static const String filterApproved = "approved";
   static const String filterRejected = "rejected";
@@ -472,6 +496,7 @@ class LanguageLabelKeys {
 
   // ── Favourites ──────────────────────────────────────────────────────────────
   static const String favourites = "favourites";
+  static const String shoppingList = "shopping_list";
   static const String noFavourites = "no_favourites";
   static const String noFavouritesSubtitle = "no_favourites_subtitle";
 
@@ -616,6 +641,9 @@ class LanguageLabelKeys {
   static const String noZonesFound = "no_zones_found";
   static const String failedToLoadZones = "failed_to_load_zones";
   static const String changeAddress = "change_address";
+  static const String selectYourState = "select_your_state";
+  static const String noRegionsFound = "no_regions_found";
+  static const String failedToLoadRegions = "failed_to_load_regions";
 
   // ── Maintenance ─────────────────────────────────────────────────────────────
   static const String maintenanceMode = "maintenance_mode";

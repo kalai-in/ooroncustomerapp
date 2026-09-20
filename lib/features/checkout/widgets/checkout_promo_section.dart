@@ -71,7 +71,7 @@ class CheckoutPromoSection extends StatelessWidget {
                     child: AppSvgIcon(
                       AssetsConstants.arrowRightIcon,
                       color: context.cs.onSurfaceVariant,
-                      size: 24,
+                      size: ThemeConstants.iconL,
                     ),
                   ),
               ],
@@ -97,7 +97,7 @@ class CheckoutPromoSection extends StatelessWidget {
                       flipX: Directionality.of(context) == TextDirection.rtl,
                       child: AppSvgIcon(
                         AssetsConstants.arrowRightIcon,
-                        size: 16,
+                        size: ThemeConstants.iconXS,
                         color: context.cs.onSurfaceVariant,
                       ),
                     ),
@@ -220,8 +220,8 @@ class _ApplyPill extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: 14,
-          vertical: 6,
+          horizontal: ThemeConstants.paddingM,
+          vertical: ThemeConstants.paddingXS,
         ),
         decoration: AppDecorations.box(
           color: context.cs.primary,
@@ -248,10 +248,10 @@ class _PromoTileIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return isApplied
-        ? AppSvgIcon(AssetsConstants.checkCircleIcon, size: 24, color: color)
+        ? AppSvgIcon(AssetsConstants.checkCircleIcon, size: ThemeConstants.iconL, color: color)
         : AppSvgIcon(
             AssetsConstants.discountCouponsIcon,
-            size: 24,
+            size: ThemeConstants.iconL,
             color: color,
           );
   }

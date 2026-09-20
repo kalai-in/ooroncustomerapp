@@ -1,13 +1,16 @@
 import 'package:customer/commons/cubit/base_pagination_cubit.dart';
 import 'package:customer/commons/utils/pagination_scroll_controller.dart';
-import 'package:customer/commons/widgets/app_icon_filter_button.dart';
+import 'package:customer/commons/widgets/app_button.dart';
+import 'package:customer/commons/widgets/app_date_range_picker.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
+import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/commons/widgets/date_range_filter_field.dart';
 import 'package:customer/core/constants/assets_constants.dart';
-import 'package:customer/commons/widgets/app_radio_option_tile.dart';
 import 'package:customer/commons/widgets/app_snack_bar.dart';
 import 'package:customer/commons/widgets/custom_app_bar.dart';
 import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/constants/navigation_service.dart';
+import 'package:customer/core/local_storage/auth_hive_box.dart';
 import 'package:customer/core/local_storage/settings_hive_box.dart';
 import 'package:customer/commons/widgets/empty_state_widget.dart';
 import 'package:customer/commons/widgets/paginated_list_footer.dart';
@@ -26,12 +29,12 @@ import 'package:customer/features/orders/models/order_model.dart';
 import 'package:customer/features/orders/widgets/ecommerce_order_card.dart';
 import 'package:customer/features/orders/widgets/order_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
+import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:customer/commons/animations/slide_animation.dart';
 import 'package:customer/commons/widgets/app_scaffold.dart';
 import 'package:customer/utils/show_app_bottom_sheet.dart';
@@ -106,14 +109,19 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  final OngoingOrderCubit _ongoingCubit = OngoingOrderCubit();
-  final CompletedOrderCubit _completedCubit = CompletedOrderCubit();
-  final OngoingEcommerceOrderCubit _ongoingEcommerceCubit =
-      OngoingEcommerceOrderCubit();
-  final CompletedEcommerceOrderCubit _completedEcommerceCubit =
-      CompletedEcommerceOrderCubit();
+  // Provided app-wide in main.dart (not owned/closed here) — the
+  // notification service refetches these directly on "order" pushes even
+  // when this screen isn't open, so they must outlive it.
+  late final OngoingOrderCubit _ongoingCubit = context.read<OngoingOrderCubit>();
+  late final CompletedOrderCubit _completedCubit =
+      context.read<CompletedOrderCubit>();
+  late final OngoingEcommerceOrderCubit _ongoingEcommerceCubit =
+      context.read<OngoingEcommerceOrderCubit>();
+  late final CompletedEcommerceOrderCubit _completedEcommerceCubit =
+      context.read<CompletedEcommerceOrderCubit>();
   String _channel = SettingsHiveBox.instance.channel;
   DateTimeRange? _dateRange;
+  final _appBarShadow = ValueNotifier<bool>(false);
 
   bool get _isEcommerce => _channel == AppConstants.ecommerce;
 
@@ -132,20 +140,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   @override
   void dispose() {
-    _ongoingCubit.close();
-    _completedCubit.close();
-    _ongoingEcommerceCubit.close();
-    _completedEcommerceCubit.close();
+    _appBarShadow.dispose();
     super.dispose();
   }
 
-  void _onFilterSelected(String channel) {
-    if (channel == _channel) return;
-    setState(() => _channel = channel);
-    _reloadCurrentChannel();
-  }
-
   void _reloadCurrentChannel() {
+    if (!AuthHiveBox.instance.isLoggedIn) return;
     if (_isEcommerce) {
       _ongoingEcommerceCubit.applyFilters(
         EcommerceOrderFilter(
@@ -177,43 +177,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
     }
   }
 
-  Future<void> _pickDateRange(BuildContext? context) async {
-    final now = DateTime.now();
-    final picked = await showDateRangePicker(
-      context: context!,
-      firstDate: DateTime(now.year - 5),
-      lastDate: now,
-      initialDateRange: _dateRange,
-      builder: (context, child) {
-        // Recompute every rebuild off the dialog's own live context so a
-        // mid-dialog system theme change (light<->dark) updates the
-        // statusbar icon immediately instead of only after reopening.
-        final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
-        final overlayStyle = isDark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark;
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: overlayStyle,
-          child: Theme(
-            data: theme.copyWith(
-              appBarTheme: theme.appBarTheme.copyWith(
-                systemOverlayStyle: overlayStyle,
-              ),
-            ),
-            child: child!,
-          ),
-        );
-      },
-    );
-    if (picked == null) return;
-    setState(() => _dateRange = picked);
+  void _applyFilters(String channel, DateTimeRange? dateRange) {
+    setState(() {
+      _channel = channel;
+      _dateRange = dateRange;
+    });
     _reloadCurrentChannel();
   }
 
-  void _clearDateRange() {
-    if (_dateRange == null) return;
-    setState(() => _dateRange = null);
+  void _clearFilters() {
+    setState(() {
+      _channel = SettingsHiveBox.instance.channel;
+      _dateRange = null;
+    });
     _reloadCurrentChannel();
   }
 
@@ -237,24 +213,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: CustomAppBar(
             title: context.translate(LanguageLabelKeys.myOrders),
-            showBackButton: true,
+            showBackButton: false,
+            shadowListenable: _appBarShadow,
             actions: [
-              AppIconFilterButtonGroup(
-                icon: AssetsConstants.dateIcon,
-                isActive: _dateRange != null,
-                tooltip: context.translate(LanguageLabelKeys.filterByDate),
-                onTap: () => _pickDateRange(context),
-                secondaryIcon: _dateRange != null
-                    ? AssetsConstants.closeIcon
-                    : null,
-                onSecondaryTap: _dateRange != null ? _clearDateRange : null,
-                secondaryTooltip: context.translate(
-                  LanguageLabelKeys.clearFilter,
-                ),
-              ),
               _OrderChannelFilter(
                 selected: _channel,
-                onSelected: _onFilterSelected,
+                dateRange: _dateRange,
+                onApply: _applyFilters,
+                onClear: _clearFilters,
               ),
             ],
             bottom: const _PillTabBar(),
@@ -268,14 +234,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         BlocProvider.value(value: _ongoingEcommerceCubit),
                         BlocProvider.value(value: _completedEcommerceCubit),
                       ],
-                      child: const _OngoingEcommerceOrderList(),
+                      child: _OngoingEcommerceOrderList(
+                        onScrolledChanged: (v) => _appBarShadow.value = v,
+                      ),
                     ),
                     MultiBlocProvider(
                       providers: [
                         BlocProvider.value(value: _ongoingEcommerceCubit),
                         BlocProvider.value(value: _completedEcommerceCubit),
                       ],
-                      child: const _CompletedEcommerceOrderList(),
+                      child: _CompletedEcommerceOrderList(
+                        onScrolledChanged: (v) => _appBarShadow.value = v,
+                      ),
                     ),
                   ]
                 : [
@@ -284,14 +254,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         BlocProvider.value(value: _ongoingCubit),
                         BlocProvider.value(value: _completedCubit),
                       ],
-                      child: const _OngoingOrderList(),
+                      child: _OngoingOrderList(
+                        onScrolledChanged: (v) => _appBarShadow.value = v,
+                      ),
                     ),
                     MultiBlocProvider(
                       providers: [
                         BlocProvider.value(value: _ongoingCubit),
                         BlocProvider.value(value: _completedCubit),
                       ],
-                      child: const _CompletedOrderList(),
+                      child: _CompletedOrderList(
+                        onScrolledChanged: (v) => _appBarShadow.value = v,
+                      ),
                     ),
                   ],
           ),
@@ -303,16 +277,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
 class _OrderChannelFilter extends StatelessWidget {
   final String selected;
-  final ValueChanged<String> onSelected;
+  final DateTimeRange? dateRange;
+  final void Function(String channel, DateTimeRange? dateRange) onApply;
+  final VoidCallback onClear;
 
-  const _OrderChannelFilter({required this.selected, required this.onSelected});
+  const _OrderChannelFilter({
+    required this.selected,
+    required this.dateRange,
+    required this.onApply,
+    required this.onClear,
+  });
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
       icon: AppSvgIcon(
         AssetsConstants.filterIcon,
-        size: 22,
+        size: ThemeConstants.iconM,
         color: context.cs.onSurfaceVariant,
       ),
       onPressed: () => _showFilterSheet(context),
@@ -324,20 +305,44 @@ class _OrderChannelFilter extends StatelessWidget {
       context,
       title: context.translate(LanguageLabelKeys.filterOrders),
       padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingM, ThemeConstants.paddingXL, ThemeConstants.paddingXXL),
-      builder: (_) =>
-          _OrderChannelFilterSheet(selected: selected, onSelected: onSelected),
+      builder: (_) => _OrderChannelFilterSheet(
+        selected: selected,
+        dateRange: dateRange,
+        onApply: onApply,
+        onClear: onClear,
+      ),
     );
   }
 }
 
-class _OrderChannelFilterSheet extends StatelessWidget {
+class _OrderChannelFilterSheet extends StatefulWidget {
   final String selected;
-  final ValueChanged<String> onSelected;
+  final DateTimeRange? dateRange;
+  final void Function(String channel, DateTimeRange? dateRange) onApply;
+  final VoidCallback onClear;
 
   const _OrderChannelFilterSheet({
     required this.selected,
-    required this.onSelected,
+    required this.dateRange,
+    required this.onApply,
+    required this.onClear,
   });
+
+  @override
+  State<_OrderChannelFilterSheet> createState() =>
+      _OrderChannelFilterSheetState();
+}
+
+class _OrderChannelFilterSheetState extends State<_OrderChannelFilterSheet> {
+  late String _tempChannel = widget.selected;
+  late DateTimeRange? _tempDateRange = widget.dateRange;
+
+  String? get _tempStartDate => _tempDateRange == null
+      ? null
+      : DateFormat('yyyy-MM-dd').format(_tempDateRange!.start);
+  String? get _tempEndDate => _tempDateRange == null
+      ? null
+      : DateFormat('yyyy-MM-dd').format(_tempDateRange!.end);
 
   @override
   Widget build(BuildContext context) {
@@ -349,28 +354,82 @@ class _OrderChannelFilterSheet extends StatelessWidget {
     };
     final entries = options.entries.toList();
 
-    return RadioGroup<String>(
-      groupValue: selected,
-      onChanged: (channel) {
-        if (channel == null) return;
-        AppNavigator.pop(context);
-        onSelected(channel);
-      },
-      child: SlideAnimationList(
-        children: [
-          for (final entry in entries)
-            AppRadioOptionTile<String>(
-              value: entry.key,
-              title: entry.value,
-              selected: entry.key == selected,
-              margin: const EdgeInsetsDirectional.only(bottom: 2),
-              onTap: () {
-                AppNavigator.pop(context);
-                onSelected(entry.key);
-              },
+    return SlideAnimationList(
+      crossAxisAlignment: .start,
+      children: [
+        AppText(
+          context.translate(LanguageLabelKeys.orderType),
+          style: context.tt.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: context.cs.onSurfaceVariant,
+          ),
+        ),
+        AppSpacing.h10,
+        Row(
+          children: [
+            for (final entry in entries) ...[
+              _OrderTypeChip(
+                label: entry.value,
+                selected: entry.key == _tempChannel,
+                onTap: () => setState(() => _tempChannel = entry.key),
+              ),
+              if (entry.key != entries.last.key) AppSpacing.w8,
+            ],
+          ],
+        ),
+        AppSpacing.h20,
+        AppText(
+          context.translate(LanguageLabelKeys.dateRange),
+          style: context.tt.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: context.cs.onSurfaceVariant,
+          ),
+        ),
+        AppSpacing.h10,
+        DateRangeFilterField(
+          startDate: _tempStartDate,
+          endDate: _tempEndDate,
+          onTap: () async {
+            final now = DateTime.now();
+            final range = await showAppDateRangePicker(
+              context: context,
+              firstDate: DateTime(now.year - 5),
+              lastDate: now,
+              initialDateRange: _tempDateRange,
+            );
+            if (range == null) return;
+            setState(() => _tempDateRange = range);
+          },
+          onClear: () => setState(() => _tempDateRange = null),
+        ),
+        AppSpacing.h28,
+        Row(
+          children: [
+            Expanded(
+              child: AppButton(
+                label: context.translate(LanguageLabelKeys.clear),
+                variant: AppButtonVariant.outline,
+                height: context.heightFraction(0.05),
+                onPressed: () {
+                  AppNavigator.pop(context);
+                  widget.onClear();
+                },
+              ),
             ),
-        ],
-      ),
+            AppSpacing.w12,
+            Expanded(
+              child: AppButton(
+                label: context.translate(LanguageLabelKeys.apply),
+                height: context.heightFraction(0.05),
+                onPressed: () {
+                  AppNavigator.pop(context);
+                  widget.onApply(_tempChannel, _tempDateRange);
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -389,7 +448,7 @@ class _PillTabBar extends StatelessWidget implements PreferredSizeWidget {
 
     return Container(
       margin: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingM),
-      padding: const EdgeInsetsDirectional.all(5),
+      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
       decoration: AppDecorations.box(
         color: containerBg,
         borderRadius: AppRadius.r20,
@@ -439,6 +498,7 @@ class _PaginatedOrderList<T> extends StatefulWidget {
   final Widget Function(BuildContext context, T item) itemBuilder;
   final String emptyTitle;
   final String emptySubtitle;
+  final ValueChanged<bool>? onScrolledChanged;
 
   const _PaginatedOrderList({
     super.key,
@@ -446,6 +506,7 @@ class _PaginatedOrderList<T> extends StatefulWidget {
     required this.itemBuilder,
     required this.emptyTitle,
     required this.emptySubtitle,
+    this.onScrolledChanged,
   });
 
   @override
@@ -459,7 +520,20 @@ class _PaginatedOrderListState<T> extends State<_PaginatedOrderList<T>> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    _pager.controller.addListener(_notifyScrolled);
+  }
+
+  void _notifyScrolled() {
+    widget.onScrolledChanged?.call(
+      _pager.controller.hasClients && _pager.controller.offset > 0,
+    );
+  }
+
+  @override
   void dispose() {
+    _pager.controller.removeListener(_notifyScrolled);
     _pager.dispose();
     super.dispose();
   }
@@ -501,25 +575,42 @@ class _PaginatedOrderListState<T> extends State<_PaginatedOrderList<T>> {
 
           return RefreshIndicator(
             onRefresh: () => widget.cubit.refresh(),
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              controller: _pager.controller,
-              padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingL),
-              itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == state.data.length) {
-                  return PaginatedListFooter(
-                    isLoadingMore: state.isFetchingMore,
-                    hasMore: state.hasMore,
-                  );
-                }
-                return widget.itemBuilder(context, state.data[index]);
-              },
+            child: _pager.attach(
+              ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: _pager.controller,
+                padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingL),
+                itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == state.data.length) {
+                    return PaginatedListFooter(
+                      isLoadingMore: state.isFetchingMore,
+                      hasMore: state.hasMore,
+                    );
+                  }
+                  return widget.itemBuilder(context, state.data[index]);
+                },
+              ),
             ),
           );
         }
 
-        return AppSpacing.shrink;
+        final isLoggedIn = AuthHiveBox.instance.isLoggedIn;
+        return EmptyStateWidget(
+          imagePath: AssetsConstants.noOrderFound,
+          title: isLoggedIn
+              ? widget.emptyTitle
+              : context.translate(LanguageLabelKeys.notLoggedInOrdersTitle),
+          subtitle: isLoggedIn
+              ? widget.emptySubtitle
+              : context.translate(LanguageLabelKeys.notLoggedInOrdersSubtitle),
+          onRetry: isLoggedIn
+              ? null
+              : () => AppNavigator.pushNamed(context, RouteNames.login),
+          retryLabel: isLoggedIn
+              ? LanguageLabelKeys.retry
+              : LanguageLabelKeys.login,
+        );
       },
     );
   }
@@ -528,7 +619,9 @@ class _PaginatedOrderListState<T> extends State<_PaginatedOrderList<T>> {
 // ── Ongoing ──────────────────────────────────────────────────────────────────
 
 class _OngoingOrderList extends StatelessWidget {
-  const _OngoingOrderList();
+  final ValueChanged<bool>? onScrolledChanged;
+
+  const _OngoingOrderList({this.onScrolledChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -536,6 +629,7 @@ class _OngoingOrderList extends StatelessWidget {
     final completedCubit = context.read<CompletedOrderCubit>();
     return _PaginatedOrderList<OrderData>(
       cubit: cubit,
+      onScrolledChanged: onScrolledChanged,
       emptyTitle: context.translate(LanguageLabelKeys.noOngoingOrders),
       emptySubtitle: context.translate(LanguageLabelKeys.noOrdersYet),
       itemBuilder: (context, order) => OrderCard(
@@ -570,13 +664,16 @@ class _OngoingOrderList extends StatelessWidget {
 // ── Completed ────────────────────────────────────────────────────────────────
 
 class _CompletedOrderList extends StatelessWidget {
-  const _CompletedOrderList();
+  final ValueChanged<bool>? onScrolledChanged;
+
+  const _CompletedOrderList({this.onScrolledChanged});
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<CompletedOrderCubit>();
     return _PaginatedOrderList<OrderData>(
       cubit: cubit,
+      onScrolledChanged: onScrolledChanged,
       emptyTitle: context.translate(LanguageLabelKeys.noCompletedOrders),
       emptySubtitle: context.translate(LanguageLabelKeys.noOrdersYet),
       itemBuilder: (context, order) => OrderCard(
@@ -603,7 +700,9 @@ class _CompletedOrderList extends StatelessWidget {
 // ── Ecommerce: Ongoing ──────────────────────────────────────────────────────
 
 class _OngoingEcommerceOrderList extends StatelessWidget {
-  const _OngoingEcommerceOrderList();
+  final ValueChanged<bool>? onScrolledChanged;
+
+  const _OngoingEcommerceOrderList({this.onScrolledChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -611,6 +710,7 @@ class _OngoingEcommerceOrderList extends StatelessWidget {
     final completedCubit = context.read<CompletedEcommerceOrderCubit>();
     return _PaginatedOrderList<EcommerceOrderDataModel>(
       cubit: cubit,
+      onScrolledChanged: onScrolledChanged,
       emptyTitle: context.translate(LanguageLabelKeys.noOngoingOrders),
       emptySubtitle: context.translate(LanguageLabelKeys.noOrdersYet),
       itemBuilder: (context, item) => EcommerceOrderCard(
@@ -640,13 +740,16 @@ class _OngoingEcommerceOrderList extends StatelessWidget {
 // ── Ecommerce: Completed ────────────────────────────────────────────────────
 
 class _CompletedEcommerceOrderList extends StatelessWidget {
-  const _CompletedEcommerceOrderList();
+  final ValueChanged<bool>? onScrolledChanged;
+
+  const _CompletedEcommerceOrderList({this.onScrolledChanged});
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<CompletedEcommerceOrderCubit>();
     return _PaginatedOrderList<EcommerceOrderDataModel>(
       cubit: cubit,
+      onScrolledChanged: onScrolledChanged,
       emptyTitle: context.translate(LanguageLabelKeys.noCompletedOrders),
       emptySubtitle: context.translate(LanguageLabelKeys.noOrdersYet),
       itemBuilder: (context, item) => EcommerceOrderCard(
@@ -667,6 +770,50 @@ class _CompletedEcommerceOrderList extends StatelessWidget {
         onReorder: _showEcommerceReorder
             ? () => _handleReorderEcommerceItem(context, item)
             : null,
+      ),
+    );
+  }
+}
+
+class _OrderTypeChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _OrderTypeChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: ThemeConstants.paddingL,
+          vertical: ThemeConstants.paddingS,
+        ),
+        decoration: AppDecorations.box(
+          color: selected ? context.cs.primary : context.cs.surfaceContainerLow,
+          borderRadius: AppRadius.r20,
+          border: Border.all(
+            color: selected
+                ? context.cs.primary
+                : context.cs.outline.withValues(alpha: 0.4),
+          ),
+        ),
+        child: AppText(
+          label,
+          style: context.tt.labelMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: selected
+                ? context.cs.onPrimary
+                : context.cs.onSurfaceVariant,
+          ),
+        ),
       ),
     );
   }

@@ -57,6 +57,13 @@ class ApiClient {
     }
   }
 
+  /// Test-only seam: swaps the underlying HTTP adapter so integration tests
+  /// can serve canned responses without hitting the network. Never called by
+  /// app code.
+  @visibleForTesting
+  set httpClientAdapter(HttpClientAdapter adapter) =>
+      _dio.httpClientAdapter = adapter;
+
   Options _withLangHeader([Options? options]) {
     final lang = SettingsHiveBox.instance.languageCode;
     final base = options ?? Options();

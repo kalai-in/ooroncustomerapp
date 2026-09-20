@@ -45,7 +45,7 @@ class ProductDetailUpsellSection extends StatelessWidget {
           crossAxisAlignment: .start,
           children: [
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(10, ThemeConstants.paddingL, 10, ThemeConstants.paddingM),
+              padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingM),
               child: AppText(
                 context.translate(LanguageLabelKeys.upgradeYourOrder),
                 style: context.tt.titleMedium?.copyWith(
@@ -57,7 +57,7 @@ class ProductDetailUpsellSection extends StatelessWidget {
             ProductCardGrid(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsetsDirectional.fromSTEB(10, 0, 10, ThemeConstants.paddingS),
+              padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingS, 0, ThemeConstants.paddingS, ThemeConstants.paddingS),
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 10 * (isTablet ? 1.75 : 1.0),
               mainAxisSpacing: 10 * (isTablet ? 1.75 : 1.0),

@@ -186,6 +186,15 @@ class ApiParameters {
   static const String walletBalance = 'wallet_balance';
   static const String orderNote = 'order_note';
   static const String promoCodeId = 'promocode_id';
+  static const String billingSameAsShipping = 'billing_same_as_shipping';
+  static const String billingName = 'billing_name';
+  static const String billingMobile = 'billing_mobile';
+  static const String billingAddress = 'billing_address';
+  static const String billingCity = 'billing_city';
+  static const String billingPincode = 'billing_pincode';
+  static const String billingCountry = 'billing_country';
+  static const String billingRegionId = 'billing_region_id';
+  static const String billingState = 'billing_state';
 
   /// Prescription files are keyed per product variant: `prescription[<id>]`.
   static const String prescription = 'prescription';

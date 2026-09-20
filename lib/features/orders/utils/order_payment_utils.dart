@@ -15,20 +15,29 @@ class OrderPaymentInfo {
   final bool isCod;
   final String methodLabel;
 
+  /// True when both wallet and a remaining method (COD/gateway) paid part
+  /// of the order — only then do the itemized wallet/remaining rows show
+  /// separately below the Total row.
+  final bool isCombined;
+
   /// Label for the Total row: "Paid via Wallet" when wallet paid it all,
-  /// "Paid via `gateway/COD`" when wallet + a gateway/COD split the bill
-  /// (wallet covers part, `final_total` is the gateway's share), else the
-  /// plain "Total".
+  /// plain "Total" when wallet + a gateway/COD split the bill (the split
+  /// itself is itemized in the rows below), else the plain "Total".
   final String totalRowLabel;
 
   /// Amount to show next to [totalRowLabel]: the wallet amount when wallet
-  /// paid it all (since `final_total` is 0 and would look wrong), otherwise
-  /// `final_total` as usual.
+  /// paid it all (since `final_total` is 0 and would look wrong), the sum
+  /// of wallet + remaining when both were used, otherwise `final_total` as
+  /// usual.
   final double totalRowAmount;
 
   /// True whenever wallet was involved (fully or partially) — callers use
   /// this to success-color the Total row instead of the neutral default.
   final bool totalRowIsWalletHighlighted;
+
+  /// Label for the itemized remaining-amount row when [isCombined]:
+  /// "Paid via `gateway/COD`". Empty when not combined.
+  final String remainingRowLabel;
 
   /// Single-row variant for cards that show only one total line (no
   /// separate "Wallet Used" row above it, unlike the order-detail screens):
@@ -44,9 +53,11 @@ class OrderPaymentInfo {
     required this.isFullyPaidByWallet,
     required this.isCod,
     required this.methodLabel,
+    required this.isCombined,
     required this.totalRowLabel,
     required this.totalRowAmount,
     required this.totalRowIsWalletHighlighted,
+    required this.remainingRowLabel,
     required this.combinedTotalRowLabel,
     required this.combinedTotalRowAmount,
   });
@@ -92,14 +103,18 @@ OrderPaymentInfo resolveOrderPaymentInfo({
       ? LanguageLabelKeys.payVia
       : LanguageLabelKeys.paidVia;
 
+  final isCombined = hasWallet && (finalTotal ?? 0) > 0;
+
   final String totalRowLabel;
   if (isFullyPaidByWallet) {
     totalRowLabel = context.translate(LanguageLabelKeys.paidFullyByWallet);
-  } else if (hasWallet && methodLabel.isNotEmpty) {
-    totalRowLabel = '${context.translate(paidPrefixKey)} $methodLabel';
   } else {
     totalRowLabel = context.translate(LanguageLabelKeys.total);
   }
+
+  final remainingRowLabel = isCombined && methodLabel.isNotEmpty
+      ? '${context.translate(paidPrefixKey)} $methodLabel'
+      : '';
 
   final String combinedTotalRowLabel;
   if (isFullyPaidByWallet) {
@@ -120,14 +135,22 @@ OrderPaymentInfo resolveOrderPaymentInfo({
       ? walletUsed + (finalTotal ?? 0)
       : (finalTotal ?? 0);
 
+  final totalRowAmount = isFullyPaidByWallet
+      ? walletUsed
+      : isCombined
+      ? walletUsed + (finalTotal ?? 0)
+      : (finalTotal ?? 0);
+
   return OrderPaymentInfo(
     hasWallet: hasWallet,
     isFullyPaidByWallet: isFullyPaidByWallet,
     isCod: isCod,
     methodLabel: methodLabel,
+    isCombined: isCombined,
     totalRowLabel: totalRowLabel,
-    totalRowAmount: isFullyPaidByWallet ? walletUsed : (finalTotal ?? 0),
+    totalRowAmount: totalRowAmount,
     totalRowIsWalletHighlighted: hasWallet,
+    remainingRowLabel: remainingRowLabel,
     combinedTotalRowLabel: combinedTotalRowLabel,
     combinedTotalRowAmount: combinedTotalRowAmount,
   );

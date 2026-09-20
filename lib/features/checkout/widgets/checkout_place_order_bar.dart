@@ -7,12 +7,16 @@ import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/features/address/models/address_model.dart';
 import 'package:customer/features/cart/models/cart_model.dart';
+import 'package:customer/features/checkout/models/billing_address_model.dart';
 import 'package:customer/features/checkout/utils/checkout_totals.dart';
+import 'package:customer/features/checkout/widgets/checkout_billing_address_section.dart';
 import 'package:customer/features/payment_method/models/payment_method_item.dart';
 import 'package:customer/features/promo_code/models/promo_code_model.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
+import 'package:customer/utils/extensions/num_extensions.dart';
+import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
@@ -29,6 +33,10 @@ class CheckoutPlaceOrderBar extends StatelessWidget {
     required this.onPlaceOrder,
     required this.onChooseAddress,
     required this.onChoosePayment,
+    required this.billingSameAsShipping,
+    required this.billingAddress,
+    required this.onBillingToggle,
+    required this.onEditBillingAddress,
     this.isLoggedIn = true,
     this.onLoginAndCheckout,
     this.useWallet = false,
@@ -45,6 +53,10 @@ class CheckoutPlaceOrderBar extends StatelessWidget {
   final VoidCallback onPlaceOrder;
   final VoidCallback onChooseAddress;
   final VoidCallback onChoosePayment;
+  final bool billingSameAsShipping;
+  final BillingAddressData? billingAddress;
+  final ValueChanged<bool> onBillingToggle;
+  final VoidCallback onEditBillingAddress;
   final bool isLoggedIn;
   final VoidCallback? onLoginAndCheckout;
   final bool useWallet;
@@ -101,16 +113,31 @@ class CheckoutPlaceOrderBar extends StatelessWidget {
         0,
         0,
         0,
-        MediaQuery.paddingOf(context).bottom + ThemeConstants.paddingL,
+        context.bottomSafePadding + ThemeConstants.paddingL,
       ),
       child: hasAddress
           ? Column(
               mainAxisSize: .min,
-              spacing: 10,
+              spacing: ThemeConstants.spaceM,
               children: [
-                _AddressStrip(
-                  selectedAddress: selectedAddress!,
-                  onChooseAddress: onChooseAddress,
+                // Address + billing checkbox share one continuous card (same
+                // background, no gap) so they read as one delivery/billing
+                // block instead of two separate chips.
+                Column(
+                  mainAxisSize: .min,
+                  children: [
+                    _AddressStrip(
+                      selectedAddress: selectedAddress!,
+                      onChooseAddress: onChooseAddress,
+                    ),
+                    if (!_notDeliverable)
+                      CheckoutBillingAddressSection(
+                        sameAsShipping: billingSameAsShipping,
+                        billingAddress: billingAddress,
+                        onToggle: onBillingToggle,
+                        onEdit: onEditBillingAddress,
+                      ),
+                  ],
                 ),
                 if (_notDeliverable)
                   _NotDeliverablePrompt(onChooseAddress: onChooseAddress)
@@ -193,7 +220,7 @@ class _LoginRequiredBar extends StatelessWidget {
         ThemeConstants.paddingL,
         ThemeConstants.paddingM,
         ThemeConstants.paddingL,
-        MediaQuery.paddingOf(context).bottom + ThemeConstants.paddingL,
+        context.bottomSafePadding + ThemeConstants.paddingL,
       ),
       child: AppButton(
         label: context.translate(LanguageLabelKeys.loginAndCheckout),
@@ -220,8 +247,8 @@ class _AddressStrip extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(
         start: ThemeConstants.paddingL,
         end: ThemeConstants.paddingL,
-        top: 10,
-        bottom: 10,
+        top: ThemeConstants.paddingS,
+        bottom: ThemeConstants.paddingS,
       ),
       decoration: AppDecorations.box(
         color: context.cs.surfaceContainerLow,
@@ -238,7 +265,7 @@ class _AddressStrip extends StatelessWidget {
             ),
             child: AppSvgIcon(
               AssetsConstants.buildingIcon,
-              size: 24,
+              size: ThemeConstants.iconL,
               color: context.cs.onSurfaceVariant,
               fit: BoxFit.scaleDown,
             ),
@@ -316,7 +343,7 @@ class _NotDeliverablePrompt extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsetsDirectional.all(10),
+            padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
             decoration: AppDecorations.box(
               color: context.cs.error.withValues(alpha: 0.08),
               borderRadius: AppRadius.r10,
@@ -325,7 +352,7 @@ class _NotDeliverablePrompt extends StatelessWidget {
               children: [
                 AppSvgIcon(
                   AssetsConstants.infoCircleIcon,
-                  size: 18,
+                  size: ThemeConstants.iconS,
                   color: context.cs.error,
                 ),
                 AppSpacing.w8,
@@ -421,7 +448,7 @@ class _PayAndPlaceOrderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      spacing: 10,
+      spacing: ThemeConstants.spaceM,
       children: [
         if (showPaymentMethod)
           Expanded(
@@ -493,10 +520,10 @@ class _PaymentMethodTile extends StatelessWidget {
                     mainAxisSize: .min,
                     children: [
                       selectedPayment != null
-                          ? AppSvgIcon(selectedPayment!.iconPath, size: 15)
+                          ? AppSvgIcon(selectedPayment!.iconPath, size: ThemeConstants.iconXS)
                           : AppSvgIcon(
                               AssetsConstants.cardIcon,
-                              size: 15,
+                              size: ThemeConstants.iconXS,
                               color: context.cs.onSurfaceVariant,
                             ),
                       AppSpacing.w8,
@@ -511,7 +538,7 @@ class _PaymentMethodTile extends StatelessWidget {
                       AppSpacing.w2,
                       AppSvgIcon(
                         AssetsConstants.arrowUpIcon,
-                        size: 13,
+                        size: ThemeConstants.iconXS,
                         color: context.cs.onSurface,
                       ),
                     ],
@@ -557,7 +584,7 @@ class _PlaceOrderButton extends StatelessWidget {
     return GestureDetector(
       onTap: isLoading ? null : onPlaceOrder,
       child: Container(
-        padding: const EdgeInsetsDirectional.all(10),
+        padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
         margin: EdgeInsetsDirectional.only(end: ThemeConstants.paddingL, start: startInset),
         height: 50,
         decoration: AppDecorations.box(
@@ -565,7 +592,7 @@ class _PlaceOrderButton extends StatelessWidget {
           borderRadius: AppRadius.r12,
         ),
         child: isLoading
-            ? LoadingWidget(size: 22, color: context.cs.onPrimary)
+            ? LoadingWidget(size: ThemeConstants.loaderSize, color: context.cs.onPrimary)
             : Row(
                 children: [
                   Expanded(
@@ -578,7 +605,7 @@ class _PlaceOrderButton extends StatelessWidget {
                         crossAxisAlignment: .start,
                         children: [
                           AppText(
-                            '$currency${total.toStringAsFixed(2)}',
+                            '$currency${total.formatPrice()}',
                             style: context.tt.bodyMedium?.copyWith(
                               color: context.cs.onPrimary,
                               fontSize: 15,
@@ -616,7 +643,7 @@ class _PlaceOrderButton extends StatelessWidget {
                     child: AppSvgIcon(
                       AssetsConstants.arrowRightIcon,
                       color: context.cs.onPrimary,
-                      size: 12,
+                      size: ThemeConstants.iconXS,
                     ),
                   ),
                   AppSpacing.w8,

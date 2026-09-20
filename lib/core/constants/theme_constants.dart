@@ -11,6 +11,9 @@ class ThemeConstants {
   ThemeConstants._();
 
   // ── Spacing / gap doubles ─────────────────────────────────────────────────
+  /// 2px — tightest gaps, label-value micro spacing
+  static const double spaceXXS = 2;
+
   /// 4px — tiny gaps, label-to-asterisk
   static const double spaceXS = 4;
 
@@ -71,6 +74,9 @@ class ThemeConstants {
   static const double bottomBarHeight = 60;
 
   // ── Icon sizes ────────────────────────────────────────────────────────────
+  /// 12px — tiny inline icons, dense chips
+  static const double iconXXS = 12;
+
   /// 16px — badge icons, small indicators
   static const double iconXS = 16;
 
@@ -100,6 +106,9 @@ class ThemeConstants {
   static const double borderThick = 2;
 
   // ── Loader ────────────────────────────────────────────────────────────────
+  /// 16px — circular progress in tight spaces
+  static const double loaderSizeS = 16;
+
   /// 20px — circular progress inside buttons
   static const double loaderSize = 20;
 

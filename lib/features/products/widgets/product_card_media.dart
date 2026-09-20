@@ -120,11 +120,11 @@ class ProductCardMedia extends StatelessWidget {
                     ),
                   ),
                 PositionedDirectional(
-                  bottom: isCompact ? 6 : 8,
+                  bottom: isCompact ? 8 : 10,
                   end: isCompact ? 6 : 8,
                   child: ProductTypeIcon(
                     productType: product.productType,
-                    size: isCompact ? 16 : 18,
+                    size: isCompact ? ThemeConstants.iconXS : ThemeConstants.iconS,
                   ),
                 ),
                 PositionedDirectional(

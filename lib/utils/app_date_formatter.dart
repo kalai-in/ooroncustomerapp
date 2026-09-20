@@ -52,6 +52,11 @@ class AppDateFormatter {
   /// Matches a trailing timezone designator: "Z" or "+05:30" / "-0530".
   static final RegExp _kTzSuffix = RegExp(r'(Z|[+-]\d{2}:?\d{2})$');
 
+  /// Parses an api date/time value (string or [DateTime]) to local time,
+  /// reinterpreting timezone-less wall-clock strings as server UTC. Returns
+  /// null if [input] can't be parsed.
+  static DateTime? parse(dynamic input) => _parse(input);
+
   static DateTime? _parse(dynamic input) {
     if (input == null) return null;
     if (input is DateTime) return input.isUtc ? input.toLocal() : input;

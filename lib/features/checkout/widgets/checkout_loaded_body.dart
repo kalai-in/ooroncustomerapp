@@ -6,6 +6,7 @@ import 'package:customer/features/address/models/address_model.dart';
 import 'package:customer/features/cart/cubit/cart_fetch_cubit.dart';
 import 'package:customer/features/cart/models/cart_model.dart';
 import 'package:customer/features/checkout/cubit/place_order_cubit.dart';
+import 'package:customer/features/checkout/models/billing_address_model.dart';
 import 'package:customer/features/checkout/widgets/checkout_bill_section.dart';
 import 'package:customer/features/checkout/widgets/checkout_cart_items_section.dart';
 import 'package:customer/features/checkout/widgets/checkout_order_note_section.dart';
@@ -47,6 +48,10 @@ class CheckoutLoadedBody extends StatelessWidget {
     required this.onPlaceOrder,
     required this.onChooseAddress,
     required this.onChoosePayment,
+    required this.billingSameAsShipping,
+    required this.billingAddress,
+    required this.onBillingToggle,
+    required this.onEditBillingAddress,
     this.prescriptions = const {},
     this.onPrescriptionPicked,
     this.onPrescriptionRemoved,
@@ -69,6 +74,10 @@ class CheckoutLoadedBody extends StatelessWidget {
   final VoidCallback onPlaceOrder;
   final VoidCallback onChooseAddress;
   final ValueChanged<bool> onChoosePayment;
+  final bool billingSameAsShipping;
+  final BillingAddressData? billingAddress;
+  final ValueChanged<bool> onBillingToggle;
+  final VoidCallback onEditBillingAddress;
 
   /// Picked prescription files keyed by product variant id (medical products).
   final Map<String, File> prescriptions;
@@ -120,6 +129,7 @@ class CheckoutLoadedBody extends StatelessWidget {
                   await context.read<CartFetchCubit>().fetchCart(
                     latitude: addressLat,
                     longitude: addressLng,
+                    addressId: selectedAddress?.id,
                   );
                   addressCubit.refresh();
                   paymentCubit.loadPaymentMethods();
@@ -202,6 +212,10 @@ class CheckoutLoadedBody extends StatelessWidget {
               onPlaceOrder: onPlaceOrder,
               onChooseAddress: onChooseAddress,
               onChoosePayment: () => onChoosePayment(cartData.codAllowed == 1),
+              billingSameAsShipping: billingSameAsShipping,
+              billingAddress: billingAddress,
+              onBillingToggle: onBillingToggle,
+              onEditBillingAddress: onEditBillingAddress,
               hasMissingRequiredPrescription:
                   !notDeliverable && _firstMissingRequiredVariantId != null,
               onUploadPrescription: () {

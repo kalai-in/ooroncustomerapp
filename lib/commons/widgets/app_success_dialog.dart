@@ -46,7 +46,7 @@ class _AppSuccessDialogState extends State<_AppSuccessDialog> {
       shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: 28,
+          horizontal: ThemeConstants.paddingXXL,
           vertical: ThemeConstants.paddingXL,
         ),
         child: Column(

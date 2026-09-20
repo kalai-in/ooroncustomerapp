@@ -35,6 +35,7 @@ class NotificationSettingsScreen extends StatefulWidget {
 class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  final _appBarShadow = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _appBarShadow.dispose();
     super.dispose();
   }
 
@@ -65,6 +67,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           return AppScaffold(
             appBar: CustomAppBar(
               title: context.translate(LanguageLabelKeys.notificationSettings),
+              shadowListenable: _appBarShadow,
               bottom: _NotifTabBar(controller: _tabController),
             ),
             // Offline replaces the body only, so the app bar's back button
@@ -155,9 +158,21 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     return TabBarView(
       controller: _tabController,
       children: [
-        _ChannelList(statuses: statuses, channel: _NotifChannel.email),
-        _ChannelList(statuses: statuses, channel: _NotifChannel.notification),
-        _ChannelList(statuses: statuses, channel: _NotifChannel.sms),
+        _ChannelList(
+          statuses: statuses,
+          channel: _NotifChannel.email,
+          onScrolledChanged: (v) => _appBarShadow.value = v,
+        ),
+        _ChannelList(
+          statuses: statuses,
+          channel: _NotifChannel.notification,
+          onScrolledChanged: (v) => _appBarShadow.value = v,
+        ),
+        _ChannelList(
+          statuses: statuses,
+          channel: _NotifChannel.sms,
+          onScrolledChanged: (v) => _appBarShadow.value = v,
+        ),
       ],
     );
   }
@@ -232,19 +247,53 @@ class _NotifTabBar extends StatelessWidget implements PreferredSizeWidget {
 
 // ── Channel list (one tab) ────────────────────────────────────────────────────
 
-class _ChannelList extends StatelessWidget {
+class _ChannelList extends StatefulWidget {
   final List<AppNotificationSettingsData> statuses;
   final _NotifChannel channel;
+  final ValueChanged<bool>? onScrolledChanged;
 
-  const _ChannelList({required this.statuses, required this.channel});
+  const _ChannelList({
+    required this.statuses,
+    required this.channel,
+    this.onScrolledChanged,
+  });
+
+  @override
+  State<_ChannelList> createState() => _ChannelListState();
+}
+
+class _ChannelListState extends State<_ChannelList> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_notifyScrolled);
+  }
+
+  void _notifyScrolled() {
+    widget.onScrolledChanged?.call(
+      _scrollController.hasClients && _scrollController.offset > 0,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_notifyScrolled);
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final statuses = widget.statuses;
+    final channel = widget.channel;
     return RefreshIndicator(
       color: context.cs.primary,
       onRefresh: () async =>
           context.read<NotificationSettingsCubit>().getNotificationSettings(),
       child: ListView.builder(
+        controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL),
         itemCount: statuses.length,
@@ -320,7 +369,7 @@ class _ChannelTileState extends State<_ChannelTile> {
     if (value == null) return const SizedBox.shrink();
 
     return Container(
-      margin: const EdgeInsetsDirectional.only(bottom: 10),
+      margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
       decoration: AppDecorations.shadowedCard(
         color: Theme.of(context).cardColor,
         shadowColor: context.cs.shadow.withValues(alpha: 0.06),
@@ -331,7 +380,7 @@ class _ChannelTileState extends State<_ChannelTile> {
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingL,
-          vertical: 14,
+          vertical: ThemeConstants.paddingM,
         ),
         child: Row(
           children: [

@@ -1,3 +1,4 @@
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/commons/widgets/app_switch.dart';
@@ -23,7 +24,7 @@ class DefaultToggleSheet extends StatelessWidget {
         Expanded(
           child: Column(
             crossAxisAlignment: .start,
-            spacing: 2,
+            spacing: ThemeConstants. spaceXXS,
             children: [
               AppText(
                 context.translate(LanguageLabelKeys.setAsDefaultAddress),

@@ -17,9 +17,9 @@ class AuthTermsBar extends StatelessWidget {
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
         ThemeConstants.paddingL,
-        14,
+        ThemeConstants.paddingM,
         ThemeConstants.paddingL,
-        14 + context.bottomSafePadding,
+        ThemeConstants.paddingM + context.bottomSafePadding,
       ),
       child: Text.rich(
         TextSpan(

@@ -117,8 +117,8 @@ class ProductVariantSheet extends StatelessWidget {
                                             const EdgeInsetsDirectional.only(
                                               start: ThemeConstants.paddingXS,
                                               end: ThemeConstants.paddingXS,
-                                              top: 3,
-                                              bottom: 6,
+                                              top: ThemeConstants.paddingXS,
+                                              bottom: ThemeConstants.paddingXS,
                                             ),
                                         color: context.cs.primary,
                                         child: AppText(
@@ -142,7 +142,7 @@ class ProductVariantSheet extends StatelessWidget {
                           Expanded(
                             child: Column(
                               crossAxisAlignment: .start,
-                              spacing: 4,
+                              spacing: ThemeConstants.spaceXS,
                               children: [
                                 AppText(
                                   _unitLabel(v),
@@ -152,7 +152,7 @@ class ProductVariantSheet extends StatelessWidget {
                                   ),
                                 ),
                                 Row(
-                                  spacing: 6,
+                                  spacing: ThemeConstants.spaceS,
                                   children: [
                                     AppText(
                                       '${product.currency}${displayPrice.formatPrice(product.decimalPoint ?? 2)}',

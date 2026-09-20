@@ -40,8 +40,44 @@ class _ReferEarnView extends StatefulWidget {
   State<_ReferEarnView> createState() => _ReferEarnViewState();
 }
 
-class _ReferEarnViewState extends State<_ReferEarnView> {
+class _ReferEarnViewState extends State<_ReferEarnView>
+    with SingleTickerProviderStateMixin {
   bool _isSharing = false;
+  bool _entranceStarted = false;
+  final _scrollController = ScrollController();
+  late final AnimationController _entranceController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _entranceController.dispose();
+    super.dispose();
+  }
+
+  Animation<double> _fade(int index, int total) {
+    final start = index / (total + 1);
+    final end = start + 2 / (total + 1);
+    return CurvedAnimation(
+      parent: _entranceController,
+      curve: Interval(start, end.clamp(0, 1), curve: Curves.easeOut),
+    );
+  }
+
+  Widget _staggered(int index, int total, Widget child) {
+    final fade = _fade(index, total);
+    return FadeTransition(
+      opacity: fade,
+      child: SlideTransition(
+        position: fade.drive(
+          Tween(begin: const Offset(0, 0.08), end: Offset.zero),
+        ),
+        child: child,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +87,20 @@ class _ReferEarnViewState extends State<_ReferEarnView> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(
         title: context.translate(LanguageLabelKeys.referAndEarn),
+        scrollController: _scrollController,
       ),
       body: BlocBuilder<CountrySettingsCubit, CountrySettingsState>(
         builder: (context, state) {
           if (state is CountrySettingsLoading ||
               state is CountrySettingsInitial) {
             return const LoadingWidget();
+          }
+
+          if (!_entranceStarted) {
+            _entranceStarted = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) _entranceController.forward();
+            });
           }
 
           final data = state is CountrySettingsLoaded
@@ -67,29 +111,44 @@ class _ReferEarnViewState extends State<_ReferEarnView> {
           final friendEarnsValue = data?.referralCreditReferred ?? 0;
           final bonus = youEarnValue.toString();
 
+          const total = 4;
+
           return SingleChildScrollView(
-            padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingXL, ThemeConstants.paddingL, ThemeConstants.spaceXXXL),
+            controller: _scrollController,
+            padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingXL, ThemeConstants.paddingL, ThemeConstants.paddingL,),
             child: Column(
               crossAxisAlignment: .start,
-              spacing: 24,
+              spacing: ThemeConstants.spaceXXL,
               children: [
-                _HeroCard(bonus: bonus, currency: currency),
-                _ReferralCodeCard(
-                  referralCode: referralCode,
-                  onCopy: () => _copyCode(context, referralCode),
-                  onShare: () => _shareCode(context, referralCode),
+                _staggered(0, total, _HeroCard(bonus: bonus, currency: currency)),
+                _staggered(
+                  1,
+                  total,
+                  _ReferralCodeCard(
+                    referralCode: referralCode,
+                    onCopy: () => _copyCode(context, referralCode),
+                    onShare: () => _shareCode(context, referralCode),
+                  ),
                 ),
-                _RewardsBreakdownCard(
-                  currency: currency,
-                  minOrderAmount: data?.referralMinOrderAmount?.toString(),
-                  youEarn: youEarnValue > 0 ? youEarnValue.toString() : null,
-                  friendEarns: friendEarnsValue > 0
-                      ? friendEarnsValue.toString()
-                      : null,
+                _staggered(
+                  2,
+                  total,
+                  _RewardsBreakdownCard(
+                    currency: currency,
+                    minOrderAmount: data?.referralMinOrderAmount?.toString(),
+                    youEarn: youEarnValue > 0 ? youEarnValue.toString() : null,
+                    friendEarns: friendEarnsValue > 0
+                        ? friendEarnsValue.toString()
+                        : null,
+                  ),
                 ),
-                _HowItWorksCard(
-                  youEarns: youEarnValue > 0,
-                  friendEarns: friendEarnsValue > 0,
+                _staggered(
+                  3,
+                  total,
+                  _HowItWorksCard(
+                    youEarns: youEarnValue > 0,
+                    friendEarns: friendEarnsValue > 0,
+                  ),
                 ),
               ],
             ),
@@ -126,10 +185,30 @@ class _ReferEarnViewState extends State<_ReferEarnView> {
 }
 
 // ── Hero card ─────────────────────────────────────────────────────────────────
-class _HeroCard extends StatelessWidget {
+class _HeroCard extends StatefulWidget {
   final String bonus;
   final String currency;
   const _HeroCard({required this.bonus, required this.currency});
+
+  @override
+  State<_HeroCard> createState() => _HeroCardState();
+}
+
+class _HeroCardState extends State<_HeroCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat(reverse: true);
+  late final Animation<double> _pulse = Tween(begin: 0.94, end: 1.08).animate(
+    CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+  );
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +219,7 @@ class _HeroCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: ThemeConstants.paddingXL,
-        vertical: 28,
+        vertical: ThemeConstants.paddingXXL,
       ),
       decoration: AppDecorations.box(
         gradient: LinearGradient(
@@ -152,18 +231,23 @@ class _HeroCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: AppDecorations.box(
-              color: onPrimary.withValues(alpha: 0.2),
-              shape: .circle,
-            ),
-            padding: EdgeInsetsDirectional.all(10.0),
-            child: AppSvgIcon(
-              AssetsConstants.giftIcon,
-              size: 24,
-              color: onPrimary,
+          ScaleTransition(
+            scale: _pulse,
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: AppDecorations.box(
+                color: onPrimary.withValues(alpha: 0.2),
+                shape: .circle,
+              ),
+              padding: const EdgeInsetsDirectional.all(
+                ThemeConstants.paddingM,
+              ),
+              child: AppSvgIcon(
+                AssetsConstants.giftIcon,
+                size: ThemeConstants.iconL,
+                color: onPrimary,
+              ),
             ),
           ),
           AppSpacing.h14,
@@ -177,7 +261,7 @@ class _HeroCard extends StatelessWidget {
           ),
           AppSpacing.h6,
           AppText(
-            '${context.translate(LanguageLabelKeys.shareCodeEarnBonus)} $currency$bonus\n${context.translate(LanguageLabelKeys.forEverySuccessfulReferral)}',
+            '${context.translate(LanguageLabelKeys.shareCodeEarnBonus)} ${widget.currency}${widget.bonus}\n${context.translate(LanguageLabelKeys.forEverySuccessfulReferral)}',
             textAlign: .center,
             style: context.tt.bodySmall?.copyWith(
               color: onPrimary.withValues(alpha: 0.88),
@@ -232,7 +316,7 @@ class _RewardsBreakdownCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: .start,
-        spacing: 12,
+        spacing: ThemeConstants.spaceM,
         children: [
           AppText(
             context.translate(LanguageLabelKeys.rewardDetails),
@@ -247,7 +331,7 @@ class _RewardsBreakdownCard extends StatelessWidget {
               final isLast = i == tiles.length - 1;
               return Expanded(
                 child: Padding(
-                  padding: EdgeInsetsDirectional.only(end: isLast ? 0 : 10),
+                  padding: EdgeInsetsDirectional.only(end: isLast ? 0 : ThemeConstants.paddingS),
                   child: _StatTile(label: label, value: value),
                 ),
               );
@@ -278,7 +362,7 @@ class _StatTile extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: .min,
-        spacing: 4,
+        spacing: ThemeConstants.spaceXS,
         children: [
           AppText(
             value,
@@ -344,7 +428,7 @@ class _ReferralCodeCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsetsDirectional.symmetric(
               horizontal: ThemeConstants.paddingL,
-              vertical: 14,
+              vertical: ThemeConstants.paddingM,
             ),
             decoration: AppDecorations.box(
               color: primary.withValues(alpha: 0.06),
@@ -364,7 +448,7 @@ class _ReferralCodeCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                GestureDetector(
+                _BouncyTap(
                   onTap: onCopy,
                   child: Container(
                     padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
@@ -374,7 +458,7 @@ class _ReferralCodeCard extends StatelessWidget {
                     ),
                     child: AppSvgIcon(
                       AssetsConstants.copyIcon,
-                      size: 18,
+                      size: ThemeConstants.iconS,
                       color: primary,
                     ),
                   ),
@@ -383,14 +467,16 @@ class _ReferralCodeCard extends StatelessWidget {
             ),
           ),
           AppSpacing.h14,
-          AppButton(
-            label: context.translate(LanguageLabelKeys.shareCode),
-            onPressed: onShare,
-            height: 46,
-            prefixIcon: AppSvgIcon(
-              AssetsConstants.shareIcon,
-              size: 24,
-              color: context.cs.onPrimary,
+          _BouncyTap(
+            child: AppButton(
+              label: context.translate(LanguageLabelKeys.shareCode),
+              onPressed: onShare,
+              height: 46,
+              prefixIcon: AppSvgIcon(
+                AssetsConstants.shareIcon,
+                size: ThemeConstants.iconL,
+                color: context.cs.onPrimary,
+              ),
             ),
           ),
         ],
@@ -473,7 +559,7 @@ class _HowItWorksCard extends StatelessWidget {
             return IntrinsicHeight(
               child: Row(
                 crossAxisAlignment: .start,
-                spacing: 14,
+                spacing: ThemeConstants.spaceL,
                 children: [
                   Column(
                     children: [
@@ -486,7 +572,7 @@ class _HowItWorksCard extends StatelessWidget {
                         ),
                         child: AppSvgIcon(
                           icon,
-                          size: 24,
+                          size: ThemeConstants.iconL,
                           color: primary,
                           fit: BoxFit.scaleDown,
                         ),
@@ -506,12 +592,12 @@ class _HowItWorksCard extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: EdgeInsetsDirectional.only(
-                        top: 6,
+                        top: ThemeConstants.paddingXS,
                         bottom: isLast ? 0 : ThemeConstants.paddingXL,
                       ),
                       child: Column(
                         crossAxisAlignment: .start,
-                        spacing: 2,
+                        spacing: ThemeConstants. spaceXXS,
                         children: [
                           AppText(
                             title,
@@ -537,6 +623,48 @@ class _HowItWorksCard extends StatelessWidget {
           }),
         ],
       ),
+    );
+  }
+}
+
+// ── Bouncy tap feedback ──────────────────────────────────────────────────────
+class _BouncyTap extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _BouncyTap({required this.child, this.onTap});
+
+  @override
+  State<_BouncyTap> createState() => _BouncyTapState();
+}
+
+class _BouncyTapState extends State<_BouncyTap>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 120),
+    lowerBound: 0.0,
+    upperBound: 0.15,
+  );
+  late final Animation<double> _scale = Tween(
+    begin: 1.0,
+    end: 0.88,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) => _controller.reverse(),
+      onTapCancel: () => _controller.reverse(),
+      onTap: widget.onTap,
+      child: ScaleTransition(scale: _scale, child: widget.child),
     );
   }
 }

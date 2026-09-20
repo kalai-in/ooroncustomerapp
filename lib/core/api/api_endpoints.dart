@@ -21,6 +21,7 @@ class ApiEndpoints {
   static const String settings = "settings";
   static const String zone = "zone";
   static const String zones = "zones";
+  static const String regions = "regions";
   static const String countries = "countries";
   static const String systemLanguages = "system_languages";
 

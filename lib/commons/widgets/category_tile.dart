@@ -1,6 +1,7 @@
 import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/commons/widgets/shimmer_builder.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,7 @@ class CategoryTile extends StatelessWidget {
       return GestureDetector(
         onTap: onTap,
         child: Column(
-          spacing: 4,
+          spacing: ThemeConstants.spaceXS,
           children: [
             Expanded(
               flex: isTablet ? 5 : 6,
@@ -113,7 +114,7 @@ class CategoryTile extends StatelessWidget {
         mainAxisSize: .min,
         mainAxisAlignment: .start,
         crossAxisAlignment: .center,
-        spacing: 4,
+        spacing: ThemeConstants.spaceXS,
         children: [
           imageWidget,
           SizedBox(
@@ -143,7 +144,7 @@ class CategoryTileShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerBuilder(
       builder: (context, color) => Column(
-        spacing: 4,
+        spacing: ThemeConstants.spaceXS,
         children: [
           Expanded(
             flex: 6,

@@ -60,6 +60,11 @@ class _ProductScreenState extends State<ProductScreen> {
   );
   bool _isGrid = true;
 
+  // Kept so the filter/sort/toggle bar stays visible while a grid<->list
+  // switch (or sort/filter change) is re-fetching — otherwise the whole
+  // row would vanish until the new page loads.
+  _ProductLoaded? _lastLoaded;
+
   bool _isTablet(BuildContext context) =>
       MediaQuery.of(context).size.shortestSide >= 600;
 
@@ -68,6 +73,16 @@ class _ProductScreenState extends State<ProductScreen> {
   bool get _isStatic => widget.products != null;
 
   FilterCubit? _filterCubit;
+
+  void _onToggleGrid(bool val) {
+    setState(() => _isGrid = val);
+    if (!_isStatic) {
+      context.read<ProductCubit>().setGridView(val);
+      if (_pager.controller.hasClients) {
+        _pager.controller.jumpTo(0);
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -105,21 +120,13 @@ class _ProductScreenState extends State<ProductScreen> {
       backgroundColor: bg,
       appBar: CustomAppBar(
         title: widget.title,
-        actions: [
-          GridListToggle(
-            isGrid: _isGrid,
-            onToggle: (val) {
-              setState(() => _isGrid = val);
-              if (!_isStatic) {
-                context.read<ProductCubit>().setGridView(val);
-                if (_pager.controller.hasClients) {
-                  _pager.controller.jumpTo(0);
-                }
-              }
-            },
-          ),
-          AppSpacing.w12,
-        ],
+        scrollController: _pager.controller,
+        actions: _isStatic
+            ? [
+                GridListToggle(isGrid: _isGrid, onToggle: _onToggleGrid),
+                AppSpacing.w12,
+              ]
+            : null,
       ),
       body: Stack(
         children: [
@@ -162,17 +169,33 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Widget _buildLiveGrid() {
-    return BlocBuilder<ProductCubit, _ProductState>(
+    return BlocConsumer<ProductCubit, _ProductState>(
+      listener: (context, state) {
+        if (state is _ProductLoaded) _lastLoaded = state;
+      },
       builder: (context, state) {
         if (state is _ProductLoading || state is _ProductInitial) {
-          return _isGrid
+          final skeleton = _isGrid
               ? ProductGridSkeleton(
                   crossAxisCount: _crossAxisCount(context),
                   edgePad: 32,
-                  spacing: 10 * (_isTablet(context) ? 1.75 : 1.0),
+                  spacing:
+                      ThemeConstants.spaceM * (_isTablet(context) ? 1.75 : 1.0),
                   mainAxisSpacing: 16 * (_isTablet(context) ? 1.75 : 1.0),
                 )
               : const ProductListSkeleton();
+          final lastLoaded = _lastLoaded;
+          if (lastLoaded == null) return skeleton;
+          return Column(
+            children: [
+              SubCategoryFilterBar(
+                state: lastLoaded,
+                isGrid: _isGrid,
+                onToggleGrid: _onToggleGrid,
+              ),
+              Expanded(child: skeleton),
+            ],
+          );
         }
         if (state is _ProductError) {
           return EmptyStateWidget(
@@ -191,7 +214,11 @@ class _ProductScreenState extends State<ProductScreen> {
         if (state is _ProductLoaded) {
           return Column(
             children: [
-              SubCategoryFilterBar(state: state),
+              SubCategoryFilterBar(
+                state: state,
+                isGrid: _isGrid,
+                onToggleGrid: _onToggleGrid,
+              ),
               Expanded(
                 child: state.data.isEmpty
                     ? EmptyStateWidget(
@@ -203,21 +230,23 @@ class _ProductScreenState extends State<ProductScreen> {
                           LanguageLabelKeys.noProductsFoundSubtitle,
                         ),
                       )
-                    : ProductListingView(
-                        products: state.data,
-                        isGrid: _isGrid,
-                        controller: _pager.controller,
-                        isFetchingMore: state.isFetchingMore,
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                          ThemeConstants.paddingL,
-                          ThemeConstants.paddingL,
-                          ThemeConstants.paddingL,
-                          ThemeConstants.paddingL +
-                              (context.select(
-                                    (CartCubit c) => c.state.totalItems > 0,
-                                  )
-                                  ? FloatingCartBar.barHeight
-                                  : 0),
+                    : _pager.attach(
+                        ProductListingView(
+                          products: state.data,
+                          isGrid: _isGrid,
+                          controller: _pager.controller,
+                          isFetchingMore: state.isFetchingMore,
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                            ThemeConstants.paddingL,
+                            ThemeConstants.paddingL,
+                            ThemeConstants.paddingL,
+                            ThemeConstants.paddingL +
+                                (context.select(
+                                      (CartCubit c) => c.state.totalItems > 0,
+                                    )
+                                    ? FloatingCartBar.barHeight
+                                    : 0),
+                          ),
                         ),
                       ),
               ),

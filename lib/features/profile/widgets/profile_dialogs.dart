@@ -12,6 +12,7 @@ import 'package:customer/core/routes/route_names.dart';
 import 'package:customer/features/auth/cubits/change_password_cubit.dart';
 import 'package:customer/features/auth/cubits/delete_account_cubit.dart';
 import 'package:customer/features/auth/cubits/logout_cubit.dart';
+import 'package:customer/features/auth/repositories/auth_repository.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/extensions/size_extensions.dart';
@@ -26,13 +27,13 @@ import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
-void showChangePasswordSheet(BuildContext context) {
+void showChangePasswordSheet(BuildContext context, {AuthRepository? repository}) {
   showAppBottomSheet(
     context,
     showDragHandle: false,
     padding: null,
     builder: (sheetContext) => BlocProvider(
-      create: (_) => ChangePasswordCubit(),
+      create: (_) => ChangePasswordCubit(repository: repository),
       child: _ChangePasswordSheetBody(parentContext: context),
     ),
   );
@@ -166,7 +167,7 @@ class _ChangePasswordSheetBodyState extends State<_ChangePasswordSheetBody> {
                           _obscureOld
                               ? AssetsConstants.passwordVisibleIcon
                               : AssetsConstants.passwordHideIcon,
-                          size: 20,
+                          size: ThemeConstants.iconM,
                           color: context.cs.onSurfaceVariant,
                         ),
                         onPressed: () =>
@@ -194,7 +195,7 @@ class _ChangePasswordSheetBodyState extends State<_ChangePasswordSheetBody> {
                           _obscurePassword
                               ? AssetsConstants.passwordVisibleIcon
                               : AssetsConstants.passwordHideIcon,
-                          size: 20,
+                          size: ThemeConstants.iconM,
                           color: context.cs.onSurfaceVariant,
                         ),
                         onPressed: () => setState(
@@ -233,7 +234,7 @@ class _ChangePasswordSheetBodyState extends State<_ChangePasswordSheetBody> {
                           _obscureConfirm
                               ? AssetsConstants.passwordVisibleIcon
                               : AssetsConstants.passwordHideIcon,
-                          size: 20,
+                          size: ThemeConstants.iconM,
                           color: context.cs.onSurfaceVariant,
                         ),
                         onPressed: () =>
@@ -263,12 +264,12 @@ class _ChangePasswordSheetBodyState extends State<_ChangePasswordSheetBody> {
   }
 }
 
-void showLogoutDialog(BuildContext context) {
+void showLogoutDialog(BuildContext context, {AuthRepository? repository}) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => BlocProvider(
-      create: (_) => LogoutCubit(),
+      create: (_) => LogoutCubit(repository: repository),
       child: BlocConsumer<LogoutCubit, LogoutState>(
         listener: (ctx, state) {
           if (state is LogoutLoaded) {
@@ -302,12 +303,12 @@ void showLogoutDialog(BuildContext context) {
   );
 }
 
-void showDeleteAccountDialog(BuildContext context) {
+void showDeleteAccountDialog(BuildContext context, {AuthRepository? repository}) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => BlocProvider(
-      create: (_) => DeleteAccountCubit(),
+      create: (_) => DeleteAccountCubit(repository: repository),
       child: BlocConsumer<DeleteAccountCubit, DeleteAccountState>(
         listener: (ctx, state) {
           if (state is DeleteAccountLoaded) {

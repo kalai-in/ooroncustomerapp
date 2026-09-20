@@ -15,7 +15,7 @@ class NotificationListSkeletonLoader extends StatelessWidget {
 
   Widget _card(BuildContext context, Color color) {
     return Container(
-      padding: const EdgeInsetsDirectional.all(14),
+      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
       decoration: AppDecorations.shadowedCard(
         color: context.cs.surface,
         shadowColor: context.theme.shadowColor.withValues(alpha: 0.06),
@@ -25,7 +25,7 @@ class NotificationListSkeletonLoader extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: .start,
-        spacing: 12,
+        spacing: ThemeConstants.spaceM,
         children: [
           Expanded(
             child: Column(

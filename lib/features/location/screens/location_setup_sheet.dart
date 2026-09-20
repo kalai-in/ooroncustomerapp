@@ -96,7 +96,7 @@ class _LocationSetupSheet extends StatelessWidget {
               padding: EdgeInsetsDirectional.all(ThemeConstants.paddingM),
               child: AppSvgIcon(
                 AssetsConstants.addressIcon,
-                size: 24,
+                size: ThemeConstants.iconL,
                 color: context.cs.primary,
               ),
             ),
@@ -130,7 +130,7 @@ class _LocationSetupSheet extends StatelessWidget {
               builder: (context, state) {
                 final isDetecting = state is UserLocationDetecting;
                 return Column(
-                  spacing: 12,
+                  spacing: ThemeConstants.spaceM,
                   children: [
                     // Use current location
                     AppButton(
@@ -148,7 +148,7 @@ class _LocationSetupSheet extends StatelessWidget {
                           .detectCurrentLocation(),
                       prefixIcon: AppSvgIcon(
                         AssetsConstants.enableLocationIcon,
-                        size: 20,
+                        size: ThemeConstants.iconM,
                         color: context.cs.onPrimary,
                       ),
                     ),
@@ -171,7 +171,7 @@ class _LocationSetupSheet extends StatelessWidget {
                               },
                         icon: AppSvgIcon(
                           AssetsConstants.searchIcon,
-                          size: 18,
+                          size: ThemeConstants.iconS,
                           color: context.cs.onSurfaceVariant,
                           fit: BoxFit.scaleDown,
                         ),

@@ -59,7 +59,10 @@ class _FaqScreenState extends State<FaqScreen> {
       builder: (context, connectivityState) {
         return AppScaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: CustomAppBar(title: context.translate(LanguageLabelKeys.faq)),
+          appBar: CustomAppBar(
+            title: context.translate(LanguageLabelKeys.faq),
+            scrollController: _pager.controller,
+          ),
           // Offline replaces the body only, so the app bar's back button
           // keeps working.
           body: connectivityState is ConnectivityDisconnected
@@ -103,20 +106,22 @@ class _FaqScreenState extends State<FaqScreen> {
       );
     }
 
-    return ListView.builder(
-      controller: _pager.controller,
-      physics: AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
-      itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == state.data.length) {
-          return PaginatedListFooter(
-            isLoadingMore: state.isFetchingMore,
-            hasMore: state.hasMore,
-          );
-        }
-        return FaqTile(faq: state.data[index]);
-      },
+    return _pager.attach(
+      ListView.builder(
+        controller: _pager.controller,
+        physics: AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == state.data.length) {
+            return PaginatedListFooter(
+              isLoadingMore: state.isFetchingMore,
+              hasMore: state.hasMore,
+            );
+          }
+          return FaqTile(faq: state.data[index]);
+        },
+      ),
     );
   }
 }

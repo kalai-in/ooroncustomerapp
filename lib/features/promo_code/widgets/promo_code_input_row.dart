@@ -1,5 +1,6 @@
 import 'package:customer/commons/widgets/app_button.dart';
 import 'package:customer/commons/widgets/app_text_field.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/features/promo_code/cubit/promo_code_validate_cubit.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
@@ -24,7 +25,7 @@ class PromoCodeInputRow extends StatelessWidget {
             validateState is PromoCodeValidateLoading &&
             validateState.promoCode == controller.text.trim();
         return Row(
-          spacing: 10,
+          spacing: ThemeConstants.spaceM,
           children: [
             Expanded(
               child: AppTextField(

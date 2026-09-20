@@ -18,7 +18,7 @@ class PaginatedListFooter extends StatelessWidget {
     if (isLoadingMore) {
       return const Padding(
         padding: EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingL),
-        child: Center(child: LoadingWidget(size: 24)),
+        child: Center(child: LoadingWidget(size: ThemeConstants.loaderSize)),
       );
     }
     return const SizedBox.shrink();

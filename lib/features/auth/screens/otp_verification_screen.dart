@@ -17,6 +17,7 @@ import 'package:customer/features/auth/widgets/auth_otp_fields.dart';
 import 'package:customer/features/auth/widgets/auth_resend_section.dart';
 import 'package:customer/features/cart/cubit/guest_cart_sync_helper.dart';
 import 'package:customer/commons/cubit/settings_cubit.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'dart:async';
@@ -56,6 +57,7 @@ class OtpVerificationScreen extends StatefulWidget {
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final _otpController = TextEditingController();
+  final _scrollController = ScrollController();
   Duration _resendTimer = const Duration(
     seconds: AppConfig.otpResendTimerSeconds,
   );
@@ -70,6 +72,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   void dispose() {
     _otpController.dispose();
+    _scrollController.dispose();
     _timer?.cancel();
     super.dispose();
   }
@@ -165,6 +168,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       appBar: CustomAppBar(
         title: context.translate(LanguageLabelKeys.verifyOtp),
         showBackButton: true,
+        scrollController: _scrollController,
       ),
       body: MultiBlocListener(
         listeners: [
@@ -209,7 +213,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           ),
         ],
         child: SingleChildScrollView(
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: 28),
+          controller: _scrollController,
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: ThemeConstants.paddingXXL + ThemeConstants.paddingXS,
+          ),
           child: Column(
             crossAxisAlignment: .start,
             children: [

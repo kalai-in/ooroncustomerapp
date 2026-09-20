@@ -1,5 +1,4 @@
 import 'package:customer/commons/models/app_settings_model.dart';
-import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -101,22 +100,5 @@ class SettingsCubit extends Cubit<SettingsState> {
         ? (state as SettingsLoaded).settings.data
         : null;
     return parseHexColor(data?.customerDarkModeColor);
-  }
-
-  String getCurencySymbol() {
-    final settings = (state is SettingsLoaded)
-        ? (state as SettingsLoaded).settings
-        : null;
-    if (settings == null) return '';
-    // Assuming settings.data contains a map of currency codes to symbols
-    return settings.data?.currency ?? '';
-  }
-
-  int getDecimalPoint() {
-    final data = (state is SettingsLoaded)
-        ? (state as SettingsLoaded).settings.data
-        : null;
-    return int.tryParse(data?.decimalPoint ?? '') ??
-        AppConstants.defaultDecimalPoint;
   }
 }

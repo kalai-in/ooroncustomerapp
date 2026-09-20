@@ -61,7 +61,7 @@ class _TypeChips extends StatelessWidget {
     ];
 
     return Row(
-      spacing: 10,
+      spacing: ThemeConstants.spaceM,
       children: types.map((t) {
         final (value, icon, label) = t;
         final isSelected = selected == value;
@@ -71,7 +71,7 @@ class _TypeChips extends StatelessWidget {
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsetsDirectional.symmetric(
               horizontal: ThemeConstants.paddingL,
-              vertical: 10,
+              vertical: ThemeConstants.paddingS,
             ),
             decoration: AppDecorations.box(
               color: isSelected ? context.cs.primary : context.cs.surface,
@@ -84,11 +84,11 @@ class _TypeChips extends StatelessWidget {
             ),
             child: Row(
               mainAxisSize: .min,
-              spacing: 6,
+              spacing: ThemeConstants.spaceS,
               children: [
                 AppSvgIcon(
                   icon,
-                  size: 16,
+                  size: ThemeConstants.iconXS,
                   color: isSelected
                       ? context.cs.onPrimary
                       : context.cs.onSurfaceVariant,

@@ -74,7 +74,7 @@ class AttachmentPreviewBar extends StatelessWidget {
             onPressed: onRemove,
             icon: AppSvgIcon(
               AssetsConstants.closeIcon,
-              size: 20,
+              size: ThemeConstants.iconM,
               color: context.cs.onSurfaceVariant,
             ),
             padding: EdgeInsetsDirectional.zero,
@@ -113,7 +113,7 @@ class _Thumbnail extends StatelessWidget {
         color: context.cs.primary.withValues(alpha: 0.1),
         borderRadius: AppRadius.r8,
       ),
-      child: AppSvgIcon(icon, color: context.cs.primary, size: 24),
+      child: AppSvgIcon(icon, color: context.cs.primary, size: ThemeConstants.iconL,),
     );
   }
 }

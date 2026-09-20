@@ -1,5 +1,7 @@
 import 'package:customer/commons/models/additional_charges_model.dart';
+import 'package:customer/commons/models/delivery_charges_model.dart';
 import 'package:customer/commons/models/surge_charges_model.dart';
+import 'package:customer/commons/models/tax_charges_model.dart';
 import 'package:customer/features/orders/models/order_address_model.dart';
 import 'package:customer/features/orders/models/ecommerce_order_model.dart';
 import 'package:customer/utils/json_parsers.dart';
@@ -8,12 +10,24 @@ import 'package:customer/utils/json_parsers.dart';
 class LiveLocation {
   double? latitude;
   double? longitude;
+  String? distance;
+  String? distanceUnit;
+  String? timeToDeliver;
 
-  LiveLocation({this.latitude, this.longitude});
+  LiveLocation({
+    this.latitude,
+    this.longitude,
+    this.distance,
+    this.distanceUnit,
+    this.timeToDeliver,
+  });
 
   LiveLocation.fromJson(Map<String, dynamic> json) {
     latitude = double.tryParse(json['latitude']?.toString() ?? '');
     longitude = double.tryParse(json['longitude']?.toString() ?? '');
+    distance = parseString(json['distance']);
+    distanceUnit = parseString(json['distance_unit']);
+    timeToDeliver = parseString(json['time_to_deliver']);
   }
 
   bool get isValid =>
@@ -65,7 +79,7 @@ class OrderData {
   String? mobile;
   String? orderNote;
   double? total;
-  double? deliveryCharge;
+  DeliveryCharges? deliveryCharge;
   double? taxAmount;
   double? taxPercentage;
   double? walletBalance;
@@ -77,10 +91,12 @@ class OrderData {
   double? cashbackAmount;
   int? cashbackCredited;
   List<AdditionalCharges>? additionalCharges;
+  List<TaxCharges>? taxBreakdown;
   List<SurgeCharges>? surgeCharges;
   double? finalTotal;
   String? currency;
   String? currencyCode;
+  int? decimalPoint;
   String? paymentMethod;
   OrderAddressModel? address;
   List<Timeline>? timeline;
@@ -105,6 +121,9 @@ class OrderData {
   double? savedAmount;
   double? refundAmount;
   String? cancellationReason;
+  String? totalDeliverTime;
+  String? preparationTime;
+  String? timeToDeliver;
 
   OrderData({
     this.id,
@@ -129,10 +148,12 @@ class OrderData {
     this.cashbackAmount,
     this.cashbackCredited,
     this.additionalCharges,
+    this.taxBreakdown,
     this.surgeCharges,
     this.finalTotal,
     this.currency,
     this.currencyCode,
+    this.decimalPoint,
     this.paymentMethod,
     this.address,
     this.timeline,
@@ -157,6 +178,9 @@ class OrderData {
     this.savedAmount,
     this.refundAmount,
     this.cancellationReason,
+    this.totalDeliverTime,
+    this.preparationTime,
+    this.timeToDeliver,
   });
 
   OrderData.fromJson(Map<String, dynamic> json) {
@@ -175,7 +199,9 @@ class OrderData {
     mobile = parseString(json['mobile']);
     orderNote = parseString(json['order_note']);
     total = parseDouble(json['total']);
-    deliveryCharge = parseDouble(json['delivery_charge']);
+    deliveryCharge = json['delivery_charges'] is Map<String, dynamic>
+        ? DeliveryCharges.fromJson(json['delivery_charges'] as Map<String, dynamic>)
+        : null;
     taxAmount = parseDouble(json['tax_amount']);
     taxPercentage = parseDouble(json['tax_percentage']);
     walletBalance = parseDouble(json['wallet_balance']);
@@ -192,6 +218,12 @@ class OrderData {
           .map((v) => AdditionalCharges.fromJson(v as Map<String, dynamic>))
           .toList();
     }
+    final rawTaxBreakdown = json['tax_breakdown'];
+    if (rawTaxBreakdown is List) {
+      taxBreakdown = rawTaxBreakdown
+          .map((v) => TaxCharges.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
     final rawSurgeCharges = json['surge_charges'];
     if (rawSurgeCharges is List) {
       surgeCharges = rawSurgeCharges
@@ -201,6 +233,7 @@ class OrderData {
     finalTotal = parseDouble(json['final_total']);
     currency = parseString(json['currency']);
     currencyCode = parseString(json['currency_code']);
+    decimalPoint = parseInt(json['decimal_point']);
     paymentMethod = parseString(json['payment_method']);
     address = json['address'] is Map<String, dynamic>
         ? OrderAddressModel.fromJson(json['address'] as Map<String, dynamic>)
@@ -243,6 +276,9 @@ class OrderData {
           ?.map((i) => i.cancellationReason)
           .firstWhere((r) => r != null && r.isNotEmpty, orElse: () => null);
     }
+    totalDeliverTime = parseString(json['total_deliver_time']);
+    preparationTime = parseString(json['preparation_time']);
+    timeToDeliver = parseString(json['time_to_deliver']);
   }
 
   Map<String, dynamic> toJson() {
@@ -259,7 +295,7 @@ class OrderData {
     data['mobile'] = mobile;
     data['order_note'] = orderNote;
     data['total'] = total;
-    data['delivery_charge'] = deliveryCharge;
+    data['delivery_charges'] = deliveryCharge?.toJson();
     data['tax_amount'] = taxAmount;
     data['tax_percentage'] = taxPercentage;
     data['wallet_balance'] = walletBalance;
@@ -275,12 +311,16 @@ class OrderData {
           .map((v) => v.toJson())
           .toList();
     }
+    if (taxBreakdown != null) {
+      data['tax_breakdown'] = taxBreakdown!.map((v) => v.toJson()).toList();
+    }
     if (surgeCharges != null) {
       data['surge_charges'] = surgeCharges!.map((v) => v.toJson()).toList();
     }
     data['final_total'] = finalTotal;
     data['currency'] = currency;
     data['currency_code'] = currencyCode;
+    data['decimal_point'] = decimalPoint;
     data['payment_method'] = paymentMethod;
     if (address != null) data['address'] = address!.toJson();
     if (timeline != null) {
@@ -309,6 +349,9 @@ class OrderData {
     data['saved_amount'] = savedAmount;
     data['refund_amount'] = refundAmount;
     data['cancellation_reason'] = cancellationReason;
+    data['total_deliver_time'] = totalDeliverTime;
+    data['preparation_time'] = preparationTime;
+    data['time_to_deliver'] = timeToDeliver;
     return data;
   }
 }

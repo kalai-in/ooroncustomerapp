@@ -77,6 +77,7 @@ class ProductDetailDataModel {
   int? totalAllowedQuantity;
   String? currency;
   int? decimalPoint;
+  String? estimatedDeliveryDate;
 
   ProductDetailDataModel({
     this.id,
@@ -123,6 +124,7 @@ class ProductDetailDataModel {
     this.totalAllowedQuantity,
     this.currency,
     this.decimalPoint,
+    this.estimatedDeliveryDate,
   });
 
   ProductDetailDataModel.fromJson(Map<String, dynamic> json) {
@@ -187,6 +189,7 @@ class ProductDetailDataModel {
     totalAllowedQuantity = parseInt(json['total_allowed_quantity']);
     currency = parseString(json['currency']) ?? "";
     decimalPoint = parseInt(json['decimal_point']) ?? 0;
+    estimatedDeliveryDate = parseString(json['estimated_delivery_date']);
   }
 
   Map<String, dynamic> toJson() {
@@ -243,6 +246,7 @@ class ProductDetailDataModel {
     data['total_allowed_quantity'] = totalAllowedQuantity;
     data['currency'] = currency;
     data['decimal_point'] = decimalPoint;
+    data['estimated_delivery_date'] = estimatedDeliveryDate;
     return data;
   }
 }

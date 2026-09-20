@@ -113,7 +113,7 @@ class _LanguageSheetState extends State<_LanguageSheet> {
                         vertical: ThemeConstants.paddingL,
                       ),
                       child: Column(
-                        spacing: 12,
+                        spacing: ThemeConstants.spaceM,
                         children: [
                           AppText(
                             state.message,
@@ -126,7 +126,7 @@ class _LanguageSheetState extends State<_LanguageSheet> {
                                 context.read<LanguageCubit>().loadLanguages(),
                             icon: AppSvgIcon(
                               AssetsConstants.refreshIcon,
-                              size: 18,
+                              size: ThemeConstants.iconS,
                               color: context.cs.primary,
                             ),
                             label: AppText(
@@ -188,7 +188,7 @@ class _LanguageSheetState extends State<_LanguageSheet> {
                                       ),
                                       trailing:
                                           isSelecting && _pendingId == lang.id
-                                          ? LoadingWidget(size: 18)
+                                          ? LoadingWidget(size: ThemeConstants.loaderSize)
                                           : null,
                                       onTap: () {
                                         setState(() => _pendingId = lang.id);

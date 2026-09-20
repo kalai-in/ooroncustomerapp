@@ -1,5 +1,6 @@
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/theme/app_radius.dart';
@@ -25,19 +26,19 @@ class TransactionItem extends StatelessWidget {
     final amountColor = statusMeta.$1;
 
     return Container(
-      margin: const EdgeInsetsDirectional.only(bottom: 10),
+      margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
       decoration: AppDecorations.shadowedCard(
         color: Theme.of(context).cardColor,
         shadowColor: context.theme.shadowColor.withValues(alpha: 0.08),
       ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(14),
+        padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
         child: Column(
           crossAxisAlignment: .start,
           children: [
             Row(
               crossAxisAlignment: .start,
-              spacing: 12,
+              spacing: ThemeConstants.spaceM,
               children: [
                 Container(
                   width: 40,
@@ -47,12 +48,12 @@ class TransactionItem extends StatelessWidget {
                     borderRadius: AppRadius.r8,
                   ),
                   alignment: Alignment.center,
-                  child: AppSvgIcon(paymentMeta.$2, size: 20),
+                  child: AppSvgIcon(paymentMeta.$2, size: ThemeConstants.iconM),
                 ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: .start,
-                    spacing: 2,
+                    spacing: ThemeConstants. spaceXXS,
                     children: [
                       AppText(
                         paymentMeta.$1,

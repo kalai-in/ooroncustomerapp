@@ -159,7 +159,7 @@ class HomeBrandBlock extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: 10,
+              horizontal: ThemeConstants.paddingS,
               vertical: ThemeConstants.paddingS,
             ),
             child: AppText(

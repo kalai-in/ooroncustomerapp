@@ -6,6 +6,7 @@ import 'package:customer/core/configs/app_config.dart';
 import 'package:customer/features/address/models/address_model.dart';
 import 'package:customer/commons/models/countries_model.dart';
 import 'package:customer/commons/models/zones_model.dart';
+import 'package:customer/commons/models/regions_model.dart';
 
 class AddressRepository {
   final ApiClient _apiClient;
@@ -181,6 +182,21 @@ class AddressRepository {
         queryParameters: {ApiParameters.countryId: countryId},
       );
       return Zones.fromJson(response as Map<String, dynamic>);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  /// Fetches the regions (states/provinces) belonging to [countryId].
+  Future<Regions> getRegions({required String countryId}) async {
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.regions,
+        queryParameters: {ApiParameters.countryId: countryId},
+      );
+      return Regions.fromJson(response as Map<String, dynamic>);
     } on ApiException {
       rethrow;
     } catch (e) {

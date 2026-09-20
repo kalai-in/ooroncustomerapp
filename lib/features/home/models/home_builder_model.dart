@@ -1,6 +1,49 @@
 import 'package:customer/features/products/models/product_model.dart';
 import 'package:customer/utils/json_parsers.dart';
 
+/// A value that may differ per device — API sends either a plain scalar
+/// (applies to every device) or an object with app/tablet/web keys.
+class ResponsiveValue<T> {
+  T? app;
+  T? tablet;
+  T? web;
+
+  ResponsiveValue({this.app, this.tablet, this.web});
+
+  T? resolve(bool isTablet) =>
+      isTablet ? (tablet ?? app ?? web) : (app ?? tablet ?? web);
+
+  Map<String, dynamic> toJson() => {'app': app, 'tablet': tablet, 'web': web};
+}
+
+ResponsiveValue<int>? _parseResponsiveInt(dynamic raw) {
+  if (raw == null) return null;
+  if (raw is Map) {
+    return ResponsiveValue<int>(
+      app: parseInt(raw['app']),
+      tablet: parseInt(raw['tablet']),
+      web: parseInt(raw['web']),
+    );
+  }
+  final v = parseInt(raw);
+  return v == null ? null : ResponsiveValue<int>(app: v, tablet: v, web: v);
+}
+
+ResponsiveValue<String>? _parseResponsiveString(dynamic raw) {
+  if (raw == null) return null;
+  if (raw is Map) {
+    return ResponsiveValue<String>(
+      app: parseString(raw['app']),
+      tablet: parseString(raw['tablet']),
+      web: parseString(raw['web']),
+    );
+  }
+  final v = parseString(raw);
+  return v == null || v.isEmpty
+      ? null
+      : ResponsiveValue<String>(app: v, tablet: v, web: v);
+}
+
 class HomeBuilderModel {
   int? status;
   String? message;
@@ -41,6 +84,7 @@ class HomeBuilderDataModel {
   String? ecommerceButtonLabel;
   List<String>? searchSuggestions;
   int? storeClosed;
+  int? totalSections;
 
   HomeBuilderDataModel({
     this.layout,
@@ -56,6 +100,7 @@ class HomeBuilderDataModel {
     this.ecommerceButtonLabel,
     this.searchSuggestions,
     this.storeClosed,
+    this.totalSections,
   });
 
   HomeBuilderDataModel.fromJson(Map<String, dynamic> json) {
@@ -81,6 +126,7 @@ class HomeBuilderDataModel {
         ? (json['search_suggestions'] as List).map((e) => e.toString()).toList()
         : <String>[];
     storeClosed = parseInt(json['store_closed']);
+    totalSections = parseInt(json['total_sections']);
   }
 
   Map<String, dynamic> toJson() {
@@ -102,6 +148,7 @@ class HomeBuilderDataModel {
     data['ecommerce_button_label'] = ecommerceButtonLabel;
     data['search_suggestions'] = searchSuggestions;
     data['store_closed'] = storeClosed;
+    data['total_sections'] = totalSections;
     return data;
   }
 }
@@ -113,7 +160,7 @@ class Layout {
   String? backgroundImageUrl;
   String? textColor;
   String? headerIconUrl;
-  String? imageAspect;
+  ResponsiveValue<String>? imageAspect;
 
   Layout({
     this.sections,
@@ -137,7 +184,7 @@ class Layout {
     backgroundImageUrl = parseString(json['background_image_url']);
     textColor = parseString(json['text_color']);
     headerIconUrl = parseString(json['header_icon_url']);
-    imageAspect = parseString(json['image_aspect']) ?? "";
+    imageAspect = _parseResponsiveString(json['image_aspect']);
   }
 
   Map<String, dynamic> toJson() {
@@ -150,6 +197,9 @@ class Layout {
     data['background_image_url'] = backgroundImageUrl;
     data['text_color'] = textColor;
     data['header_icon_url'] = headerIconUrl;
+    if (imageAspect != null) {
+      data['image_aspect'] = imageAspect!.toJson();
+    }
     return data;
   }
 }
@@ -159,7 +209,7 @@ class Sections {
   String? type;
   int? marginTop;
   int? marginBottom;
-  int? borderRadius;
+  BorderRadiusCorners? borderRadiusCorners;
   List<Blocks>? blocks;
 
   Sections({
@@ -167,7 +217,7 @@ class Sections {
     this.type,
     this.marginTop,
     this.marginBottom,
-    this.borderRadius,
+    this.borderRadiusCorners,
     this.blocks,
   });
 
@@ -176,7 +226,11 @@ class Sections {
     type = parseString(json['type']);
     marginTop = parseInt(json['margin_top']);
     marginBottom = parseInt(json['margin_bottom']);
-    borderRadius = parseInt(json['border_radius']);
+    borderRadiusCorners = json['border_radius_corners'] is Map<String, dynamic>
+        ? BorderRadiusCorners.fromJson(
+            json['border_radius_corners'] as Map<String, dynamic>,
+          )
+        : null;
     final rawBlocks = json['blocks'];
     if (rawBlocks is List) {
       blocks = rawBlocks
@@ -191,10 +245,42 @@ class Sections {
     data['type'] = type;
     data['margin_top'] = marginTop;
     data['margin_bottom'] = marginBottom;
-    data['border_radius'] = borderRadius;
+    if (borderRadiusCorners != null) {
+      data['border_radius_corners'] = borderRadiusCorners!.toJson();
+    }
     if (blocks != null) {
       data['blocks'] = blocks!.map((v) => v.toJson()).toList();
     }
+    return data;
+  }
+}
+
+class BorderRadiusCorners {
+  int? topLeft;
+  int? topRight;
+  int? bottomLeft;
+  int? bottomRight;
+
+  BorderRadiusCorners({
+    this.topLeft,
+    this.topRight,
+    this.bottomLeft,
+    this.bottomRight,
+  });
+
+  BorderRadiusCorners.fromJson(Map<String, dynamic> json) {
+    topLeft = parseInt(json['top_left']);
+    topRight = parseInt(json['top_right']);
+    bottomLeft = parseInt(json['bottom_left']);
+    bottomRight = parseInt(json['bottom_right']);
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['top_left'] = topLeft;
+    data['top_right'] = topRight;
+    data['bottom_left'] = bottomLeft;
+    data['bottom_right'] = bottomRight;
     return data;
   }
 }
@@ -326,31 +412,31 @@ class Config {
   bool? autoScroll;
   bool? infiniteLoop;
   int? speedMs;
-  int? chipGap;
-  int? chipRadius;
-  int? brandGap;
+  ResponsiveValue<int>? chipGap;
+  ResponsiveValue<int>? chipRadius;
+  ResponsiveValue<int>? brandGap;
   String? variant;
   String? sectionTitle;
   String? dataSource;
   int? limit;
-  int? columns;
-  int? productGridGap;
+  ResponsiveValue<int>? columns;
+  ResponsiveValue<int>? productGridGap;
   int? productCardRadius;
   int? blockPadding;
   String? backgroundImageUrl;
   bool? showName;
-  int? gridGap;
+  ResponsiveValue<int>? gridGap;
   int? tileRadius;
   String? textAlign;
   String? textColor;
   String? backgroundColor;
   String? sectionSubtitle;
   int? imageHeight;
-  int? brandRadius;
-  int? gridRows;
+  ResponsiveValue<int>? brandRadius;
+  ResponsiveValue<int>? gridRows;
   String? gridLayoutType;
-  String? imageAspect;
-  String? bgImageAspect;
+  ResponsiveValue<String>? imageAspect;
+  ResponsiveValue<String>? bgImageAspect;
   String? itemTextColor;
 
   Config({
@@ -393,32 +479,33 @@ class Config {
     autoScroll = parseBool(json['auto_scroll']);
     infiniteLoop = parseBool(json['infinite_loop']);
     speedMs = parseInt(json['speed_ms']);
-    chipGap = parseInt(json['category_gap']) ?? parseInt(json['chip_gap']);
-    chipRadius =
-        parseInt(json['category_radius']) ?? parseInt(json['chip_radius']);
-    brandGap = parseInt(json['brand_gap']);
+    chipGap = _parseResponsiveInt(json['category_gap'] ?? json['chip_gap']);
+    chipRadius = _parseResponsiveInt(
+      json['category_radius'] ?? json['chip_radius'],
+    );
+    brandGap = _parseResponsiveInt(json['brand_gap']);
     variant = parseString(json['variant']);
     sectionTitle = parseString(json['section_title']);
     dataSource = parseString(json['data_source']);
     limit = parseInt(json['limit']);
-    columns = parseInt(json['grid_columns']) ?? parseInt(json['columns']);
-    productGridGap = parseInt(json['product_grid_gap']);
+    columns = _parseResponsiveInt(json['grid_columns'] ?? json['columns']);
+    productGridGap = _parseResponsiveInt(json['product_grid_gap']);
     productCardRadius = parseInt(json['product_card_radius']);
     blockPadding = parseInt(json['block_padding']);
     backgroundImageUrl = parseString(json['background_image_url']);
     showName = parseBool(json['show_name']);
-    gridGap = parseInt(json['grid_gap']);
+    gridGap = _parseResponsiveInt(json['grid_gap']);
     tileRadius = parseInt(json['tile_radius']);
     textAlign = parseString(json['text_align']);
     textColor = parseString(json['text_color']);
     backgroundColor = parseString(json['background_color']);
     sectionSubtitle = parseString(json['section_subtitle']);
     imageHeight = parseInt(json['image_height']);
-    brandRadius = parseInt(json['brand_radius']);
-    gridRows = parseInt(json['grid_rows']);
+    brandRadius = _parseResponsiveInt(json['brand_radius']);
+    gridRows = _parseResponsiveInt(json['grid_rows']);
     gridLayoutType = parseString(json['grid_layout_type']);
-    imageAspect = parseString(json['image_aspect']) ?? "";
-    bgImageAspect = parseString(json['bg_image_aspect']);
+    imageAspect = _parseResponsiveString(json['image_aspect']);
+    bgImageAspect = _parseResponsiveString(json['bg_image_aspect']);
     itemTextColor = parseString(json['item_text_color']) ?? "";
   }
 
@@ -429,31 +516,31 @@ class Config {
     data['auto_scroll'] = autoScroll;
     data['infinite_loop'] = infiniteLoop;
     data['speed_ms'] = speedMs;
-    data['category_gap'] = chipGap;
-    data['category_radius'] = chipRadius;
-    data['brand_gap'] = brandGap;
+    data['category_gap'] = chipGap?.toJson();
+    data['category_radius'] = chipRadius?.toJson();
+    data['brand_gap'] = brandGap?.toJson();
     data['variant'] = variant;
     data['section_title'] = sectionTitle;
     data['data_source'] = dataSource;
     data['limit'] = limit;
-    data['grid_columns'] = columns;
-    data['product_grid_gap'] = productGridGap;
+    data['grid_columns'] = columns?.toJson();
+    data['product_grid_gap'] = productGridGap?.toJson();
     data['product_card_radius'] = productCardRadius;
     data['block_padding'] = blockPadding;
     data['background_image_url'] = backgroundImageUrl;
     data['show_name'] = showName;
-    data['grid_gap'] = gridGap;
+    data['grid_gap'] = gridGap?.toJson();
     data['tile_radius'] = tileRadius;
     data['text_align'] = textAlign;
     data['text_color'] = textColor;
     data['background_color'] = backgroundColor;
     data['section_subtitle'] = sectionSubtitle;
     data['image_height'] = imageHeight;
-    data['brand_radius'] = brandRadius;
-    data['grid_rows'] = gridRows;
+    data['brand_radius'] = brandRadius?.toJson();
+    data['grid_rows'] = gridRows?.toJson();
     data['grid_layout_type'] = gridLayoutType;
-    data['image_aspect'] = imageAspect;
-    data['bg_image_aspect'] = bgImageAspect;
+    data['image_aspect'] = imageAspect?.toJson();
+    data['bg_image_aspect'] = bgImageAspect?.toJson();
     data['item_text_color'] = itemTextColor;
     return data;
   }

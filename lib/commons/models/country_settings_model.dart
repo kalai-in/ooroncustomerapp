@@ -24,6 +24,7 @@ class CountrySettingsData {
   String? timeFormat;
   String? currency;
   String? currencyCode;
+  int? decimalPoint;
   String? privacyPolicy;
   String? returnPolicy;
   String? shippingPolicy;
@@ -38,6 +39,7 @@ class CountrySettingsData {
     this.timeFormat,
     this.currency,
     this.currencyCode,
+    this.decimalPoint,
     this.privacyPolicy,
     this.returnPolicy,
     this.shippingPolicy,
@@ -53,6 +55,7 @@ class CountrySettingsData {
     timeFormat = json['time_format']?.toString();
     currency = json['currency']?.toString();
     currencyCode = json['currency_code']?.toString();
+    decimalPoint = parseInt(json['decimal_point']);
     privacyPolicy = json['privacy_policy']?.toString();
     returnPolicy = json['return_policy']?.toString();
     shippingPolicy = json['shipping_policy']?.toString();

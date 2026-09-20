@@ -124,7 +124,7 @@ class _FloatingCartBarState extends State<FloatingCartBar>
             opacity: _barVisible ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 220),
             child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, 0, ThemeConstants.paddingM, 10),
+              padding: EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, 0, ThemeConstants.paddingM, ThemeConstants.paddingS),
               child: Center(
                 child: GestureDetector(
                   onTap: widget.onViewCart,
@@ -192,7 +192,7 @@ class _FloatingCartBarState extends State<FloatingCartBar>
                                         child: Column(
                                         mainAxisAlignment: .center,
                                         crossAxisAlignment: .start,
-                                        spacing: 3,
+                                        spacing: ThemeConstants.spaceXS,
                                         children: [
                                           AppText(
                                             context.translate(
@@ -253,7 +253,7 @@ class _FloatingCartBarState extends State<FloatingCartBar>
                                         child: AppSvgIcon(
                                           AssetsConstants.arrowRightIcon,
                                           color: context.cs.onPrimary,
-                                          size: 18,
+                                          size: ThemeConstants.iconS,
                                           fit: BoxFit.scaleDown,
                                         ),
                                       ),

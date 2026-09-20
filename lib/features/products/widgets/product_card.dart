@@ -281,7 +281,7 @@ class _ProductCardState extends State<ProductCard> {
               ),
               Padding(
                 padding: isCardWrapped
-                    ? const EdgeInsetsDirectional.fromSTEB(10, ThemeConstants.paddingS, 10, 10)
+                    ? const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingS, ThemeConstants.paddingS, ThemeConstants.paddingS, ThemeConstants.paddingS)
                     : EdgeInsets.zero,
                 child: ConstrainedBox(
                   constraints: BoxConstraints(

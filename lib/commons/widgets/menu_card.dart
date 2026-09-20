@@ -13,11 +13,13 @@ class MenuItemData {
   final String label;
   final VoidCallback onTap;
   final String? trailing;
+  final bool selected;
   const MenuItemData({
     required this.iconPath,
     required this.label,
     required this.onTap,
     this.trailing,
+    this.selected = false,
   });
 }
 
@@ -64,16 +66,17 @@ class MenuCard extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: item.onTap,
+                  borderRadius: isLast ? AppRadius.bottom16 : null,
                   child: Padding(
                     padding: const EdgeInsetsDirectional.symmetric(
                       horizontal: ThemeConstants.paddingL,
-                      vertical: 13,
+                      vertical: ThemeConstants.paddingM,
                     ),
                     child: Row(
                       children: [
                         AppSvgIcon(
                           item.iconPath,
-                          size: 18,
+                          size: ThemeConstants.iconS,
                           color: context.cs.onSurfaceVariant,
                         ),
                         AppSpacing.w10,
@@ -101,7 +104,7 @@ class MenuCard extends StatelessWidget {
                           child: AppSvgIcon(
                             AssetsConstants.arrowRightIcon,
                             color: context.cs.onSurfaceVariant,
-                            size: 18,
+                            size: ThemeConstants.iconS,
                           ),
                         ),
                       ],
@@ -122,7 +125,7 @@ class MenuCard extends StatelessWidget {
               height: 1,
               thickness: 1,
               color: context.cs.outlineVariant,
-              indent: 52,
+              indent: ThemeConstants.paddingXXL * 2 + ThemeConstants.paddingXS,
             ),
             footer!,
           ],

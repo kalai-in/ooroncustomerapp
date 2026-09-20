@@ -281,7 +281,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
           ),
           child: Row(
             crossAxisAlignment: .end,
-            spacing: 8,
+            spacing: ThemeConstants.spaceS,
             children: [
               Expanded(
                 child: Container(
@@ -306,7 +306,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                               ? AssetsConstants.keyboardIcon
                               : AssetsConstants.emojiIcon,
                           color: context.cs.onSurfaceVariant,
-                          size: 22,
+                          size: ThemeConstants.iconM,
                         ),
                         padding: EdgeInsetsDirectional.zero,
                         constraints: const BoxConstraints(
@@ -332,7 +332,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                           isDense: true,
                           border: InputBorder.none,
                           contentPadding: const EdgeInsetsDirectional.symmetric(
-                            vertical: 13,
+                            vertical: ThemeConstants.paddingM,
                           ),
                         ),
                       ),
@@ -340,7 +340,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                         onPressed: _showAttachMenu,
                         icon: AppSvgIcon(
                           AssetsConstants.attachmentIcon,
-                          size: 20,
+                          size: ThemeConstants.iconM,
                           color: context.cs.onSurfaceVariant,
                         ),
                         padding: EdgeInsetsDirectional.zero,
@@ -383,7 +383,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                             ? 'send'
                             : 'mic',
                       ),
-                      size: 22,
+                      size: ThemeConstants.iconM,
                       color: context.cs.onPrimary,
                     ),
                   ),
@@ -426,7 +426,7 @@ class _AttachOption extends StatelessWidget {
             ),
             child: AppSvgIcon(
               icon,
-              size: 24,
+              size: ThemeConstants.iconL,
               color: color,
               fit: BoxFit.scaleDown,
             ),

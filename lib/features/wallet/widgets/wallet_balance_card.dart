@@ -64,17 +64,17 @@ class WalletBalanceCard extends StatelessWidget {
                 child: AppSvgIcon(
                   AssetsConstants.walletIcon,
                   color: context.cs.onPrimary,
-                  size: 24,
+                  size: ThemeConstants.iconL,
                   fit: BoxFit.scaleDown,
                 ),
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 14),
+                  padding: const EdgeInsetsDirectional.only(start: ThemeConstants.paddingM),
                   child: Column(
                     crossAxisAlignment: .start,
                     mainAxisSize: .min,
-                    spacing: 4,
+                    spacing: ThemeConstants.spaceXS,
                     children: [
                       AppText(
                         context.translate(LanguageLabelKeys.availableBalance),
@@ -97,7 +97,7 @@ class WalletBalanceCard extends StatelessWidget {
                 onTap: onAddMoney,
                 child: Container(
                   padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: 22,
+                    horizontal: ThemeConstants.paddingXL,
                     vertical: ThemeConstants.paddingM,
                   ),
                   decoration: AppDecorations.box(

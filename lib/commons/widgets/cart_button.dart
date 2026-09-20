@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:customer/commons/utils/app_log.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 import '../../commons/widgets/app_text.dart';
 
@@ -334,7 +335,7 @@ class _CartButtonState extends State<CartButton>
             Expanded(child: Center(child: _addLabelText())),
             Container(
               color: context.cs.primary,
-              padding: const EdgeInsetsDirectional.symmetric(vertical: 3),
+              padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXS),
               child: Center(
                 child: AppText(
                   '$opts ${context.translate(LanguageLabelKeys.options)}',

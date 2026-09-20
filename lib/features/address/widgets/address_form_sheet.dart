@@ -10,9 +10,16 @@ import 'package:customer/core/local_storage/auth_hive_box.dart';
 import 'package:customer/core/local_storage/settings_hive_box.dart';
 import 'package:customer/features/address/cubit/address_cubit.dart';
 import 'package:customer/commons/cubit/countries_cubit.dart';
+import 'package:customer/commons/cubit/regions_cubit.dart';
 import 'package:customer/features/address/cubit/save_address_cubit.dart';
 import 'package:customer/features/address/models/address_model.dart';
 import 'package:customer/commons/models/countries_model.dart';
+import 'package:customer/commons/models/regions_model.dart';
+import 'package:customer/commons/widgets/country_dropdown_field.dart';
+import 'package:customer/commons/widgets/region_dropdown_field.dart';
+import 'package:customer/commons/widgets/app_text_field.dart';
+import 'package:customer/core/localization/language_label_key.dart';
+import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/features/address/models/location_result.dart';
 import 'package:customer/commons/animations/slide_animation.dart';
 import 'package:customer/core/constants/theme_constants.dart';
@@ -72,8 +79,22 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
   // saved address / map geocode, so later edits don't flip their lock state.
   late final bool _cityPrefilled;
   late final bool _pincodePrefilled;
-  late final bool _statePrefilled;
-  late final bool _countryPrefilled;
+
+  // Country/state (region) dropdown selection. [_regionId] is only ever set
+  // by [_onRegionSelected] (dropdown pick) and cleared on country change, so
+  // it naturally stays null when the state was typed into the manual
+  // fallback field instead — the request only carries `region_id` when it's
+  // non-null.
+  final RegionsCubit _regionsCubit = RegionsCubit();
+  CountriesData? _selectedCountry;
+  RegionsData? _selectedRegion;
+  int? _regionId;
+  bool _regionAutoMatchAttempted = false;
+
+  // The country/state names to auto-match against the country/regions apis
+  // once they load — captured once from the saved address or map geocode.
+  late final String _initialCountryTarget;
+  late final String _initialStateTarget;
 
   @override
   void initState() {
@@ -116,8 +137,8 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
     );
     _cityPrefilled = _cityCtrl.text.trim().isNotEmpty;
     _pincodePrefilled = _pincodeCtrl.text.trim().isNotEmpty;
-    _statePrefilled = _stateCtrl.text.trim().isNotEmpty;
-    _countryPrefilled = _countryCtrl.text.trim().isNotEmpty;
+    _initialCountryTarget = _countryCtrl.text.trim();
+    _initialStateTarget = _stateCtrl.text.trim();
     _type = a?.type ?? 'home';
     _isDefault = a?.isDefault == '1';
     const defaultDialCode = '';
@@ -131,6 +152,7 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
     final countriesState = context.read<CountriesCubit>().state;
     if (countriesState is CountriesLoaded) {
       _prefillCountries(countriesState.countries, useSetState: false);
+      _prefillAddressCountry(countriesState.countries, useSetState: false);
     }
   }
 
@@ -146,6 +168,7 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
     _cityCtrl.dispose();
     _stateCtrl.dispose();
     _countryCtrl.dispose();
+    _regionsCubit.close();
     super.dispose();
   }
 
@@ -187,6 +210,81 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
     }
   }
 
+  /// Auto-selects the address's country in the dropdown by matching
+  /// [_initialCountryTarget] (the saved address / map geocode country name)
+  /// against the loaded countries, then kicks off the region fetch for it.
+  /// Called once from [initState] and again from the [CountriesCubit]
+  /// listener, same as [_prefillCountries].
+  void _prefillAddressCountry(
+    List<CountriesData> countries, {
+    bool useSetState = true,
+  }) {
+    if (_selectedCountry != null || _initialCountryTarget.isEmpty) return;
+    CountriesData? match;
+    for (final c in countries) {
+      if ((c.name ?? '').trim().toLowerCase() ==
+          _initialCountryTarget.toLowerCase()) {
+        match = c;
+        break;
+      }
+    }
+    if (match == null) return;
+    final selected = match;
+    if (useSetState) {
+      setState(() => _selectedCountry = selected);
+    } else {
+      _selectedCountry = selected;
+    }
+    if (selected.id != null) _regionsCubit.fetchRegions(selected.id!);
+  }
+
+  void _onCountrySelected(CountriesData country) {
+    final changed = _selectedCountry?.id != country.id;
+    setState(() {
+      _selectedCountry = country;
+      _countryCtrl.text = country.name ?? _countryCtrl.text;
+      if (changed) {
+        _selectedRegion = null;
+        _regionId = null;
+        _stateCtrl.clear();
+        _regionAutoMatchAttempted = false;
+      }
+    });
+    if (changed && country.id != null) _regionsCubit.fetchRegions(country.id!);
+  }
+
+  void _onRegionSelected(RegionsData region) {
+    setState(() {
+      _selectedRegion = region;
+      _regionId = region.id;
+      _stateCtrl.text = region.name ?? '';
+    });
+  }
+
+  /// Auto-selects the region matching [_initialStateTarget] once the regions
+  /// for the selected country load — only attempted once per country so a
+  /// deliberate user pick is never overwritten by a later rebuild.
+  void _onRegionsChanged(RegionsState state) {
+    if (state is! RegionsLoaded || _regionAutoMatchAttempted) return;
+    _regionAutoMatchAttempted = true;
+    if (_initialStateTarget.isEmpty) return;
+    RegionsData? match;
+    for (final r in state.regions) {
+      if ((r.name ?? '').trim().toLowerCase() ==
+          _initialStateTarget.toLowerCase()) {
+        match = r;
+        break;
+      }
+    }
+    if (match == null) return;
+    final region = match;
+    setState(() {
+      _selectedRegion = region;
+      _regionId = region.id;
+      _stateCtrl.text = region.name ?? '';
+    });
+  }
+
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     final loc = widget.locationResult;
@@ -218,6 +316,7 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
         latitude: loc.latitude.toString(),
         longitude: loc.longitude.toString(),
         isDefault: _isDefault,
+        regionId: _regionId,
       );
     } else {
       cubit.addAddress(
@@ -241,6 +340,7 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
         latitude: loc.latitude.toString(),
         longitude: loc.longitude.toString(),
         isDefault: _isDefault,
+        regionId: _regionId,
       );
     }
   }
@@ -257,105 +357,165 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<SaveAddressCubit, SaveAddressState>(
-          listener: (context, state) {
-            if (state is SaveAddressSuccess) {
-              final addressCubit = context.read<AddressCubit>();
-              final saved = state.address;
-              // Update the list locally from the response; refetch only if the
-              // API didn't return the saved address.
-              if (saved != null) {
-                if (state.isEdit) {
-                  addressCubit.updateLocally(saved);
+    return BlocProvider<RegionsCubit>.value(
+      value: _regionsCubit,
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<RegionsCubit, RegionsState>(
+            listener: (context, state) => _onRegionsChanged(state),
+          ),
+          BlocListener<SaveAddressCubit, SaveAddressState>(
+            listener: (context, state) {
+              if (state is SaveAddressSuccess) {
+                final addressCubit = context.read<AddressCubit>();
+                final saved = state.address;
+                // Update the list locally from the response; refetch only if the
+                // API didn't return the saved address.
+                if (saved != null) {
+                  if (state.isEdit) {
+                    addressCubit.updateLocally(saved);
+                  } else {
+                    addressCubit.addLocally(saved);
+                  }
                 } else {
-                  addressCubit.addLocally(saved);
+                  addressCubit.refresh();
                 }
-              } else {
-                addressCubit.refresh();
+                AppNavigator.pop(context);
+                widget.onSuccess();
+              } else if (state is SaveAddressError) {
+                AppSnackBar.show(
+                  context: context,
+                  message: state.message,
+                  type: SnackBarType.error,
+                );
               }
-              AppNavigator.pop(context);
-              widget.onSuccess();
-            } else if (state is SaveAddressError) {
-              AppSnackBar.show(
-                context: context,
-                message: state.message,
-                type: SnackBarType.error,
-              );
-            }
-          },
-        ),
-        BlocListener<CountriesCubit, CountriesState>(
-          listener: (context, state) {
-            if (state is CountriesLoaded) _prefillCountries(state.countries);
-          },
-        ),
-      ],
-      child: Container(
-        margin: EdgeInsetsDirectional.only(
-          bottom: context.keyboardInset,
-        ),
-        constraints: BoxConstraints(
-          maxHeight: context.screenHeight * 0.92,
-        ),
-        decoration: AppDecorations.bottomSheet(color: context.cs.surface),
-        child: Column(
-          crossAxisAlignment: .start,
-          mainAxisSize: .min,
-          children: [
-            const SheetDragHandle(),
-            SheetHeader(isEdit: widget.isEdit),
-            Flexible(
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingXS, ThemeConstants.paddingXL, ThemeConstants.paddingXL),
-                  child: SlideAnimationList(
-                    crossAxisAlignment: .start,
-                    spacing: 20,
-                    children: [
-                      AddressDetailsSection(
-                        addressCtrl: _addressCtrl,
-                        landmarkCtrl: _landmarkCtrl,
-                        areaCtrl: _areaCtrl,
-                        cityCtrl: _cityCtrl,
-                        pincodeCtrl: _pincodeCtrl,
-                        stateCtrl: _stateCtrl,
-                        countryCtrl: _countryCtrl,
-                        cityPrefilled: _cityPrefilled,
-                        pincodePrefilled: _pincodePrefilled,
-                        statePrefilled: _statePrefilled,
-                        countryPrefilled: _countryPrefilled,
-                      ),
-                      ContactDetailsSection(
-                        nameCtrl: _nameCtrl,
-                        mobileCtrl: _mobileCtrl,
-                        altMobileCtrl: _altMobileCtrl,
-                        selectedMobileCountry: _selectedMobileCountry,
-                        selectedAltMobileCountry: _selectedAltMobileCountry,
-                        onMobileCountryChanged: _onMobileCountryChanged,
-                        onAltMobileCountryChanged: _onAltMobileCountryChanged,
-                        onMobileChanged: (number) => _fullMobile = number,
-                        onAltMobileChanged: (number) => _fullAltMobile = number,
-                      ),
-                      AddressTypeSection(
-                        selected: _type,
-                        onChanged: (v) => setState(() => _type = v),
-                      ),
-                      DefaultToggleSheet(
-                        value: _isDefault,
-                        onChanged: (v) => setState(() => _isDefault = v),
-                      ),
-                    ],
+            },
+          ),
+          BlocListener<CountriesCubit, CountriesState>(
+            listener: (context, state) {
+              if (state is CountriesLoaded) {
+                _prefillCountries(state.countries);
+                _prefillAddressCountry(state.countries);
+              }
+            },
+          ),
+        ],
+        child: Container(
+          margin: EdgeInsetsDirectional.only(bottom: context.keyboardInset),
+          constraints: BoxConstraints(maxHeight: context.screenHeight * 0.92),
+          decoration: AppDecorations.bottomSheet(color: context.cs.surface),
+          child: Column(
+            crossAxisAlignment: .start,
+            mainAxisSize: .min,
+            children: [
+              const SheetDragHandle(),
+              SheetHeader(isEdit: widget.isEdit),
+              Flexible(
+                child: Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      ThemeConstants.paddingXL,
+                      ThemeConstants.paddingXS,
+                      ThemeConstants.paddingXL,
+                      ThemeConstants.paddingXL,
+                    ),
+                    child: SlideAnimationList(
+                      crossAxisAlignment: .start,
+                      spacing: ThemeConstants.spaceXL,
+                      children: [
+                        AddressDetailsSection(
+                          addressCtrl: _addressCtrl,
+                          landmarkCtrl: _landmarkCtrl,
+                          areaCtrl: _areaCtrl,
+                          cityCtrl: _cityCtrl,
+                          pincodeCtrl: _pincodeCtrl,
+                          cityPrefilled: _cityPrefilled,
+                          pincodePrefilled: _pincodePrefilled,
+                          countryField: CountryDropdownField(
+                            selected: _selectedCountry,
+                            labelText: context.translate(
+                              LanguageLabelKeys.country,
+                            ),
+                            hintText: context.translate(
+                              LanguageLabelKeys.enterCountry,
+                            ),
+                            onChanged: _onCountrySelected,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? context.translate(LanguageLabelKeys.required)
+                                : null,
+                          ),
+                          stateField: BlocBuilder<RegionsCubit, RegionsState>(
+                            builder: (context, state) {
+                              if (state is RegionsLoaded &&
+                                  state.regions.isNotEmpty) {
+                                return RegionDropdownField(
+                                  selected: _selectedRegion,
+                                  labelText: context.translate(
+                                    LanguageLabelKeys.stateLabel,
+                                  ),
+                                  hintText: context.translate(
+                                    LanguageLabelKeys.selectYourState,
+                                  ),
+                                  onChanged: _onRegionSelected,
+                                  validator: (v) =>
+                                      (v == null || v.trim().isEmpty)
+                                      ? context.translate(
+                                          LanguageLabelKeys.required,
+                                        )
+                                      : null,
+                                );
+                              }
+                              return AppTextField(
+                                controller: _stateCtrl,
+                                isRequired: true,
+                                labelText: context.translate(
+                                  LanguageLabelKeys.stateLabel,
+                                ),
+                                hintText: context.translate(
+                                  LanguageLabelKeys.enterState,
+                                ),
+                                textCapitalization: TextCapitalization.words,
+                                validator: (v) =>
+                                    (v == null || v.trim().isEmpty)
+                                    ? context.translate(
+                                        LanguageLabelKeys.required,
+                                      )
+                                    : null,
+                              );
+                            },
+                          ),
+                        ),
+                        ContactDetailsSection(
+                          nameCtrl: _nameCtrl,
+                          mobileCtrl: _mobileCtrl,
+                          altMobileCtrl: _altMobileCtrl,
+                          selectedMobileCountry: _selectedMobileCountry,
+                          selectedAltMobileCountry: _selectedAltMobileCountry,
+                          onMobileCountryChanged: _onMobileCountryChanged,
+                          onAltMobileCountryChanged: _onAltMobileCountryChanged,
+                          onMobileChanged: (number) => _fullMobile = number,
+                          onAltMobileChanged: (number) =>
+                              _fullAltMobile = number,
+                        ),
+                        AddressTypeSection(
+                          selected: _type,
+                          onChanged: (v) => setState(() => _type = v),
+                        ),
+                        DefaultToggleSheet(
+                          value: _isDefault,
+                          onChanged: (v) => setState(() => _isDefault = v),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            SheetFooter(
-              child: SaveButton(isEdit: widget.isEdit, onSubmit: _submit),
-            ),
-          ],
+              SheetFooter(
+                child: SaveButton(isEdit: widget.isEdit, onSubmit: _submit),
+              ),
+            ],
+          ),
         ),
       ),
     );

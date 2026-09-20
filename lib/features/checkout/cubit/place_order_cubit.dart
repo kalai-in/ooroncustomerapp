@@ -52,6 +52,15 @@ class PlaceOrderCubit extends Cubit<PlaceOrderState> {
     String? walletBalance,
     String? orderNote,
     Map<String, String>? prescriptions,
+    bool billingSameAsShipping = true,
+    String? billingName,
+    String? billingMobile,
+    String? billingAddress,
+    String? billingCity,
+    String? billingPincode,
+    String? billingCountry,
+    String? billingState,
+    int? billingRegionId,
   }) async {
     emit(PlaceOrderLoading());
     try {
@@ -66,6 +75,15 @@ class PlaceOrderCubit extends Cubit<PlaceOrderState> {
         walletBalance: walletBalance,
         orderNote: orderNote,
         prescriptions: prescriptions,
+        billingSameAsShipping: billingSameAsShipping,
+        billingName: billingName,
+        billingMobile: billingMobile,
+        billingAddress: billingAddress,
+        billingCity: billingCity,
+        billingPincode: billingPincode,
+        billingCountry: billingCountry,
+        billingState: billingState,
+        billingRegionId: billingRegionId,
       );
 
       final responseStatus = map['status']?.toString() ?? '0';

@@ -1,13 +1,13 @@
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/show_app_bottom_sheet.dart';
 import 'package:customer/commons/animations/slide_animation.dart';
-import 'package:customer/core/constants/theme_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -132,45 +132,42 @@ class _VoiceSearchSheetState extends State<_VoiceSearchSheet>
           ],
         );
       case _VoiceStep.notHeard:
-        return Padding(
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingXXL),
-          child: SlideAnimationList(
-            children: [
-              AppText(
-                context.translate(LanguageLabelKeys.voiceSearchNotHeard),
-                textAlign: TextAlign.center,
-                style: context.tt.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: context.cs.onSurface,
-                ),
+        return SlideAnimationList(
+          children: [
+            AppText(
+              context.translate(LanguageLabelKeys.voiceSearchNotHeard),
+              textAlign: TextAlign.center,
+              style: context.tt.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: context.cs.onSurface,
               ),
-              AppSpacing.h8,
-              AppText(
-                context.translate(
-                  LanguageLabelKeys.voiceSearchNotHeardSubtitle,
-                ),
-                textAlign: TextAlign.center,
-                style: context.tt.bodyMedium?.copyWith(
-                  color: context.cs.onSurfaceVariant,
-                ),
+            ),
+            AppSpacing.h8,
+            AppText(
+              context.translate(
+                LanguageLabelKeys.voiceSearchNotHeardSubtitle,
               ),
-              AppSpacing.h24,
-              InkWell(
-                onTap: _startListening,
-                customBorder: const CircleBorder(),
-                child: _micCircle(context, radius: 40, iconSize: 26),
+              textAlign: TextAlign.center,
+              style: context.tt.bodyMedium?.copyWith(
+                color: context.cs.onSurfaceVariant,
               ),
-              AppSpacing.h16,
-              AppText(
-                context.translate(LanguageLabelKeys.voiceSearchTapToRetry),
-                textAlign: TextAlign.center,
-                style: context.tt.bodyMedium?.copyWith(
-                  color: context.cs.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+            ),
+            AppSpacing.h24,
+            InkWell(
+              onTap: _startListening,
+              customBorder: const CircleBorder(),
+              child: _micCircle(context, radius: 40, iconSize: 26),
+            ),
+            AppSpacing.h16,
+            AppText(
+              context.translate(LanguageLabelKeys.voiceSearchTapToRetry),
+              textAlign: TextAlign.center,
+              style: context.tt.bodyMedium?.copyWith(
+                color: context.cs.onSurface,
+                fontWeight: FontWeight.w600,
               ),
-            ],
-          ),
+            ),
+          ],
         );
       case _VoiceStep.recognized:
         return SlideAnimationList(
@@ -189,7 +186,7 @@ class _VoiceSearchSheetState extends State<_VoiceSearchSheet>
               backgroundColor: context.cs.onSecondaryContainer,
               child: AppSvgIcon(
                 AssetsConstants.checkIcon,
-                size: 26,
+                size: ThemeConstants.iconL,
                 color: context.cs.surface,
               ),
             ),

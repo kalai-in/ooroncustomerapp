@@ -89,10 +89,10 @@ class LocationSuggestions extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingM,
-          vertical: 10,
+          vertical: ThemeConstants.paddingS,
         ),
         child: Row(
-          spacing: 12,
+          spacing: ThemeConstants.spaceM,
           children: [
             Container(
               width: 34,
@@ -103,7 +103,7 @@ class LocationSuggestions extends StatelessWidget {
               ),
               child: AppSvgIcon(
                 AssetsConstants.addressIcon,
-                size: 18,
+                size: ThemeConstants.iconS,
                 color: context.cs.primary,
                 fit: BoxFit.scaleDown,
               ),

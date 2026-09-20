@@ -34,6 +34,7 @@ class PromoCodeScreen extends StatefulWidget {
 
 class _PromoCodeScreenState extends State<PromoCodeScreen> {
   final _controller = TextEditingController();
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -48,6 +49,7 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -92,9 +94,10 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: CustomAppBar(
           title: context.translate(LanguageLabelKeys.promoCodes),
+          scrollController: _scrollController,
         ),
         body: Column(
-          spacing: 16,
+          spacing: ThemeConstants.spaceL,
           children: [
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, 0),
@@ -132,6 +135,7 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
                       return RefreshIndicator(
                         onRefresh: onRefresh,
                         child: ListView(
+                          controller: _scrollController,
                           physics: const AlwaysScrollableScrollPhysics(),
                           children: [
                             EmptyStateWidget(
@@ -150,6 +154,7 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
                     return RefreshIndicator(
                       onRefresh: onRefresh,
                       child: ListView.builder(
+                        controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsetsDirectional.fromSTEB(
                           ThemeConstants.paddingL,

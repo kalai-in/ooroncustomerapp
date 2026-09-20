@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class AppPillTabBar extends StatelessWidget {
   final TabController controller;
@@ -18,7 +19,7 @@ class AppPillTabBar extends StatelessWidget {
     final primary = context.cs.primary;
 
     return Container(
-      padding: const EdgeInsetsDirectional.all(5),
+      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
       decoration: AppDecorations.box(
         color: context.cs.surface,
         borderRadius: AppRadius.r20,

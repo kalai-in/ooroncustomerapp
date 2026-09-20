@@ -5,6 +5,7 @@ import 'package:customer/commons/widgets/app_snack_bar.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/commons/widgets/app_text_field.dart';
 import 'package:customer/commons/widgets/product_image_placeholder.dart';
+import 'package:customer/commons/widgets/tax_breakdown_sheet.dart';
 import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/constants/navigation_service.dart';
@@ -26,6 +27,7 @@ import 'package:customer/utils/app_date_formatter.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/extensions/size_extensions.dart';
+import 'package:customer/utils/extensions/num_extensions.dart';
 import 'package:customer/utils/extensions/string_extensions.dart';
 import 'package:customer/utils/order_status_labels.dart';
 import 'package:customer/commons/animations/slide_animation.dart';
@@ -166,7 +168,7 @@ class _CancelOrderSheetState extends State<_CancelOrderSheet> {
           ),
           AppSpacing.h24,
           Row(
-            spacing: 12,
+            spacing: ThemeConstants.spaceM,
             children: [
               Expanded(
                 child: AppButton(
@@ -220,7 +222,7 @@ class OrderDetailInstructionCard extends StatelessWidget {
     return OrderDetailCard(
       child: Row(
         crossAxisAlignment: .start,
-        spacing: 12,
+        spacing: ThemeConstants.spaceM,
         children: [
           Container(
             width: 34,
@@ -231,14 +233,14 @@ class OrderDetailInstructionCard extends StatelessWidget {
             ),
             child: AppSvgIcon(
               AssetsConstants.noteIcon,
-              size: 17,
+              size: ThemeConstants.iconS,
               color: context.cs.errorContainer,
             ),
           ),
           Expanded(
             child: Column(
               crossAxisAlignment: .start,
-              spacing: 4,
+              spacing: ThemeConstants.spaceXS,
               children: [
                 AppText(
                   context.translate(LanguageLabelKeys.deliveryInstruction),
@@ -321,7 +323,7 @@ class OrderDetailOtpCard extends StatelessWidget {
                   .map(
                     (digit) => Padding(
                       padding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: 6,
+                        horizontal: ThemeConstants.paddingXS,
                       ),
                       child: AppText(
                         digit,
@@ -381,12 +383,18 @@ class _OtpActionButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: AppRadius.r8,
       child: Padding(
-        padding: const EdgeInsetsDirectional.symmetric(vertical: 10),
+        padding: const EdgeInsetsDirectional.symmetric(
+          vertical: ThemeConstants.paddingS,
+        ),
         child: Row(
           mainAxisAlignment: .center,
-          spacing: 6,
+          spacing: ThemeConstants.spaceS,
           children: [
-            AppSvgIcon(icon, color: context.cs.primary, size: 16),
+            AppSvgIcon(
+              icon,
+              color: context.cs.primary,
+              size: ThemeConstants.iconXS,
+            ),
             AppText(
               label,
               style: context.tt.bodySmall?.copyWith(
@@ -412,9 +420,7 @@ class OrderDetailCustomerInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fullAddress = order.orderAddress.hasValue
-        ? order.orderAddress!
-        : '';
+    final fullAddress = order.orderAddress.hasValue ? order.orderAddress! : '';
     final orderIdText = order.orderNumber?.toString() ?? '';
     final customerLine = [
       if (order.userName.hasValue) order.userName!,
@@ -438,7 +444,7 @@ class OrderDetailCustomerInfoCard extends StatelessWidget {
                 },
                 child: AppSvgIcon(
                   AssetsConstants.copyIcon,
-                  size: 16,
+                  size: ThemeConstants.iconXS,
                   color: context.cs.onSurfaceVariant,
                 ),
               ),
@@ -458,6 +464,13 @@ class OrderDetailCustomerInfoCard extends StatelessWidget {
           label: context.translate(LanguageLabelKeys.deliverTo),
           value: fullAddress,
           maxLines: 2,
+        ),
+      if (order.address?.billingSameAsShipping == 0 &&
+          order.address?.billing != null)
+        OrderDetailLabelValueRow(
+          label: context.translate(LanguageLabelKeys.billingAddress),
+          value: formatBillingAddress(order.address!.billing!),
+          maxLines: 3,
         ),
       if (order.date.hasValue)
         OrderDetailLabelValueRow(
@@ -481,11 +494,17 @@ class OrderDetailItemsCard extends StatelessWidget {
   final List<OrderItems> items;
   final String? currency;
   final OrderData order;
+
+  /// One-time attention pulse on every rating-eligible item's rating
+  /// control — see [OrderDetailScreen.highlightRating].
+  final bool highlightRating;
+
   const OrderDetailItemsCard({
     super.key,
     required this.items,
     this.currency,
     required this.order,
+    this.highlightRating = false,
   });
 
   @override
@@ -517,12 +536,14 @@ class OrderDetailItemsCard extends StatelessWidget {
                   final pid = item.productId;
                   final showRatingControl =
                       pid == null || lastIndexByProductId[pid] == i;
+                  final highlightThis = highlightRating && showRatingControl;
                   return _OrderDetailItemRowSlot(
                     item: item,
                     currency: currency,
                     order: order,
                     showRatingControl: showRatingControl,
                     isLast: i == items.length - 1,
+                    highlightRating: highlightThis,
                   );
                 }).toList(),
               );
@@ -540,12 +561,14 @@ class _OrderDetailItemRowSlot extends StatelessWidget {
   final OrderData order;
   final bool showRatingControl;
   final bool isLast;
+  final bool highlightRating;
   const _OrderDetailItemRowSlot({
     required this.item,
     this.currency,
     required this.order,
     required this.showRatingControl,
     required this.isLast,
+    this.highlightRating = false,
   });
 
   @override
@@ -557,6 +580,7 @@ class _OrderDetailItemRowSlot extends StatelessWidget {
           currency: currency,
           order: order,
           showRatingControl: showRatingControl,
+          highlightRating: highlightRating,
         ),
         if (!isLast) ...[
           AppSpacing.h10,
@@ -573,12 +597,14 @@ class OrderDetailItemRow extends StatelessWidget {
   final String? currency;
   final OrderData order;
   final bool showRatingControl;
+  final bool highlightRating;
   const OrderDetailItemRow({
     super.key,
     required this.item,
     this.currency,
     required this.order,
     this.showRatingControl = true,
+    this.highlightRating = false,
   });
 
   @override
@@ -590,7 +616,7 @@ class OrderDetailItemRow extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: .start,
-      spacing: 8,
+      spacing: ThemeConstants.spaceS,
       children: [
         Row(
           crossAxisAlignment: .start,
@@ -607,7 +633,7 @@ class OrderDetailItemRow extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: .start,
-                spacing: 2,
+                spacing: ThemeConstants.spaceXXS,
                 children: [
                   AppText(
                     '${item.quantity ?? 1} × ${item.productName ?? ''}',
@@ -658,7 +684,6 @@ class OrderDetailItemRow extends StatelessWidget {
             final isRated =
                 showRatingControl &&
                 order.productRating == true &&
-                order.activeStatus == OrderStatus.delivered &&
                 (item.itemRating?.isNotEmpty ?? false);
             final showRate =
                 showRatingControl &&
@@ -668,6 +693,7 @@ class OrderDetailItemRow extends StatelessWidget {
                 item.activeStatus != OrderStatus.returned &&
                 !showCancel &&
                 !returnEligible &&
+                !(returnRequested != null && returnRequested != 0) &&
                 !isRated;
 
             if (!showCancel &&
@@ -679,7 +705,9 @@ class OrderDetailItemRow extends StatelessWidget {
             }
 
             return Padding(
-              padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingS),
+              padding: const EdgeInsetsDirectional.only(
+                top: ThemeConstants.paddingS,
+              ),
               child: Row(
                 mainAxisAlignment: .end,
                 children: [
@@ -692,7 +720,7 @@ class OrderDetailItemRow extends StatelessWidget {
                       height: 28,
                       fontSize: 13,
                       contentPadding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: 14,
+                        horizontal: ThemeConstants.paddingM,
                         vertical: ThemeConstants.paddingXS,
                       ),
                       onPressed: () async {
@@ -722,7 +750,7 @@ class OrderDetailItemRow extends StatelessWidget {
                       height: 28,
                       fontSize: 13,
                       contentPadding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: 14,
+                        horizontal: ThemeConstants.paddingM,
                         vertical: ThemeConstants.paddingXS,
                       ),
                       onPressed: () async {
@@ -752,12 +780,12 @@ class OrderDetailItemRow extends StatelessWidget {
                       height: 28,
                       fontSize: 13,
                       contentPadding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: 14,
+                        horizontal: ThemeConstants.paddingM,
                         vertical: ThemeConstants.paddingXS,
                       ),
                       prefixIcon: const AppSvgIcon(
                         AssetsConstants.faqIcon,
-                        size: 14,
+                        size: ThemeConstants.iconXS,
                       ),
                       onPressed: () async {
                         final conversationId =
@@ -783,6 +811,7 @@ class OrderDetailItemRow extends StatelessWidget {
                       child: _ItemRatingControl(
                         item: item,
                         isRated: isRated,
+                        highlight: highlightRating && !isRated,
                         onRatingChanged: (data) =>
                             context.read<OrderDetailCubit>().applyItemRating(
                               item.id,
@@ -809,20 +838,79 @@ class _ItemRatingControl extends StatefulWidget {
   final bool isRated;
   final ValueChanged<Map<String, dynamic>> onRatingChanged;
 
+  /// Plays a one-time attention pulse (subtle double scale + glow) right
+  /// after this control appears, so a customer landing here straight off a
+  /// delivered-order hand-off notices it. Never loops — a single settle-in
+  /// pulse reads as a nudge, a repeating one reads as nagging.
+  final bool highlight;
+
   const _ItemRatingControl({
     required this.item,
     required this.isRated,
     required this.onRatingChanged,
+    this.highlight = false,
   });
 
   @override
   State<_ItemRatingControl> createState() => _ItemRatingControlState();
 }
 
-class _ItemRatingControlState extends State<_ItemRatingControl> {
+class _ItemRatingControlState extends State<_ItemRatingControl>
+    with SingleTickerProviderStateMixin {
   bool _isSubmitting = false;
+  AnimationController? _pulseController;
+  Animation<double>? _pulseScale;
+  final GlobalKey _highlightKey = GlobalKey();
 
   ItemRating? get _own => widget.isRated ? widget.item.itemRating?.first : null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.highlight) {
+      final controller = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 1800),
+      );
+      _pulseController = controller;
+      // Three visible bumps rather than a subtle single one — a faint
+      // one-shot tint was easy to miss entirely on first glance.
+      _pulseScale = TweenSequence<double>([
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.1), weight: 1),
+        TweenSequenceItem(tween: Tween(begin: 1.1, end: 1.0), weight: 1),
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.08), weight: 1),
+        TweenSequenceItem(tween: Tween(begin: 1.08, end: 1.0), weight: 1),
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.06), weight: 1),
+        TweenSequenceItem(tween: Tween(begin: 1.06, end: 1.0), weight: 1),
+      ]).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+      // Let the navigation transition settle, then scroll it fully into view
+      // (it can land below the fold on smaller screens) before pulsing —
+      // otherwise the animation plays off-screen and nobody sees it.
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // Best-effort — if scrolling into view fails for any reason, the
+        // pulse must still play rather than silently never firing.
+        try {
+          final ctx = _highlightKey.currentContext;
+          if (ctx != null) {
+            await Scrollable.ensureVisible(
+              ctx,
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeOut,
+              alignment: 0.2,
+            );
+          }
+        } catch (_) {}
+        await Future.delayed(const Duration(milliseconds: 250));
+        if (mounted) controller.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseController?.dispose();
+    super.dispose();
+  }
 
   Future<void> _quickRate(int rate) async {
     if (_isSubmitting) return;
@@ -882,7 +970,7 @@ class _ItemRatingControlState extends State<_ItemRatingControl> {
         ? LanguageLabelKeys.viewReview
         : LanguageLabelKeys.writeAReview;
 
-    return Row(
+    final row = Row(
       crossAxisAlignment: .center,
       mainAxisSize: .min,
       children: [
@@ -906,6 +994,40 @@ class _ItemRatingControlState extends State<_ItemRatingControl> {
           ),
         ),
       ],
+    );
+
+    final pulseController = _pulseController;
+    if (pulseController == null) return row;
+    return AnimatedBuilder(
+      key: _highlightKey,
+      animation: pulseController,
+      child: row,
+      builder: (context, child) {
+        final scale = _pulseScale!.value;
+        final glowStrength = ((scale - 1.0) / 0.1).clamp(0.0, 1.0);
+        // Same yellow RatingStarsRow uses for the stars themselves, so the
+        // highlight reads as "this is about rating" rather than a generic
+        // theme-color nudge.
+        final glowColor = context.cs.onPrimaryFixedVariant;
+        return Transform.scale(
+          scale: scale,
+          child: Container(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: ThemeConstants.paddingS,
+              vertical: 2,
+            ),
+            decoration: BoxDecoration(
+              color: glowColor.withValues(alpha: 0.18 * glowStrength),
+              borderRadius: AppRadius.r8,
+              border: Border.all(
+                color: glowColor.withValues(alpha: 0.7 * glowStrength),
+                width: 1.5,
+              ),
+            ),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
@@ -939,6 +1061,11 @@ class OrderDetailPriceSummaryCard extends StatelessWidget {
         order.additionalCharges != null && order.additionalCharges!.isNotEmpty;
     final hasSurge =
         order.surgeCharges != null && order.surgeCharges!.isNotEmpty;
+    final hasTax =
+        order.taxBreakdown?.any(
+          (tax) => tax.amount != null && tax.amount != 0,
+        ) ??
+        false;
     final saved = (order.savedAmount ?? 0) > 0
         ? order.savedAmount!
         : (order.discount ?? 0) + (order.promoDiscount ?? 0);
@@ -952,11 +1079,17 @@ class OrderDetailPriceSummaryCard extends StatelessWidget {
       walletValue: (hasWallet && !paymentInfo.isFullyPaidByWallet)
           ? '${order.paidWallet}'
           : null,
+      remainingLabel: paymentInfo.isCombined
+          ? paymentInfo.remainingRowLabel
+          : null,
+      remainingValue: paymentInfo.isCombined
+          ? (order.finalTotal ?? 0).formatPrice()
+          : null,
       totalRowLabel: paymentInfo.totalRowLabel,
-      totalRowValue: '$currency${paymentInfo.totalRowAmount}',
+      totalRowValue: '$currency${paymentInfo.totalRowAmount.formatPrice()}',
       saved: saved,
       cashbackText: hasCashback
-          ? '${context.translate(LanguageLabelKeys.cashback)} $currency${order.cashbackAmount!.toStringAsFixed(2)}'
+          ? '${context.translate(LanguageLabelKeys.cashback)} $currency${order.cashbackAmount!.formatPrice()}'
           : null,
       cashbackSubtitle: hasCashback
           ? context.translate(LanguageLabelKeys.cashbackCreditedToWallet)
@@ -965,18 +1098,53 @@ class OrderDetailPriceSummaryCard extends StatelessWidget {
         OrderDetailPriceRow(
           label: context.translate(LanguageLabelKeys.subtotal),
           value: '$currency${order.total ?? 0}',
-          suffixLabel: (order.taxAmount != null && order.taxAmount != 0)
+          suffixLabel: hasTax
               ? context.translate(LanguageLabelKeys.inclTax)
               : null,
+          suffixTooltipMessage: hasTax
+              ? taxBreakdownMessage(
+                  context,
+                  order.taxBreakdown!,
+                  (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                )
+              : null,
+          suffixSheetTitle: hasTax
+              ? context.translate(LanguageLabelKeys.taxBreakdown)
+              : null,
+          suffixContentBuilder: hasTax
+              ? (sheetContext) => taxBreakdownSheet(
+                  sheetContext,
+                  order.taxBreakdown!,
+                  (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                )
+              : null,
         ),
-        OrderDetailPriceRow(
-          label: context.translate(LanguageLabelKeys.deliveryCharge),
-          value: '$currency${order.deliveryCharge ?? 0}',
-        ),
+        if ((order.deliveryCharge?.amount ?? 0) > 0)
+          OrderDetailPriceRow(
+            label: context.translate(LanguageLabelKeys.deliveryCharge),
+            value: '$currency${order.deliveryCharge?.amount ?? 0}',
+            detailContentBuilder:
+                hasChargeTaxDetail(
+                  taxName: order.deliveryCharge?.taxName,
+                  taxAmount: order.deliveryCharge?.taxAmount,
+                  taxableAmount: order.deliveryCharge?.taxableAmount,
+                  taxRate: order.deliveryCharge?.taxRate,
+                )
+                ? (sheetContext) => additionalChargeDetailSheet(
+                    sheetContext,
+                    (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                    label: context.translate(LanguageLabelKeys.deliveryCharge),
+                    totalAmount: order.deliveryCharge?.amount ?? 0,
+                    taxName: order.deliveryCharge?.taxName,
+                    taxAmount: order.deliveryCharge?.taxAmount,
+                    taxRate: order.deliveryCharge?.taxRate,
+                  )
+                : null,
+          ),
         if (hasDiscount)
           OrderDetailPriceRow(
             label: context.translate(LanguageLabelKeys.discount),
-            value: '- $currency${order.discount}',
+            value: '- $currency${(order.discount ?? 0).formatPrice()}',
             valueColor: context.cs.onSecondaryContainer,
           ),
         if (hasPromo)
@@ -987,23 +1155,61 @@ class OrderDetailPriceSummaryCard extends StatelessWidget {
             valueColor: context.cs.onSecondaryContainer,
           ),
         if (hasAdditional)
-          ...order.additionalCharges!.map(
-            (charge) => OrderDetailPriceRow(
-              label:
-                  charge.name ??
-                  context.translate(LanguageLabelKeys.additional),
+          ...order.additionalCharges!.map((charge) {
+            final hasTaxDetail = hasChargeTaxDetail(
+              taxName: charge.taxName,
+              taxAmount: charge.taxAmount,
+              taxableAmount: charge.taxableAmount,
+              taxRate: charge.taxRate,
+            );
+            final label =
+                charge.name ?? context.translate(LanguageLabelKeys.additional);
+            return OrderDetailPriceRow(
+              label: label,
               value: '$currency${charge.amount ?? 0}',
-              isRefundable: charge.isRefundable,
-            ),
-          ),
+              isRefundable: hasTaxDetail ? null : charge.isRefundable,
+              detailContentBuilder: hasTaxDetail
+                  ? (sheetContext) => additionalChargeDetailSheet(
+                      sheetContext,
+                      (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                      label: label,
+                      totalAmount: charge.amount ?? 0,
+                      isRefundable: charge.isRefundable,
+                      taxName: charge.taxName,
+                      taxAmount: charge.taxAmount,
+                      taxRate: charge.taxRate,
+                    )
+                  : null,
+            );
+          }),
         if (hasSurge)
-          ...order.surgeCharges!.map(
-            (surge) => OrderDetailPriceRow(
-              label: surge.label ?? context.translate(LanguageLabelKeys.surge),
+          ...order.surgeCharges!.map((surge) {
+            final hasTaxDetail = hasChargeTaxDetail(
+              taxName: surge.taxName,
+              taxAmount: surge.taxAmount,
+              taxableAmount: surge.taxableAmount,
+              taxRate: surge.taxRate,
+            );
+            final label =
+                surge.label ?? context.translate(LanguageLabelKeys.surge);
+            return OrderDetailPriceRow(
+              label: label,
               value: '$currency${surge.charge ?? 0}',
-              isRefundable: surge.isRefundable,
-            ),
-          ),
+              isRefundable: hasTaxDetail ? null : surge.isRefundable,
+              detailContentBuilder: hasTaxDetail
+                  ? (sheetContext) => additionalChargeDetailSheet(
+                      sheetContext,
+                      (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                      label: label,
+                      totalAmount: surge.charge ?? 0,
+                      isRefundable: surge.isRefundable,
+                      taxName: surge.taxName,
+                      taxAmount: surge.taxAmount,
+                      taxRate: surge.taxRate,
+                    )
+                  : null,
+            );
+          }),
       ],
     );
   }

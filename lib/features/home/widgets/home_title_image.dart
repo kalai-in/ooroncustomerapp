@@ -52,7 +52,9 @@ class HomeTitleImage extends StatelessWidget {
     // ungapped regardless of what imageAspect (or a mismatched per-device
     // upload) says.
     final placeholderHeight = ResponsiveHeightHelper.calculateFromAspect(
-      imageAspect: block.config?.imageAspect,
+      imageAspect: block.config?.imageAspect?.resolve(
+        context.screenWidth >= 600,
+      ),
       context: context,
     );
 

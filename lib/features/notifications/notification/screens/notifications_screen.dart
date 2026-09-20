@@ -1,4 +1,5 @@
 import 'package:customer/commons/utils/url_launcher_helper.dart';
+import 'package:customer/commons/widgets/app_bouncing.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/commons/widgets/app_network_image.dart';
@@ -69,6 +70,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return AppScaffold(
       appBar: CustomAppBar(
         title: context.translate(LanguageLabelKeys.notifications),
+        scrollController: _scrollCtrl,
       ),
       body:
           BlocBuilder<
@@ -176,7 +178,7 @@ class _NotificationCard extends StatelessWidget {
       ),
       child: AppSvgIcon(
         AssetsConstants.notificationIcon,
-        size: 22,
+        size: ThemeConstants.iconM,
         color: context.cs.primary,
         fit: BoxFit.scaleDown,
       ),
@@ -255,11 +257,10 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return AppBouncing(
       onTap: () => _handleTap(context),
-      borderRadius: AppRadius.r12,
       child: Container(
-        padding: const EdgeInsetsDirectional.all(14),
+        padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
         decoration: AppDecorations.shadowedCard(
           color: context.cs.surface,
           shadowColor: context.theme.shadowColor.withValues(alpha: 0.06),
@@ -269,7 +270,7 @@ class _NotificationCard extends StatelessWidget {
         ),
         child: Row(
           crossAxisAlignment: .start,
-          spacing: 12,
+          spacing: ThemeConstants.spaceM,
           children: [
             Expanded(
               child: Column(
@@ -299,11 +300,11 @@ class _NotificationCard extends StatelessWidget {
                   if (item.dateSent.isNotEmpty) ...[
                     AppSpacing.h6,
                     Row(
-                      spacing: 4,
+                      spacing: ThemeConstants.spaceXS,
                       children: [
                         AppSvgIcon(
                           AssetsConstants.timeIcon,
-                          size: 12,
+                          size: ThemeConstants.iconXS,
                           color: context.cs.onSurfaceVariant.withValues(
                             alpha: 0.6,
                           ),

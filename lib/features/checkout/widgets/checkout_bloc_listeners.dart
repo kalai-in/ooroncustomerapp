@@ -51,7 +51,9 @@ class CheckoutBlocListeners extends StatelessWidget {
               if (cart != null) {
                 ctx.read<CartFetchCubit>().setCart(cart);
               } else {
-                ctx.read<CartFetchCubit>().fetchCart();
+                ctx.read<CartFetchCubit>().fetchCart(
+                  addressId: selectedAddress?.id,
+                );
               }
             } else if (state is CartActionError) {
               if (state.fromRemove) {
@@ -86,7 +88,7 @@ class CheckoutBlocListeners extends StatelessWidget {
                               unlockPromoCodeId: prevData.unlockPromoCodeId,
                               isDeliverableAddress:
                                   prevData.isDeliverableAddress,
-                              deliveryCharge: prevData.deliveryCharge,
+                              deliveryCharges: prevData.deliveryCharges,
                               surgeCharges: prevData.surgeCharges,
                               zoneAdditionalCharges:
                                   prevData.zoneAdditionalCharges,
@@ -105,7 +107,9 @@ class CheckoutBlocListeners extends StatelessWidget {
                 }
                 return;
               }
-              ctx.read<CartFetchCubit>().fetchCart();
+              ctx.read<CartFetchCubit>().fetchCart(
+                addressId: selectedAddress?.id,
+              );
               AppSnackBar.show(
                 context: ctx,
                 message: state.message,
@@ -148,9 +152,12 @@ class CheckoutBlocListeners extends StatelessWidget {
             if (state is! PaginationLoaded<AddressData>) return;
             final current = selectedAddress;
 
-            // No saved addresses left — drop any stale selection.
+            // No saved addresses left — drop any stale selection. Also
+            // covers the first-load case where the user has no addresses
+            // at all: the cart still needs a fetch (without addressId) so
+            // the screen doesn't stay stuck on its loading state.
             if (state.data.isEmpty) {
-              if (current != null) onAddressCleared();
+              onAddressCleared();
               return;
             }
 

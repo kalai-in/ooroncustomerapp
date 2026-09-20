@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:customer/commons/widgets/app_icon_filter_button.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
+import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:flutter/material.dart';
 import '../../utils/extensions/context_extensions.dart';
@@ -9,127 +12,279 @@ import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
-class AppSearchFilterBar extends StatelessWidget {
+class AppSearchFilterBar extends StatefulWidget {
   final TextEditingController searchController;
   final ValueChanged<String> onSearchChanged;
   final ValueChanged<String>? onSubmitted;
-  final VoidCallback onDateRange;
-  final VoidCallback onClearFilters;
+  // When null, the sort/filter icon is hidden entirely.
+  final VoidCallback? onDateRange;
+  final VoidCallback? onClearFilters;
   final bool hasDateFilter;
   final String? dateRangeLabel;
   final bool hasActiveFilters;
   final String? hintText;
-  final EdgeInsetsDirectional? padding;
   final String filterIcon;
   final VoidCallback? onMicTap;
   final bool isListening;
+  // Overrides the default search icon at the field's start (e.g. a back
+  // arrow). Tapping it fires [onPrefixTap] instead of just being decorative.
+  final String? prefixIconAsset;
+  final VoidCallback? onPrefixTap;
+  final bool autofocus;
+  // Words to rotate through as an animated placeholder (e.g. API-driven
+  // search suggestions). Falls back to the static [hintText] when null or
+  // empty — no hardcoded default words.
+  final List<String>? hintSuggestions;
 
   const AppSearchFilterBar({
     super.key,
     required this.searchController,
     required this.onSearchChanged,
     this.onSubmitted,
-    required this.onDateRange,
-    required this.onClearFilters,
+    this.onDateRange,
+    this.onClearFilters,
     this.hasDateFilter = false,
     this.dateRangeLabel,
     this.hasActiveFilters = false,
     this.hintText = 'Search by order ID or customer…',
-    this.padding,
     this.filterIcon = AssetsConstants.dateIcon,
     this.onMicTap,
     this.isListening = false,
+    this.prefixIconAsset,
+    this.onPrefixTap,
+    this.autofocus = false,
+    this.hintSuggestions,
   });
+
+  @override
+  State<AppSearchFilterBar> createState() => _AppSearchFilterBarState();
+}
+
+class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
+  int _hintIndex = 0;
+  Timer? _timer;
+  final FocusNode _focusNode = FocusNode();
+
+  List<String> get _hints => widget.hintSuggestions?.isNotEmpty ?? false
+      ? widget.hintSuggestions!
+      : const [];
+
+  @override
+  void initState() {
+    super.initState();
+    widget.searchController.addListener(_onControllerChanged);
+    // Cursor sits where the hint overlay is drawn — hide the overlay once
+    // focused so the blinking caret never overlaps the animated text.
+    _focusNode.addListener(_onControllerChanged);
+    _restartTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant AppSearchFilterBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchController != widget.searchController) {
+      oldWidget.searchController.removeListener(_onControllerChanged);
+      widget.searchController.addListener(_onControllerChanged);
+    }
+    if (oldWidget.hintSuggestions != widget.hintSuggestions) {
+      _hintIndex = 0;
+      _restartTimer();
+    }
+  }
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _restartTimer() {
+    _timer?.cancel();
+    if (_hints.isEmpty) return;
+    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (mounted) setState(() => _hintIndex = (_hintIndex + 1) % _hints.length);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    widget.searchController.removeListener(_onControllerChanged);
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final borders = AppDecorations.inputBorderSet(context.cs);
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      padding: padding ?? const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingM),
+    final hints = _hints;
+    final showAnimatedHint = hints.isNotEmpty && widget.searchController.text.isEmpty;
+    return SizedBox(height: 40, width: double.infinity,
       child: Row(
         children: [
           Expanded(
-            child: TextFormField(
-              controller: searchController,
-              onChanged: onSearchChanged,
-              onFieldSubmitted: onSubmitted,
-              style: context.tt.bodyMedium,
-              decoration: InputDecoration(
-                hintText: hintText,
-                hintStyle: context.tt.bodyMedium?.copyWith(
-                  color: context.cs.onSurfaceVariant,
-                ),
-                prefixIcon: AppSvgIcon(
-                  AssetsConstants.searchIcon,
-                  size: 18,
-                  color: context.cs.onSurfaceVariant,
-                  fit: BoxFit.scaleDown,
-                ),
-                suffixIcon: searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: AppSvgIcon(
-                          AssetsConstants.closeIcon,
-                          size: 18,
-                          color: context.cs.onSurfaceVariant,
+            child: Stack(
+              alignment: AlignmentDirectional.centerStart,
+              children: [
+                TextFormField(
+                  controller: widget.searchController,
+                  focusNode: _focusNode,
+                  autofocus: widget.autofocus,
+                  onChanged: widget.onSearchChanged,
+                  onFieldSubmitted: widget.onSubmitted,
+                  style: context.tt.bodyMedium,
+                  decoration: InputDecoration(
+                    hintText: showAnimatedHint ? '' : widget.hintText,
+                    hintStyle: context.tt.bodyMedium?.copyWith(
+                      color: context.cs.onSurfaceVariant,
+                    ),
+                    prefixIcon: GestureDetector(
+                      onTap: widget.onPrefixTap,
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.only(
+                          start: ThemeConstants.paddingM,
+                          end: ThemeConstants.paddingS,
                         ),
-                        onPressed: () {
-                          searchController.clear();
-                          onSearchChanged('');
-                        },
-                      )
-                    : onMicTap != null
-                    ? Row(
-                        mainAxisSize: .min,
-                        children: [
-                          SizedBox(
-                            height: 22,
-                            child: VerticalDivider(
-                              width: 1,
-                              thickness: 1,
-                              color: context.cs.outlineVariant,
-                            ),
-                          ),
-                          IconButton(
+                        child: AppSvgIcon(
+                          widget.prefixIconAsset ?? AssetsConstants.searchIcon,
+                          size: ThemeConstants.iconM,
+                          color: context.cs.onSurfaceVariant,
+                          fit: widget.prefixIconAsset != null
+                              ? BoxFit.contain :BoxFit.scaleDown,
+                        ),
+                      ),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                    suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                    suffixIcon: widget.searchController.text.isNotEmpty
+                        ? IconButton(
                             icon: AppSvgIcon(
-                              AssetsConstants.microphoneIcon,
-                              size: 20,
-                              color: isListening
-                                  ? context.cs.primary
-                                  : context.cs.onSurfaceVariant,
+                              AssetsConstants.closeIcon,
+                              size: ThemeConstants.iconS,
+                              color: context.cs.onSurfaceVariant,
                             ),
-                            onPressed: onMicTap,
-                          ),
-                        ],
-                      )
-                    : null,
-                filled: true,
-                fillColor: context.cs.surface,
-                contentPadding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: ThemeConstants.paddingM,
-                  vertical: 10,
+                            padding: EdgeInsetsDirectional.zero,
+                            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                            onPressed: () {
+                              widget.searchController.clear();
+                              widget.onSubmitted != null ? widget.onSubmitted!('') : widget.onSearchChanged('');
+                            },
+                          )
+                        : widget.onMicTap != null
+                        ? Row(
+                            mainAxisSize: .min,
+                            children: [
+                              SizedBox(
+                                height: 22,
+                                child: VerticalDivider(
+                                  width: 1,
+                                  thickness: 1,
+                                  color: context.cs.outlineVariant,
+                                ),
+                              ),
+                              IconButton(
+                                icon: AppSvgIcon(
+                                  AssetsConstants.microphoneIcon,
+                                  size: ThemeConstants.iconM,
+                                  color: widget.isListening
+                                      ? context.cs.primary
+                                      : context.cs.onSurfaceVariant,
+                                ),
+                                padding: EdgeInsetsDirectional.zero,
+                                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                onPressed: widget.onMicTap,
+                              ),
+                            ],
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: context.cs.surface,
+                    isDense: true,visualDensity: VisualDensity(vertical: -4, horizontal: -4),
+                    contentPadding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: ThemeConstants.paddingM,
+                      vertical: ThemeConstants.paddingXS,
+                    ),
+                    border: borders.border,
+                    enabledBorder: borders.enabledBorder,
+                    // Neutral on focus — no primary-color pop, matches idle state.
+                    focusedBorder: borders.enabledBorder,
+                  ),
                 ),
-                border: borders.border,
-                enabledBorder: borders.enabledBorder,
-                focusedBorder: borders.focusedBorder,
-              ),
+                if (showAnimatedHint)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.only(
+                          // Extra 4dp past the icon gives the blinking caret
+                          // room before the hint text starts, so they never
+                          // visually overlap while still animating on focus.
+                          start: ThemeConstants.paddingM + ThemeConstants.iconM + ThemeConstants.paddingS + 4,
+                          // Reserve the suffix icon's zone so long hint text
+                          // ellipsizes before reaching it instead of running
+                          // underneath the mic button.
+                          end: widget.onMicTap != null
+                              ? ThemeConstants.paddingM + ThemeConstants.iconM + ThemeConstants.paddingM
+                              : ThemeConstants.paddingM,
+                        ),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: ClipRect(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 500),
+                              transitionBuilder: (child, animation) {
+                                return FadeTransition(
+                                  opacity: CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeInOut,
+                                  ),
+                                  child: SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(0, 0.5),
+                                      end: Offset.zero,
+                                    ).animate(
+                                      CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeInOut,
+                                      ),
+                                    ),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: AppText(
+                                '${context.translate(LanguageLabelKeys.search)} "${hints[_hintIndex % hints.length]}"',
+                                key: ValueKey<int>(_hintIndex),
+                                style: context.tt.bodyMedium?.copyWith(
+                                  color: context.cs.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: .ellipsis,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-          AppSpacing.w8,
-          AppIconFilterButton(
-            icon: filterIcon,
-            isActive: hasDateFilter,
-            onTap: onDateRange,
-            tooltip:
-                dateRangeLabel ??
-                context.translate(LanguageLabelKeys.filterByDate),
-          ),
-          if (hasActiveFilters) ...[
+          if (widget.onDateRange != null) ...[
+            AppSpacing.w8,
+            AppIconFilterButton(
+              icon: widget.filterIcon,
+              isActive: widget.hasDateFilter,
+              onTap: widget.onDateRange!,
+              tooltip:
+                  widget.dateRangeLabel ??
+                  context.translate(LanguageLabelKeys.filterByDate),
+            ),
+          ],
+          if (widget.hasActiveFilters && widget.onClearFilters != null) ...[
             AppSpacing.w6,
             AppIconFilterButton(
               icon: AssetsConstants.closeIcon,
               isActive: false,
-              onTap: onClearFilters,
+              onTap: widget.onClearFilters!,
               tooltip: context.translate(LanguageLabelKeys.clearFiltersTooltip),
             ),
           ],

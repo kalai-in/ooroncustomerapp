@@ -122,10 +122,12 @@ class _WebViewPaymentScreenState extends State<WebViewPaymentScreen> {
         );
 
       case PaymentGatewayType.paypal:
-        // PayPal uses URL path last segment: /success or /fail
-        final segment = Uri.tryParse(
-          url,
-        )?.pathSegments.lastOrNull?.toLowerCase();
+        // Status comes as a query param (?status=success|fail|pending) on
+        // the redirect URL — fall back to the old path-segment convention
+        // (/success or /fail) for backwards compatibility.
+        final segment =
+            params['status']?.toLowerCase() ??
+            Uri.tryParse(url)?.pathSegments.lastOrNull?.toLowerCase();
         if (segment == null) return;
         if (segment == 'success' || segment == 'fail' || segment == 'pending') {
           _handled = true;
@@ -238,14 +240,14 @@ class _WebViewPaymentScreenState extends State<WebViewPaymentScreen> {
     if (!mounted) return;
     final cubit = context.read<PaymentCubit>();
     AppNavigator.pop(context);
-    if (segment == 'success') {
+    if (segment.trim().toLowerCase() == 'success') {
       cubit.onWebViewSuccess(
         widget.args.orderId,
         orderItemId: widget.args.orderItemId,
       );
     } else {
       // 'pending' is kept, not deleted — same reasoning as PhonePe PENDING.
-      if (segment != 'pending') {
+      if (segment.trim().toLowerCase() != 'pending') {
         cubit.deleteOrder(widget.args.orderId);
       }
       cubit.onWebViewFailed(

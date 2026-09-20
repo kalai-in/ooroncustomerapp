@@ -37,7 +37,7 @@ class AppIconFilterButton extends StatelessWidget {
           ),
           child: AppSvgIcon(
             icon,
-            size: 18,
+            size: ThemeConstants.iconS,
             color: isActive ? context.cs.primary : context.cs.onSurfaceVariant,
             fit: BoxFit.scaleDown,
           ),

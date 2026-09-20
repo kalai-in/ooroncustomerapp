@@ -21,6 +21,12 @@ class ProductListingView extends StatelessWidget {
   final bool isFetchingMore;
   final EdgeInsetsDirectional padding;
 
+  /// Pass true (with [physics] set to [NeverScrollableScrollPhysics]) when
+  /// this is nested inside an outer scrollable — e.g. a full-page
+  /// SingleChildScrollView that also scrolls a header above the list.
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
+
   /// Grid-mode only — [ProductListItem] doesn't expose a favorite-tap
   /// override, so list mode always falls back to the button's own default.
   /// When omitted, grid falls back to the same default too.
@@ -31,6 +37,10 @@ class ProductListingView extends StatelessWidget {
   /// loading indicator instead.
   final WidgetBuilder? listLoadingMoreBuilder;
 
+  /// Fired right before navigating to product detail, in both layouts —
+  /// e.g. to record a result tap as an implicit recent-search save.
+  final ValueChanged<ProductDataModel>? onProductTap;
+
   const ProductListingView({
     super.key,
     required this.products,
@@ -40,6 +50,9 @@ class ProductListingView extends StatelessWidget {
     this.padding = const EdgeInsetsDirectional.all(ThemeConstants.paddingL),
     this.onFavoriteTap,
     this.listLoadingMoreBuilder,
+    this.onProductTap,
+    this.shrinkWrap = false,
+    this.physics,
   });
 
   bool _isTablet(BuildContext context) =>
@@ -56,11 +69,14 @@ class ProductListingView extends StatelessWidget {
     final spacing = 10 * (_isTablet(context) ? 1.75 : 1.0);
     return ProductCardGrid(
       controller: controller,
+      shrinkWrap: shrinkWrap,
+      physics: physics,
       padding: padding,
       crossAxisCount: _crossAxisCount(context),
       crossAxisSpacing: spacing,
       mainAxisSpacing: spacing,
-      itemCount: products.length + (isFetchingMore ? _crossAxisCount(context) : 0),
+      itemCount:
+          products.length + (isFetchingMore ? _crossAxisCount(context) : 0),
       itemBuilder: (context, i, cardWidth) {
         if (i >= products.length) {
           return const ProductCardSkeleton();
@@ -74,6 +90,24 @@ class ProductListingView extends StatelessWidget {
           onFavoriteTap: onFavoriteTap == null
               ? null
               : () => onFavoriteTap!(product),
+          onCardTap: onProductTap == null || product.id == null
+              ? null
+              : () {
+                  onProductTap!(product);
+                  AppNavigator.pushNamed(
+                    context,
+                    RouteNames.productDetail,
+                    arguments: ProductDetailArgs(
+                      productId: product.id!,
+                      imageUrl: product.images?.isNotEmpty == true
+                          ? product.images!.first.imageUrl
+                          : null,
+                      heroSuffix: '',
+                      productList: products,
+                      initialIndex: i,
+                    ),
+                  );
+                },
         );
       },
     );
@@ -82,6 +116,8 @@ class ProductListingView extends StatelessWidget {
   Widget _buildList(BuildContext context) {
     return ListView.separated(
       controller: controller,
+      shrinkWrap: shrinkWrap,
+      physics: physics,
       padding: padding,
       itemCount: products.length + (isFetchingMore ? 1 : 0),
       separatorBuilder: (_, _) => AppSpacing.h10,
@@ -98,19 +134,22 @@ class ProductListingView extends StatelessWidget {
           index: i,
           onTap: product.id == null
               ? null
-              : () => AppNavigator.pushNamed(
-                  context,
-                  RouteNames.productDetail,
-                  arguments: ProductDetailArgs(
-                    productId: product.id!,
-                    imageUrl: product.images?.isNotEmpty == true
-                        ? product.images!.first.imageUrl
-                        : null,
-                    heroSuffix: '_$i',
-                    productList: products,
-                    initialIndex: i,
-                  ),
-                ),
+              : () {
+                  onProductTap?.call(product);
+                  AppNavigator.pushNamed(
+                    context,
+                    RouteNames.productDetail,
+                    arguments: ProductDetailArgs(
+                      productId: product.id!,
+                      imageUrl: product.images?.isNotEmpty == true
+                          ? product.images!.first.imageUrl
+                          : null,
+                      heroSuffix: '_$i',
+                      productList: products,
+                      initialIndex: i,
+                    ),
+                  );
+                },
         );
       },
     );

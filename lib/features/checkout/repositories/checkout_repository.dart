@@ -18,6 +18,15 @@ class CheckoutRepository {
     String? walletBalance,
     String? orderNote,
     Map<String, String>? prescriptions,
+    required bool billingSameAsShipping,
+    String? billingName,
+    String? billingMobile,
+    String? billingAddress,
+    String? billingCity,
+    String? billingPincode,
+    String? billingCountry,
+    String? billingState,
+    int? billingRegionId,
   }) async {
     try {
       final data = <String, dynamic>{
@@ -31,6 +40,17 @@ class CheckoutRepository {
           ApiParameters.walletBalance: walletBalance,
         if (orderNote != null && orderNote.isNotEmpty)
           ApiParameters.orderNote: orderNote,
+        ApiParameters.billingSameAsShipping: billingSameAsShipping ? '1' : '0',
+        if (!billingSameAsShipping) ...{
+          ApiParameters.billingName: billingName ?? '',
+          ApiParameters.billingMobile: billingMobile ?? '',
+          ApiParameters.billingAddress: billingAddress ?? '',
+          ApiParameters.billingCity: billingCity ?? '',
+          ApiParameters.billingPincode: billingPincode ?? '',
+          ApiParameters.billingCountry: billingCountry ?? '',
+          ApiParameters.billingState: billingState ?? '',
+          ApiParameters.billingRegionId: (billingRegionId ?? '').toString(),
+        },
       };
 
       // With prescription files attached, switch to multipart. Each file is

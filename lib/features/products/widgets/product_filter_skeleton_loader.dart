@@ -20,8 +20,8 @@ class ProductFilterSkeletonLoader extends StatelessWidget {
   Widget _railItem(Color color, double width) {
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: 14,
-        vertical: 14,
+        horizontal: ThemeConstants.paddingM,
+        vertical: ThemeConstants.paddingM,
       ),
       child: ShimmerBox(color, width: width, height: 13),
     );
@@ -30,7 +30,7 @@ class ProductFilterSkeletonLoader extends StatelessWidget {
   Widget _optionItem(Color color, double width) {
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: 14,
+        horizontal: ThemeConstants.paddingM,
         vertical: ThemeConstants.paddingM,
       ),
       child: Row(

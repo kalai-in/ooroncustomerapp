@@ -20,13 +20,13 @@ class CheckoutSkeletonLoader extends StatelessWidget {
           for (var i = 0; i < 3; i++) ...[
             Row(
               crossAxisAlignment: .start,
-              spacing: 12,
+              spacing: ThemeConstants.spaceM,
               children: [
                 ShimmerBox(color, width: 56, height: 56, radius: AppRadius.r8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: .start,
-                    spacing: 8,
+                    spacing: ThemeConstants.spaceS,
                     children: [
                       ShimmerBox(color, width: double.infinity, height: 13),
                       ShimmerBox(color, width: 70, height: 12),
@@ -46,7 +46,7 @@ class CheckoutSkeletonLoader extends StatelessWidget {
   Widget _row(Color color) {
     return CheckoutCard(
       child: Row(
-        spacing: 12,
+        spacing: ThemeConstants.spaceM,
         children: [
           ShimmerBox(color, width: 22, height: 22, radius: AppRadius.r6),
           Expanded(child: ShimmerBox(color, height: 13)),

@@ -59,7 +59,7 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
         crossAxisCount: isTablet ? 5 : 3,
         padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
         edgePad: 24,
-        spacing: 10 * (isTablet ? 1.75 : 1.0),
+        spacing: ThemeConstants.spaceM * (isTablet ? 1.75 : 1.0),
         mainAxisSpacing: 10 * (isTablet ? 1.75 : 1.0),
       );
     }
@@ -85,13 +85,16 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
       child: AppScaffold(
         appBar: CustomAppBar(
           title: context.translate(LanguageLabelKeys.favourites),
-          showBackButton: false,
+          showBackButton: true,
+          scrollController: _pager.controller,
           actions: [
             GridListToggle(
               isGrid: _isGrid,
               onToggle: (val) {
                 setState(() => _isGrid = val);
-                context.read<FavoriteCubit>().setGridView(val);
+                if (AuthHiveBox.instance.isLoggedIn) {
+                  context.read<FavoriteCubit>().setGridView(val);
+                }
                 if (_pager.controller.hasClients) {
                   _pager.controller.jumpTo(0);
                 }
@@ -132,23 +135,25 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
               final cartHasItems = context.select(
                 (CartCubit c) => c.state.totalItems > 0,
               );
-              return ProductListingView(
-                products: state.products,
-                isGrid: _isGrid,
-                controller: _pager.controller,
-                isFetchingMore: state.isLoadingMore,
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  ThemeConstants.paddingM,
-                  ThemeConstants.paddingM,
-                  ThemeConstants.paddingM,
-                  ThemeConstants.paddingM +
-                      (cartHasItems ? FloatingCartBar.barHeight : 0),
-                ),
-                onFavoriteTap: (product) =>
-                    context.read<FavoriteCubit>().toggle(product),
-                listLoadingMoreBuilder: (context) => const Padding(
-                  padding: EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXXL),
-                  child: LoadingWidget(),
+              return _pager.attach(
+                ProductListingView(
+                  products: state.products,
+                  isGrid: _isGrid,
+                  controller: _pager.controller,
+                  isFetchingMore: state.isLoadingMore,
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    ThemeConstants.paddingM,
+                    ThemeConstants.paddingM,
+                    ThemeConstants.paddingM,
+                    ThemeConstants.paddingM +
+                        (cartHasItems ? FloatingCartBar.barHeight : 0),
+                  ),
+                  onFavoriteTap: (product) =>
+                      context.read<FavoriteCubit>().toggle(product),
+                  listLoadingMoreBuilder: (context) => const Padding(
+                    padding: EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXXL),
+                    child: LoadingWidget(),
+                  ),
                 ),
               );
             },

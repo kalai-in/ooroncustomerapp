@@ -12,13 +12,22 @@ class CartRepository {
   CartRepository({ApiClient? apiClient})
     : _apiClient = apiClient ?? ApiClient();
 
-  Future<Cart> getCart({String? latitude, String? longitude}) async {
+  Future<Cart> getCart({
+    String? latitude,
+    String? longitude,
+    String? addressId,
+  }) async {
     try {
       final lat = latitude ?? SettingsHiveBox.instance.userLatitude;
       final lng = longitude ?? SettingsHiveBox.instance.userLongitude;
+      final cleanAddressId = addressId?.trim();
       final params = <String, dynamic>{
         ApiParameters.latitude: lat,
         ApiParameters.longitude: lng,
+        if (cleanAddressId != null &&
+            cleanAddressId.isNotEmpty &&
+            cleanAddressId != 'null')
+          ApiParameters.addressId: cleanAddressId,
       };
       final response = await _apiClient.get(
         ApiEndpoints.cart,

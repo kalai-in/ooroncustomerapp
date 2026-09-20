@@ -2,6 +2,7 @@ import 'package:customer/commons/widgets/api_country_phone_field.dart';
 import 'package:customer/commons/widgets/app_text_field.dart';
 import 'package:customer/commons/widgets/country_dropdown_field.dart';
 import 'package:customer/commons/widgets/password_requirements_checklist.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/commons/models/countries_model.dart';
@@ -100,7 +101,7 @@ class _SignUpFormState extends State<SignUpForm> {
           if (widget.showPhone) ...[
             Column(
               crossAxisAlignment: .start,
-              spacing: 8,
+              spacing: ThemeConstants.spaceS,
               children: [
                 AppText(
                   context.translate(LanguageLabelKeys.phoneNumber),

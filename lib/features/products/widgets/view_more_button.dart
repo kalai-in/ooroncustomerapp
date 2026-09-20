@@ -56,7 +56,7 @@ class ViewMoreButton extends StatelessWidget {
         margin: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingXS, ThemeConstants.paddingL, ThemeConstants.paddingL),
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingL,
-          vertical: 10,
+          vertical: ThemeConstants.paddingS,
         ),
         decoration: AppDecorations.box(
           color: context.cs.surfaceContainerHigh,
@@ -94,7 +94,7 @@ class ViewMoreButton extends StatelessWidget {
               flipX: Directionality.of(context) == TextDirection.rtl,
               child: AppSvgIcon(
                 AssetsConstants.arrowRightIcon,
-                size: 20,
+                size: ThemeConstants.iconM,
                 color: context.cs.onSurfaceVariant,
               ),
             ),

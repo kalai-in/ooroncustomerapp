@@ -17,14 +17,14 @@ class HomeBannerCarousel extends StatefulWidget {
   final List<Items> items;
   final Config? config;
   final int sectionPadding;
-  final int sectionBorderRadius;
+  final BorderRadius sectionBorderRadius;
 
   const HomeBannerCarousel({
     super.key,
     required this.items,
     this.config,
     this.sectionPadding = 0,
-    this.sectionBorderRadius = 0,
+    this.sectionBorderRadius = BorderRadius.zero,
   });
 
   @override
@@ -88,7 +88,7 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
 
   double _height(BuildContext context) {
     // Use responsive height if imageAspect is configured
-    final aspect = widget.config?.imageAspect;
+    final aspect = widget.config?.imageAspect?.resolve(_isTablet(context));
     if (aspect != null && aspect.isNotEmpty) {
       return ResponsiveHeightHelper.calculateFromAspect(
         imageAspect: aspect,
@@ -200,9 +200,7 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
 
     // SpotLight: continuous scale+opacity via AnimatedBuilder — carousel_slider style
     if (_style == CarouselStyle.spotLight) {
-      final double radius = widget.sectionBorderRadius > 0
-          ? widget.sectionBorderRadius.toDouble()
-          : 0.0;
+      final BorderRadius radius = widget.sectionBorderRadius;
       return Padding(
         padding: outerPadding,
         child: SizedBox(
@@ -238,7 +236,7 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
                 child: GestureDetector(
                   onTap: () => _handleTap(ctx, item),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(radius),
+                    borderRadius: radius,
                     child: url != null
                         ? AppNetworkImage(
                             url: url,
@@ -279,14 +277,12 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
 
     // Peek: current image large at left edge, next peeks on right
     if (_style == CarouselStyle.peek) {
-      final double radius = widget.sectionBorderRadius > 0
-          ? widget.sectionBorderRadius.toDouble()
-          : 0.0;
+      final BorderRadius radius = widget.sectionBorderRadius;
       return Padding(
         padding: outerPadding,
         child: Column(
           mainAxisSize: .min,
-          spacing: 8,
+          spacing: ThemeConstants.spaceS,
           children: [
             SizedBox(
               height: _height(context),
@@ -307,7 +303,7 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
                     child: Padding(
                       padding: EdgeInsetsDirectional.symmetric(horizontal: gap),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(radius),
+                        borderRadius: radius,
                         child: url != null
                             ? AppNetworkImage(
                                 url: url,
@@ -342,7 +338,7 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
       padding: outerPadding,
       child: Column(
         mainAxisSize: .min,
-        spacing: 8,
+        spacing: ThemeConstants.spaceS,
         children: [
           SizedBox(
             height: _height(context),
@@ -390,27 +386,23 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
     switch (_style) {
       case CarouselStyle.fullWidth:
         return ClipRRect(
-          borderRadius: BorderRadius.circular(
-            widget.sectionBorderRadius.toDouble(),
-          ),
+          borderRadius: widget.sectionBorderRadius,
           child: image,
         );
 
       case CarouselStyle.peek:
         return Padding(
           padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: 6,
+            horizontal: ThemeConstants.paddingXS,
             vertical: ThemeConstants.paddingXS,
           ),
           child: ClipRRect(borderRadius: AppRadius.r12, child: image),
         );
 
       case CarouselStyle.card:
-        final cardRadius = BorderRadius.circular(
-          widget.sectionBorderRadius > 0
-              ? widget.sectionBorderRadius.toDouble()
-              : 16.0,
-        );
+        final cardRadius = widget.sectionBorderRadius != BorderRadius.zero
+            ? widget.sectionBorderRadius
+            : BorderRadius.circular(16.0);
         final cardPad = widget.sectionPadding.toDouble();
         return Padding(
           padding: EdgeInsetsDirectional.symmetric(horizontal: cardPad),
@@ -425,22 +417,18 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
       case CarouselStyle.story:
         final storyRatio =
             ResponsiveHeightHelper.parseAspectRatio(
-              widget.config?.imageAspect,
+              widget.config?.imageAspect?.resolve(_isTablet(context)),
             ) ??
             (9 / 16);
         return Padding(
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: 6),
+          padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingXS),
           child: ClipRRect(
             child: AspectRatio(aspectRatio: storyRatio, child: image),
           ),
         );
 
       case CarouselStyle.spotLight:
-        final slRadius = BorderRadius.circular(
-          widget.sectionBorderRadius > 0
-              ? widget.sectionBorderRadius.toDouble()
-              : 0.0,
-        );
+        final slRadius = widget.sectionBorderRadius;
         final slPad = widget.sectionPadding.toDouble();
         return Padding(
           padding: EdgeInsetsDirectional.symmetric(horizontal: slPad),
@@ -457,7 +445,7 @@ class _StorySlider extends StatefulWidget {
   final int speedMs;
   final bool autoScroll;
   final bool infiniteLoop;
-  final int borderRadius;
+  final BorderRadius borderRadius;
   final void Function(BuildContext, Items) onItemTap;
   final String? Function(BuildContext, Items) imageUrlFn;
 
@@ -468,7 +456,7 @@ class _StorySlider extends StatefulWidget {
     required this.infiniteLoop,
     required this.onItemTap,
     required this.imageUrlFn,
-    this.borderRadius = 0,
+    this.borderRadius = BorderRadius.zero,
   });
 
   @override
@@ -526,7 +514,7 @@ class _StorySliderState extends State<_StorySlider>
     final url = widget.imageUrlFn(context, item);
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(widget.borderRadius.toDouble()),
+      borderRadius: widget.borderRadius,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -569,7 +557,7 @@ class _StorySliderState extends State<_StorySlider>
               children: List.generate(widget.items.length, (i) {
                 return Expanded(
                   child: Padding(
-                    padding: EdgeInsetsDirectional.only(start: i == 0 ? 0 : 3),
+                    padding: EdgeInsetsDirectional.only(start: i == 0 ? 0 : ThemeConstants.paddingXS),
                     child: AnimatedBuilder(
                       animation: _progress,
                       builder: (_, _) => LinearProgressIndicator(

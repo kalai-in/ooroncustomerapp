@@ -15,13 +15,13 @@ class FaqListSkeletonLoader extends StatelessWidget {
 
   Widget _tile(BuildContext context, Color color, double width) {
     return Container(
-      margin: const EdgeInsetsDirectional.only(bottom: 10),
+      margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
       decoration: AppDecorations.box(
         color: context.cs.surface,
         borderRadius: AppRadius.r8,
         border: Border.all(color: context.cs.outlineVariant),
       ),
-      padding: const EdgeInsetsDirectional.all(14),
+      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
       child: Row(
         children: [
           Expanded(child: ShimmerBox(color, width: width, height: 15)),

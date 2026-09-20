@@ -59,8 +59,8 @@ class ForceUpdateHelper {
 
   static Future<void> launchStore(AppSettingsData data) async {
     final url = Platform.isIOS
-        ? (data.iosAppUrl ?? '')
-        : (data.androidAppUrl ?? '');
+        ? (data.appstoreUrl ?? '')
+        : (data.playstoreUrl ?? '');
     if (url.isEmpty) return;
     try {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
@@ -106,7 +106,7 @@ class ForceUpdateDialog extends StatelessWidget {
         contentPadding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingM, ThemeConstants.paddingXL, 0),
         actionsPadding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingL),
         title: Column(
-          spacing: 12,
+          spacing: ThemeConstants.spaceM,
           children: [
             Container(
               width: 60,
@@ -118,7 +118,7 @@ class ForceUpdateDialog extends StatelessWidget {
               child: AppSvgIcon(
                 AssetsConstants.forceUpdateIcon,
                 color: context.cs.primary,
-                size: 30,
+                size: ThemeConstants.iconXL,
               ),
             ),
             AppText(
@@ -147,7 +147,7 @@ class ForceUpdateDialog extends StatelessWidget {
         actions: [
           Column(
             crossAxisAlignment: .stretch,
-            spacing: 8,
+            spacing: ThemeConstants.spaceS,
             children: [
               AppButton(
                 label: context.translate(LanguageLabelKeys.updateNow),

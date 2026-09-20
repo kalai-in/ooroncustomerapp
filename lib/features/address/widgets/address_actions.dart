@@ -116,11 +116,11 @@ class _AddressOptionTile extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingL,
-          vertical: 14,
+          vertical: ThemeConstants.paddingM,
         ),
         child: Row(
           children: [
-            AppSvgIcon(icon, size: 18, color: context.cs.onSurfaceVariant),
+            AppSvgIcon(icon, size: ThemeConstants.iconS, color: context.cs.onSurfaceVariant),
             AppSpacing.w12,
             Expanded(
               child: AppText(
@@ -135,7 +135,7 @@ class _AddressOptionTile extends StatelessWidget {
               flipX: Directionality.of(context) == TextDirection.rtl,
               child: AppSvgIcon(
                 AssetsConstants.arrowRightIcon,
-                size: 18,
+                size: ThemeConstants.iconS,
                 color: context.cs.onSurfaceVariant,
               ),
             ),

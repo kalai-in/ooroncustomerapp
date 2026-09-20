@@ -8,6 +8,13 @@ class OrderAddressModel {
   String? latitude;
   String? longitude;
 
+  /// `0` means billing address differs from this shipping address; `1` means
+  /// the order was billed to this same address.
+  int? billingSameAsShipping;
+
+  /// Billing address, present when [billingSameAsShipping] is `0`.
+  OrderAddressModel? billing;
+
   OrderAddressModel({
     this.name,
     this.address,
@@ -15,6 +22,8 @@ class OrderAddressModel {
     this.alternateMobile,
     this.latitude,
     this.longitude,
+    this.billingSameAsShipping,
+    this.billing,
   });
 
   OrderAddressModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +33,10 @@ class OrderAddressModel {
     alternateMobile = parseString(json['alternate_mobile']);
     latitude = parseString(json['latitude']);
     longitude = parseString(json['longitude']);
+    billingSameAsShipping = parseInt(json['billing_same_as_shipping']);
+    billing = json['billing'] is Map<String, dynamic>
+        ? OrderAddressModel.fromJson(json['billing'] as Map<String, dynamic>)
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -34,6 +47,8 @@ class OrderAddressModel {
     data['alternate_mobile'] = alternateMobile;
     data['latitude'] = latitude;
     data['longitude'] = longitude;
+    data['billing_same_as_shipping'] = billingSameAsShipping;
+    if (billing != null) data['billing'] = billing!.toJson();
     return data;
   }
 }

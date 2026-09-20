@@ -45,6 +45,21 @@ class ProductCardDetails extends StatelessWidget {
   static String _fmtCount(int n) =>
       n >= 1000 ? '${(n / 1000).toStringAsFixed(n >= 10000 ? 0 : 1)}k' : '$n';
 
+  /// Compact threshold — a details block narrower than this (phone grid
+  /// cards) uses the smaller font scale; wider blocks (list rows, tablet
+  /// grid cards) use the larger one. Shared with [ProductListItem] so both
+  /// card styles scale off the same rule.
+  static const double compactWidthThreshold = 140;
+
+  static double priceFontSize(bool isCompact) => isCompact ? 14.0 : 17.0;
+  static double strikeFontSize(bool isCompact) => isCompact ? 10.0 : 12.0;
+  static double discountFontSize(bool isCompact) => isCompact ? 11.0 : 13.0;
+  static double nameFontSize(bool isCompact) => isCompact ? 11.5 : 13.5;
+  static double starSize(bool isCompact) => isCompact ? ThemeConstants.iconXXS : ThemeConstants.iconXS;
+  static double ratingFontSize(bool isCompact) => isCompact ? 9.5 : 11.5;
+  static double timeFontSize(bool isCompact) => isCompact ? 9.5 : 11.0;
+  static double timeIconSize(bool isCompact) => isCompact ? 10.0 : 12.0;
+
   /// Estimates this widget's natural height for [product] at [cardWidth],
   /// mirroring the spacing/font sizes used in [build]. Used as a min-height
   /// floor so sibling cards in the same row/section can match the tallest
@@ -54,7 +69,7 @@ class ProductCardDetails extends StatelessWidget {
     ProductDataModel product,
     double cardWidth,
   ) {
-    final isCompact = cardWidth < 140;
+    final isCompact = cardWidth < compactWidthThreshold;
     final variants = product.variants ?? [];
     final activeV = variants.isNotEmpty ? variants.first : null;
     final rawPrice = (activeV?.price ?? product.price ?? 0).toDouble();
@@ -64,11 +79,11 @@ class ProductCardDetails extends StatelessWidget {
     final avgRating = (product.rating ?? 0).toDouble();
     final ratingCount = product.ratingCount ?? 0;
 
-    final priceFontSize = isCompact ? 14.0 : 17.0;
-    final discountFontSize = isCompact ? 11.0 : 13.0;
-    final nameFontSize = isCompact ? 11.5 : 13.5;
-    final ratingFontSize = isCompact ? 9.5 : 11.5;
-    final timeFontSize = isCompact ? 9.5 : 11.0;
+    final priceFontSize = ProductCardDetails.priceFontSize(isCompact);
+    final discountFontSize = ProductCardDetails.discountFontSize(isCompact);
+    final nameFontSize = ProductCardDetails.nameFontSize(isCompact);
+    final ratingFontSize = ProductCardDetails.ratingFontSize(isCompact);
+    final timeFontSize = ProductCardDetails.timeFontSize(isCompact);
 
     double height = priceFontSize * 1.35;
     if (hasDiscount) {
@@ -120,17 +135,17 @@ class ProductCardDetails extends StatelessWidget {
         : context.cs.onSurfaceVariant;
     final decimalPoint = product.decimalPoint ?? 2;
 
-    final priceFontSize = isCompact ? 14.0 : 17.0;
-    final strikeFontSize = isCompact ? 10.0 : 12.0;
-    final discountFontSize = isCompact ? 11.0 : 13.0;
-    final nameFontSize = isCompact ? 11.5 : 13.5;
-    final starSize = isCompact ? 13.0 : 16.0;
-    final ratingFontSize = isCompact ? 9.5 : 11.5;
-    final timeFontSize = isCompact ? 9.5 : 11.0;
-    final timeIconSize = isCompact ? 10.0 : 12.0;
+    final priceFontSize = ProductCardDetails.priceFontSize(isCompact);
+    final strikeFontSize = ProductCardDetails.strikeFontSize(isCompact);
+    final discountFontSize = ProductCardDetails.discountFontSize(isCompact);
+    final nameFontSize = ProductCardDetails.nameFontSize(isCompact);
+    final starSize = ProductCardDetails.starSize(isCompact);
+    final ratingFontSize = ProductCardDetails.ratingFontSize(isCompact);
+    final timeFontSize = ProductCardDetails.timeFontSize(isCompact);
+    final timeIconSize = ProductCardDetails.timeIconSize(isCompact);
 
     return Padding(
-      padding: EdgeInsetsDirectional.only(top: isCompact ? ThemeConstants.paddingXS : 6),
+      padding: EdgeInsetsDirectional.only(top: isCompact ? ThemeConstants.paddingXS : ThemeConstants.paddingXS),
       child: Column(
         mainAxisSize: .min,
         crossAxisAlignment: .start,
@@ -223,7 +238,7 @@ class ProductCardDetails extends StatelessWidget {
           if (product.isMinAlert == true ||
               product.timeToDeliver?.isNotEmpty == true)
             Padding(
-              padding: EdgeInsetsDirectional.only(top: isCompact ? 3 : ThemeConstants.paddingXS),
+              padding: EdgeInsetsDirectional.only(top: isCompact ? ThemeConstants.paddingXS : ThemeConstants.paddingXS),
               child: Row(
                 children: [
                   if (product.timeToDeliver?.isNotEmpty == true) ...[
@@ -254,7 +269,7 @@ class ProductCardDetails extends StatelessWidget {
                       quarterTurns: -2,
                       child: AppSvgIcon(
                         AssetsConstants.fewLeftIcon,
-                        size: 12,
+                        size: ThemeConstants.iconXXS,
                         color: mutedColor,
                       ),
                     ),

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:customer/utils/extensions/string_extensions.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class HomeGridBanner extends StatelessWidget {
   final List<Items> items;
@@ -160,7 +161,7 @@ class HomeGridBanner extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         padding: gap == 0
-            ? const EdgeInsetsDirectional.symmetric(horizontal: 10)
+            ? const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingS)
             : EdgeInsets.zero,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: effectiveRows,
@@ -231,7 +232,7 @@ class HomeGridBanner extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: 10,
+              horizontal: ThemeConstants.paddingS,
             ),
             /*  : EdgeInsets.zero */
             child: AppText(

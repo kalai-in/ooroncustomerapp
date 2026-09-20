@@ -66,12 +66,12 @@ class _OrderHelpButtonState extends State<OrderHelpButton> {
         borderRadius: AppRadius.r20,
         borderColor: context.cs.onSurfaceVariant,
         contentPadding: const EdgeInsetsDirectional.symmetric(
-          horizontal: 14,
-          vertical: 6,
+          horizontal: ThemeConstants.paddingM,
+          vertical: ThemeConstants.paddingXS,
         ),
         prefixIcon: AppSvgIcon(
           AssetsConstants.supportChatIcon,
-          size: 16,
+          size: ThemeConstants.iconXS,
           color: context.cs.onSurfaceVariant,
         ),
       ),

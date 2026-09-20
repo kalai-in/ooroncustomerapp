@@ -91,7 +91,7 @@ class ApiCountryPhoneField extends StatelessWidget {
     return Column(
       crossAxisAlignment: .start,
       mainAxisSize: .min,
-      spacing: 6,
+      spacing: ThemeConstants.spaceS,
       children: [
         AppTextField(
           controller: controller,
@@ -140,7 +140,10 @@ class _CountryDialCodeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 14, end: 6),
+      padding: const EdgeInsetsDirectional.only(
+        start: ThemeConstants.spaceM,
+        end: ThemeConstants.spaceXS,
+      ),
       child: Row(
         mainAxisSize: .min,
         spacing: ThemeConstants.spaceXS,
@@ -151,7 +154,7 @@ class _CountryDialCodeChip extends StatelessWidget {
             height: 20,
             errorWidget: AppSvgIcon(
               AssetsConstants.flagIcon,
-              size: 16,
+              size: ThemeConstants.iconXS,
               color: context.cs.onSurfaceVariant,
             ),
           ),
@@ -161,7 +164,7 @@ class _CountryDialCodeChip extends StatelessWidget {
           ),
           AppSvgIcon(
             AssetsConstants.arrowDownIcon,
-            size: 18,
+            size: ThemeConstants.iconS,
             color: context.cs.onSurfaceVariant,
           ),
           Container(width: 1, height: 22, color: context.cs.outline),

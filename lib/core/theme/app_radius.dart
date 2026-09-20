@@ -66,6 +66,10 @@ class AppRadius {
     bottomLeft: md,
     bottomRight: md,
   );
+  static const BorderRadius bottom16 = BorderRadius.only(
+    bottomLeft: lg,
+    bottomRight: lg,
+  );
 
   // Specific shapes
   // Rounds the "inner" (start-facing) edge of a side-pinned element

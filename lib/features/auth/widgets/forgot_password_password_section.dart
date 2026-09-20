@@ -3,6 +3,7 @@ import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/commons/widgets/app_text_field.dart';
 import 'package:customer/commons/widgets/password_requirements_checklist.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
@@ -46,7 +47,7 @@ class _ForgotPasswordPasswordSectionState
           prefixIcon: AppSvgIcon(
             AssetsConstants.lockIcon,
             color: context.cs.primary,
-            size: 20,
+            size: ThemeConstants.iconM,
           ),
           isPassword: true,
           validator: (v) => v.validateNewPassword(context),
@@ -69,7 +70,7 @@ class _ForgotPasswordPasswordSectionState
           prefixIcon: AppSvgIcon(
             AssetsConstants.lockIcon,
             color: context.cs.primary,
-            size: 20,
+            size: ThemeConstants.iconM,
           ),
           isPassword: true,
           validator: (v) => v.validateConfirmPassword(

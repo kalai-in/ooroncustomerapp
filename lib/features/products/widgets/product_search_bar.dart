@@ -31,9 +31,9 @@ class ProductSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).cardColor,
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, 10, ThemeConstants.paddingL, ThemeConstants.paddingM),
+      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingM),
       child: Row(
-        spacing: 8,
+        spacing: ThemeConstants.spaceS,
         children: [
           Expanded(
             child: AppTextField(
@@ -50,7 +50,7 @@ class ProductSearchBar extends StatelessWidget {
               ),
               prefixIcon: AppSvgIcon(
                 AssetsConstants.searchIcon,
-                size: 24,
+                size: ThemeConstants.iconL,
                 color: context.cs.onSurfaceVariant,
                 fit: BoxFit.scaleDown,
               ),
@@ -58,7 +58,7 @@ class ProductSearchBar extends StatelessWidget {
                   ? IconButton(
                       icon: AppSvgIcon(
                         AssetsConstants.closeIcon,
-                        size: 18,
+                        size: ThemeConstants.iconS,
                         color: context.cs.onSurfaceVariant,
                       ),
                       onPressed: onClear,
@@ -88,7 +88,7 @@ class ProductSearchBar extends StatelessWidget {
                 ),
                 child: AppSvgIcon(
                   AssetsConstants.filterSettingIcon,
-                  size: 20,
+                  size: ThemeConstants.iconM,
                   color: hasActiveSort
                       ? context.cs.primary
                       : context.cs.onSurfaceVariant,

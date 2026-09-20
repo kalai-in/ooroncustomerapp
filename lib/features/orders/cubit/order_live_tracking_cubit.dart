@@ -41,6 +41,15 @@ class OrderLiveTrackingCubit extends Cubit<OrderLiveTrackingState> {
     );
   }
 
+  /// Stops the 30s poll — called once the order leaves the out-for-delivery
+  /// state (delivered/cancelled/etc.) so a stale rider position isn't kept
+  /// alive after live tracking no longer applies.
+  void stopTracking() {
+    _timer?.cancel();
+    _timer = null;
+    if (state is! OrderLiveTrackingInitial) emit(OrderLiveTrackingInitial());
+  }
+
   Future<void> _fetch(String orderId) async {
     if (state is OrderLiveTrackingInitial) emit(OrderLiveTrackingLoading());
     try {

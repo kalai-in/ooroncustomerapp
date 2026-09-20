@@ -12,8 +12,21 @@ import 'package:customer/features/auth/cubits/auth_cubit.dart';
 import 'package:customer/commons/widgets/app_scaffold.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
-class AccountSettingsScreen extends StatelessWidget {
+class AccountSettingsScreen extends StatefulWidget {
   const AccountSettingsScreen({super.key});
+
+  @override
+  State<AccountSettingsScreen> createState() => _AccountSettingsScreenState();
+}
+
+class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +34,11 @@ class AccountSettingsScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(
         title: context.translate(LanguageLabelKeys.settings),
+        scrollController: _scrollController,
       ),
       body: ListView(
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, 28),
+        controller: _scrollController,
+        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingXXL+ThemeConstants.paddingXS),
         children: [
           MenuCard(
             title: context.translate(LanguageLabelKeys.general),

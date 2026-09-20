@@ -39,7 +39,7 @@ class LocationTile extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: .start,
-      spacing: 8,
+      spacing: ThemeConstants.spaceS,
       children: [
         AppText(
           label,
@@ -50,12 +50,12 @@ class LocationTile extends StatelessWidget {
         ),
         Row(
           crossAxisAlignment: .start,
-          spacing: 8,
+          spacing: ThemeConstants.spaceS,
           children: [
             AppSvgIcon(
               isPickup ? AssetsConstants.addressIcon : AssetsConstants.flagIcon,
               color: iconColor,
-              size: 20,
+              size: ThemeConstants.iconM,
             ),
             Expanded(
               child: Column(
@@ -105,7 +105,7 @@ class LocationTile extends StatelessWidget {
                   child: AppSvgIcon(
                     AssetsConstants.phoneIcon,
                     color: context.cs.primary,
-                    size: 18,
+                    size: ThemeConstants.iconS,
                   ),
                 ),
               ),

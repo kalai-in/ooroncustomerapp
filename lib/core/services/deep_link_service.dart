@@ -31,7 +31,7 @@ class DeepLinkService {
   StreamSubscription<Uri>? _sub;
 
   String get _scheme {
-    final s = SettingsHiveBox.instance.getAppSettings()?.deepLinkScheme;
+    final s = SettingsHiveBox.instance.getAppSettings()?.deeplinkSchema;
     return (s != null && s.isNotEmpty && s != 'null')
         ? s
         : AppConfig.deeplinkScheme;

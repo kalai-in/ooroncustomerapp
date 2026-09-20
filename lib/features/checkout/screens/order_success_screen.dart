@@ -100,9 +100,9 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
           child: Padding(
             padding: EdgeInsetsDirectional.fromSTEB(
               ThemeConstants.paddingL,
-              14,
+              ThemeConstants.paddingM,
               ThemeConstants.paddingL,
-              14 + context.bottomSafePadding,
+              ThemeConstants.paddingM + context.bottomSafePadding,
             ),
             child: Column(
               mainAxisSize: .min,
@@ -128,11 +128,8 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
                       } else {
                         AppNavigator.pushReplacementNamed(
                           context,
-                          RouteNames.orderDetail,
-                          arguments: OrderDetailArgs(
-                            orderId: widget.orderId,
-                            isOngoing: true,
-                          ),
+                          RouteNames.orderTracking,
+                          arguments: widget.orderId,
                         );
                       }
                     },

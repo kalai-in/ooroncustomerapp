@@ -4,6 +4,7 @@ import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
+import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_scaffold.dart';
 import 'package:customer/commons/widgets/app_text.dart';
@@ -32,7 +33,7 @@ class MaintenanceScreen extends StatelessWidget {
               children: [
                 AppSvgIcon(
                   AssetsConstants.noMaintenanceFound,
-                  size: 180,
+                  size: context.widthFraction(0.48),
                   color: context.cs.primary,
                   useColorMapper: true,
                 ),

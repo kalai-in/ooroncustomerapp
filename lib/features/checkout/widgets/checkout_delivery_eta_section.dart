@@ -2,10 +2,12 @@ import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_decorations.dart';
+import 'package:customer/utils/app_date_formatter.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class CheckoutDeliveryEtaSection extends StatelessWidget {
   const CheckoutDeliveryEtaSection({
@@ -13,6 +15,7 @@ class CheckoutDeliveryEtaSection extends StatelessWidget {
     required this.distance,
     required this.itemCount,
     this.timeToDeliver,
+    this.estimatedDeliveryDate,
   });
 
   /// Raw distance string from API, e.g. "7.1 km".
@@ -21,20 +24,26 @@ class CheckoutDeliveryEtaSection extends StatelessWidget {
   /// ETA string from API, e.g. "21 mins". Empty/null for ecommerce.
   final String? timeToDeliver;
 
+  /// Estimated delivery date from API. Empty/null for quick commerce.
+  final String? estimatedDeliveryDate;
+
   /// Number of items in the cart, shown in the subtitle.
   final int itemCount;
 
   @override
   Widget build(BuildContext context) {
     final eta = timeToDeliver ?? '';
-    final title = eta.isEmpty
-        ? context.translate(LanguageLabelKeys.delivery)
-        : '${context.translate(LanguageLabelKeys.deliveryIn)} $eta';
+    final estimatedDate = estimatedDeliveryDate ?? '';
+    final title = eta.isNotEmpty
+        ? '${context.translate(LanguageLabelKeys.deliveryIn)} $eta'
+        : estimatedDate.isNotEmpty
+        ? '${context.translate(LanguageLabelKeys.estimatedDeliveryBy)} ${AppDateFormatter.formatDate(estimatedDate)}'
+        : context.translate(LanguageLabelKeys.delivery);
 
     return Padding(
-      padding: const EdgeInsetsDirectional.only(bottom: 14),
+      padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingM),
       child: Row(
-        spacing: 10, crossAxisAlignment: .start,
+        spacing: ThemeConstants.spaceM, crossAxisAlignment: .start,
         children: [
           Container(
             width: 36,
@@ -46,7 +55,7 @@ class CheckoutDeliveryEtaSection extends StatelessWidget {
             child: AppSvgIcon(
               AssetsConstants.orderTimeIcon,
               color: context.cs.onSecondaryContainer,
-              size: 24,
+              size: ThemeConstants.iconL,
               fit: BoxFit.scaleDown,
             ),
           ),

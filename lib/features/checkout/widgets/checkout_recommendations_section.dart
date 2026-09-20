@@ -1,5 +1,6 @@
 import 'package:customer/commons/utils/pagination_scroll_controller.dart';
 import 'package:customer/commons/widgets/loading_widget.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_sizes.dart';
 import 'package:customer/core/theme/app_spacing.dart';
@@ -101,7 +102,7 @@ class _RecommendationRowState extends State<_RecommendationRow> {
     return CheckoutCard(
       child: Column(
         crossAxisAlignment: .start,
-        spacing: 10,
+        spacing: ThemeConstants.spaceM,
         children: [
           AppText(
             widget.title,
@@ -118,26 +119,28 @@ class _RecommendationRowState extends State<_RecommendationRow> {
                   widget.products.length + (widget.isLoadingMore ? 1 : 0);
               return SizedBox(
                 height: 265,
-                child: ListView.separated(
-                  controller: _pager.controller,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: itemCount,
-                  separatorBuilder: (_, _) => AppSpacing.w10,
-                  itemBuilder: (context, i) {
-                    if (i >= widget.products.length) {
+                child: _pager.attach(
+                  ListView.separated(
+                    controller: _pager.controller,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: itemCount,
+                    separatorBuilder: (_, _) => AppSpacing.w10,
+                    itemBuilder: (context, i) {
+                      if (i >= widget.products.length) {
+                        return SizedBox(
+                          width: itemWidth,
+                          child: const Center(child: LoadingWidget()),
+                        );
+                      }
                       return SizedBox(
                         width: itemWidth,
-                        child: const Center(child: LoadingWidget()),
+                        child: ProductCard(
+                          product: widget.products[i],
+                          heroSuffix: widget.heroSuffix,
+                        ),
                       );
-                    }
-                    return SizedBox(
-                      width: itemWidth,
-                      child: ProductCard(
-                        product: widget.products[i],
-                        heroSuffix: widget.heroSuffix,
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 ),
               );
             },

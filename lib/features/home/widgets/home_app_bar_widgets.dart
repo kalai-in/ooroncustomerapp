@@ -16,6 +16,7 @@ import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../commons/widgets/app_text.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class HomeAnimatedGradient extends ImplicitlyAnimatedWidget {
   final List<Color> colors;
@@ -101,12 +102,12 @@ class HomeModeToggle extends StatelessWidget {
               duration: const Duration(milliseconds: 220),
               curve: Curves.easeOut,
               margin: EdgeInsetsDirectional.only(
-                end: i == 0 ? 6 : 0,
-                start: i == 1 ? 6 : 0,
+                end: i == 0 ? ThemeConstants.paddingXS : 0,
+                start: i == 1 ? ThemeConstants.paddingXS : 0,
               ),
               padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: 14,
-                vertical: 10,
+                horizontal: ThemeConstants.paddingM,
+                vertical: ThemeConstants.paddingS,
               ),
               decoration: AppDecorations.box(
                 color: active
@@ -199,7 +200,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
         context,
         BlocProvider(
           create: (_) => SearchProductCubit(),
-          child: const ProductSearchScreen(),
+          child: ProductSearchScreen(searchSuggestions: widget.searchSuggestions),
         ),
       ),
       child: Container(
@@ -220,7 +221,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
             AppSpacing.w12,
             AppSvgIcon(
               AssetsConstants.searchIcon,
-              size: 18,
+              size: ThemeConstants.iconS,
               color: context.cs.onSurfaceVariant,
               fit: BoxFit.scaleDown,
             ),
@@ -272,13 +273,13 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
             Container(
               width: 1,
               height: 22,
-              margin: const EdgeInsetsDirectional.symmetric(horizontal: 10),
+              margin: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingS),
               color: context.cs.outline,
             ),
             AppSvgIcon(
               AssetsConstants.microphoneIcon,
               color: context.cs.onSurfaceVariant,
-              size: 18,
+              size: ThemeConstants.iconS,
             ),
             AppSpacing.w12,
           ],
@@ -317,7 +318,7 @@ class HomeNavTabBar extends StatelessWidget {
       labelColor: resolvedTextColor,
       unselectedLabelColor: resolvedTextColor.withValues(alpha: 0.6),
       padding: EdgeInsetsDirectional.zero,
-      labelPadding: const EdgeInsetsDirectional.symmetric(horizontal: 15),
+      labelPadding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM),
       tabs: tabs.asMap().entries.map((e) {
         final sh = context.screenHeight;
         final sw = context.screenWidth;

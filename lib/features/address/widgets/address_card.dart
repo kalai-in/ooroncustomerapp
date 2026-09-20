@@ -81,10 +81,10 @@ class AddressCard extends StatelessWidget {
               onTap: onTap,
               borderRadius: AppRadius.r16,
               child: Padding(
-                padding: const EdgeInsetsDirectional.all(14),
+                padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
                 child: Row(
                   crossAxisAlignment: .start,
-                  spacing: 12,
+                  spacing: ThemeConstants.spaceM,
                   children: [
                     Container(
                       width: 40,
@@ -95,7 +95,7 @@ class AddressCard extends StatelessWidget {
                       ),
                       child: AppSvgIcon(
                         _typeIcon,
-                        size: 20,
+                        size: ThemeConstants.iconM,
                         color: context.cs.primary,
                         fit: BoxFit.scaleDown,
                       ),
@@ -103,10 +103,10 @@ class AddressCard extends StatelessWidget {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: .start,
-                        spacing: 4,
+                        spacing: ThemeConstants.spaceXS,
                         children: [
                           Row(
-                            spacing: 6,
+                            spacing: ThemeConstants.spaceS,
                             children: [
                               AppText(
                                 _typeLabel(context),
@@ -163,7 +163,7 @@ class AddressCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsetsDirectional.only(top: 6, end: ThemeConstants.paddingXS),
+            padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingXS, end: ThemeConstants.paddingXS),
             child: InkWell(
               onTap: () => showAddressOptionsSheet(
                 context,
@@ -175,7 +175,7 @@ class AddressCard extends StatelessWidget {
                 padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
                 child: AppSvgIcon(
                   AssetsConstants.menuIcon,
-                  size: 20,
+                  size: ThemeConstants.iconM,
                   color: context.cs.onSurfaceVariant,
                 ),
               ),
@@ -197,7 +197,7 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: ThemeConstants.paddingS,
-        vertical: 2,
+        vertical: ThemeConstants.paddingXS,
       ),
       decoration: AppDecorations.box(
         color: color.withValues(alpha: 0.1),

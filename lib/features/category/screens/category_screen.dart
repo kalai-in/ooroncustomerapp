@@ -106,6 +106,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             appBar: CustomAppBar(
               title: context.translate(LanguageLabelKeys.categories),
               showBackButton: false,
+              scrollController: _pager.controller,
             ),
             // Offline lives in the body so the app bar (and its back button on
             // the pushed-route variant of this screen) stays usable.
@@ -181,30 +182,32 @@ class _CategoryScreenState extends State<CategoryScreen> {
     return RefreshIndicator(
       color: context.cs.primary,
       onRefresh: () async => context.read<CategoryCubit>().loadCategories(),
-      child: GridView.builder(
-        controller: _pager.controller,
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: ThemeConstants.paddingM,
-          vertical: ThemeConstants.paddingL,
+      child: _pager.attach(
+        GridView.builder(
+          controller: _pager.controller,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: ThemeConstants.paddingM,
+            vertical: ThemeConstants.paddingL,
+          ),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 6 * (isTablet ? 1.75 : 1.0),
+            crossAxisSpacing: 10 * (isTablet ? 1.75 : 1.0),
+            childAspectRatio: isTablet ? 0.55 : 0.65,
+          ),
+          itemCount: itemCount,
+          itemBuilder: (context, index) {
+            if (index >= state.data.length) {
+              return const CategoryTileShimmer();
+            }
+            return CategoryTile(
+              imageUrl: state.data[index].imageUrl ?? '',
+              name: state.data[index].name ?? '',
+              onTap: () => _onCategoryTap(context, state.data[index]),
+            );
+          },
         ),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 6 * (isTablet ? 1.75 : 1.0),
-          crossAxisSpacing: 10 * (isTablet ? 1.75 : 1.0),
-          childAspectRatio: isTablet ? 0.55 : 0.65,
-        ),
-        itemCount: itemCount,
-        itemBuilder: (context, index) {
-          if (index >= state.data.length) {
-            return const CategoryTileShimmer();
-          }
-          return CategoryTile(
-            imageUrl: state.data[index].imageUrl ?? '',
-            name: state.data[index].name ?? '',
-            onTap: () => _onCategoryTap(context, state.data[index]),
-          );
-        },
       ),
     );
   }

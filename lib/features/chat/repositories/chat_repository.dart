@@ -132,11 +132,15 @@ class ChatRepository {
     List<String>? audioPaths,
     List<String>? videoPaths,
     List<String>? filePaths,
+    String? latitude,
+    String? longitude,
   }) async {
     try {
       final fields = <String, dynamic>{
         ApiParameters.conversationId: conversationId,
         ApiParameters.message: message,
+        ApiParameters.latitude: ?latitude,
+        ApiParameters.longitude: ?longitude,
       };
       if (imagePaths != null && imagePaths.isNotEmpty) {
         fields[ApiParameters.images] = await Future.wait(

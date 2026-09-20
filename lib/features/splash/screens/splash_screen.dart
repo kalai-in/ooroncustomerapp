@@ -28,16 +28,12 @@ class _SplashScreenState extends State<SplashScreen>
     with WidgetsBindingObserver {
   AppSettingsData? _pendingForceUpdateData;
   bool _dialogShowing = false;
-  bool _hasNavigated = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     context.read<SettingsCubit>().loadSettings();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkExistingStates();
-    });
   }
 
   @override
@@ -56,28 +52,8 @@ class _SplashScreenState extends State<SplashScreen>
     }
   }
 
-  Future<void> _checkExistingStates() async {
-    if (!mounted || _hasNavigated) return;
-    final settingsState = context.read<SettingsCubit>().state;
-    if (settingsState is SettingsLoaded) {
-      final data = settingsState.settings.data;
-      if (data != null) {
-        if (data.appModeCustomer == '1') {
-          _navigateToMaintenance(data.appModeCustomerRemark);
-          return;
-        }
-        await _checkAndHandleUpdate(data);
-      } else {
-        _navigate();
-      }
-    } else if (settingsState is SettingsError) {
-      _navigate();
-    }
-  }
-
   void _navigateToMaintenance(String? remark) {
-    if (!mounted || _hasNavigated) return;
-    _hasNavigated = true;
+    if (!mounted) return;
     AppNavigator.pushReplacementNamed(
       context,
       RouteNames.maintenance,
@@ -87,22 +63,20 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigate() {
-    if (!mounted || _hasNavigated) return;
-    _hasNavigated = true;
-
+    if (!mounted) return;
     final settingsState = context.read<SettingsCubit>().state;
-    if (settingsState is SettingsLoaded) {
-      final data = settingsState.settings.data;
-      if (data?.appModeCustomer == '1') {
-        _hasNavigated = false;
-        _navigateToMaintenance(data?.appModeCustomerRemark);
-        return;
-      }
+    if (settingsState is! SettingsLoaded) return;
+    final data = settingsState.settings.data;
+    if (data?.appModeCustomer == '1') {
+      _navigateToMaintenance(data?.appModeCustomerRemark);
+      return;
     }
     _pendingForceUpdateData = null;
     if (!mounted) return;
     if (!SettingsHiveBox.instance.onboardingSeen) {
       AppNavigator.pushReplacementNamed(context, RouteNames.onboarding);
+    } else if (!SettingsHiveBox.instance.hasLocation) {
+      AppNavigator.pushReplacementNamed(context, RouteNames.locationRequired);
     } else {
       AppNavigator.pushReplacementNamed(context, RouteNames.main);
     }
@@ -110,10 +84,9 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkAndHandleUpdate(AppSettingsData data) async {
-    if (!mounted || _hasNavigated) return;
     final status = await ForceUpdateHelper.getStatus(data);
 
-    if (!mounted || _hasNavigated) return;
+    if (!mounted) return;
 
     if (status == UpdateStatus.none) {
       _pendingForceUpdateData = null;

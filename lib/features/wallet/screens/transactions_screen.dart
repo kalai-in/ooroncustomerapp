@@ -56,6 +56,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: CustomAppBar(
             title: context.translate(LanguageLabelKeys.transactionHistory),
+            scrollController: _pager.controller,
           ),
           // Offline replaces the body only, so the app bar's back button
           // keeps working.
@@ -107,20 +108,22 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     return RefreshIndicator(
       color: context.cs.primary,
       onRefresh: () async => context.read<TransactionCubit>().refresh(),
-      child: ListView.builder(
-        controller: _pager.controller,
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
-        itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == state.data.length) {
-            return PaginatedListFooter(
-              isLoadingMore: state.isFetchingMore,
-              hasMore: state.hasMore,
-            );
-          }
-          return TransactionItem(txn: state.data[index]);
-        },
+      child: _pager.attach(
+        ListView.builder(
+          controller: _pager.controller,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+          itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == state.data.length) {
+              return PaginatedListFooter(
+                isLoadingMore: state.isFetchingMore,
+                hasMore: state.hasMore,
+              );
+            }
+            return TransactionItem(txn: state.data[index]);
+          },
+        ),
       ),
     );
   }

@@ -184,7 +184,7 @@ class _RateProductSheetState extends State<RateProductSheet> {
               Center(
                 child: StarRatingRow(
                   rating: _rate.toDouble(),
-                  size: 32,
+                  size: ThemeConstants.iconXL,
                   outlineColor: context.cs.outlineVariant,
                   enabled: !isSubmitting,
                   onStarTap: (rate) => setState(() => _rate = rate),
@@ -225,7 +225,7 @@ class _RateProductSheetState extends State<RateProductSheet> {
                               child: IconButton(
                                 icon: const AppSvgIcon(
                                   AssetsConstants.closeCircleIcon,
-                                  size: 18,
+                                  size: ThemeConstants.iconS,
                                 ),
                                 onPressed: isSubmitting
                                     ? null
@@ -259,7 +259,7 @@ class _RateProductSheetState extends State<RateProductSheet> {
                               child: IconButton(
                                 icon: const AppSvgIcon(
                                   AssetsConstants.closeCircleIcon,
-                                  size: 18,
+                                  size: ThemeConstants.iconS,
                                 ),
                                 onPressed: isSubmitting
                                     ? null

@@ -108,7 +108,7 @@ class _ZonePickerSheetState extends State<_ZonePickerSheet> {
               padding: const EdgeInsetsDirectional.only(start: ThemeConstants.paddingL, end: ThemeConstants.paddingS),
               child: AppSvgIcon(
                 AssetsConstants.searchIcon,
-                size: 18,
+                size: ThemeConstants.iconS,
                 color: context.cs.onSurfaceVariant,
                 fit: BoxFit.scaleDown,
               ),
@@ -119,7 +119,7 @@ class _ZonePickerSheetState extends State<_ZonePickerSheet> {
             ),
             // No `border` override — the default outline set is what makes the
             // field visible against the sheet's surface-coloured background.
-            contentPadding: const EdgeInsetsDirectional.symmetric(vertical: 10),
+            contentPadding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingS),
           ),
           AppSpacing.h12,
         ],
@@ -157,7 +157,7 @@ class _ZonePickerSheetState extends State<_ZonePickerSheet> {
                         margin: const EdgeInsetsDirectional.only(bottom: 2),
                         leading: AppSvgIcon(
                           AssetsConstants.addressIcon,
-                          size: 18,
+                          size: ThemeConstants.iconS,
                           color: context.cs.onSurface,
                         ),
                         onTap: () => AppNavigator.pop(context, zone),
@@ -205,7 +205,7 @@ class _ErrorView extends StatelessWidget {
         children: [
           AppSvgIcon(
             AssetsConstants.locationOffIcon,
-            size: 24,
+            size: ThemeConstants.iconL,
             color: context.cs.error,
           ),
           AppSpacing.h8,
@@ -221,7 +221,7 @@ class _ErrorView extends StatelessWidget {
             onPressed: onRetry,
             icon: AppSvgIcon(
               AssetsConstants.refreshIcon,
-              size: 18,
+              size: ThemeConstants.iconS,
               color: context.cs.primary,
             ),
             label: AppText(context.translate(LanguageLabelKeys.retry)),

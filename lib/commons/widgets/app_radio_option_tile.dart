@@ -3,6 +3,7 @@ import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 /// Common selectable row used with a [RadioGroup]: leading (optional) +
 /// title (+ optional subtitle) + trailing [Radio]. Used across bottom
@@ -34,8 +35,8 @@ class AppRadioOptionTile<T> extends StatelessWidget {
     this.highlightSelectedColor = true,
     this.margin,
     this.padding = const EdgeInsetsDirectional.symmetric(
-      horizontal: 5,
-      vertical: 5,
+      horizontal: ThemeConstants.paddingXS,
+      vertical: ThemeConstants.paddingXS,
     ),
     this.trailing,
   });
@@ -52,7 +53,7 @@ class AppRadioOptionTile<T> extends StatelessWidget {
     );
 
     final content = Row(
-      spacing: 14,
+      spacing: ThemeConstants.spaceL,
       children: [
         ?leading,
         Expanded(
@@ -60,7 +61,7 @@ class AppRadioOptionTile<T> extends StatelessWidget {
               ? AppText(title, style: titleStyle)
               : Column(
                   crossAxisAlignment: .start,
-                  spacing: 2,
+                  spacing: ThemeConstants. spaceXXS,
                   children: [
                     AppText(title, style: titleStyle),
                     AppText(

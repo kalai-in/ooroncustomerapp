@@ -22,6 +22,8 @@ import 'package:customer/features/cart/cubit/cart_recommendations_cubit.dart';
 import 'package:customer/features/cart/cubit/guest_cart_fetch_cubit.dart';
 import 'package:customer/features/cart/models/cart_model.dart';
 import 'package:customer/features/checkout/cubit/place_order_cubit.dart';
+import 'package:customer/features/checkout/models/billing_address_model.dart';
+import 'package:customer/features/checkout/widgets/billing_address_sheet.dart';
 import 'package:customer/features/checkout/utils/checkout_totals.dart';
 import 'package:customer/features/checkout/utils/checkout_variant_id.dart';
 import 'package:customer/features/address/widgets/address_picker_sheet.dart';
@@ -64,6 +66,9 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   String _orderNote = '';
   bool _useWallet = false;
   Timer? _guestSyncDebounce;
+
+  bool _billingSameAsShipping = true;
+  BillingAddressData? _billingAddress;
 
   // Gateway (stripe/razorpay/paystack/webview) is launched straight off
   // checkout once the order is created — no intermediate payment-methods
@@ -123,7 +128,10 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     super.initState();
     initRazorpay();
     if (_isLoggedIn) {
-      context.read<CartFetchCubit>().fetchCart();
+      // Don't fetch here without addressId — AddressCubit resolves the
+      // default address asynchronously below, and _onAddressResolved fires
+      // the real, address-scoped fetch once it lands. Firing an unscoped
+      // fetch here races it and can leave the cart with no address_id.
       context.read<AddressCubit>().fetchInitial();
       context.read<PaymentMethodsCubit>().loadPaymentMethods();
     } else {
@@ -197,6 +205,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     context.read<CartFetchCubit>().fetchCart(
       latitude: _addressLat,
       longitude: _addressLng,
+      addressId: _selectedAddress?.id,
     );
   }
 
@@ -213,6 +222,33 @@ class _CheckoutScreenState extends State<CheckoutScreen>
       latitude: _addressLat,
       longitude: _addressLng,
     );
+  }
+
+  Future<void> _openBillingAddressSheet() async {
+    final result = await showBillingAddressSheet(
+      context,
+      initial: _billingAddress,
+    );
+    if (result != null && mounted) {
+      setState(() {
+        _billingAddress = result;
+        _billingSameAsShipping = false;
+      });
+    }
+  }
+
+  void _onBillingToggle(bool sameAsShipping) {
+    if (!sameAsShipping) {
+      // Unchecking requires a filled billing address — open the sheet
+      // straight away instead of leaving the checkbox in a state with no
+      // data behind it.
+      _openBillingAddressSheet();
+      return;
+    }
+    setState(() {
+      _billingSameAsShipping = true;
+      _billingAddress = null;
+    });
   }
 
   void _removePromo() {
@@ -320,6 +356,16 @@ class _CheckoutScreenState extends State<CheckoutScreen>
       return;
     }
 
+    if (!_billingSameAsShipping && _billingAddress == null) {
+      AppSnackBar.show(
+        context: context,
+        message: context.translate(LanguageLabelKeys.pleaseFillBillingAddress),
+        type: SnackBarType.error,
+      );
+      _openBillingAddressSheet();
+      return;
+    }
+
     final walletBalance = cartData.userBalance ?? 0.0;
     final orderAmount = _postPromoTotal(cartData);
     final walletCoversFull = resolveCheckoutWalletCoversFull(
@@ -393,6 +439,15 @@ class _CheckoutScreenState extends State<CheckoutScreen>
       walletUsed: walletUsed,
       walletBalance: walletBalanceStr,
       prescriptions: prescriptionPaths.isNotEmpty ? prescriptionPaths : null,
+      billingSameAsShipping: _billingSameAsShipping,
+      billingName: _billingAddress?.name,
+      billingMobile: _billingAddress?.fullMobile,
+      billingAddress: _billingAddress?.address,
+      billingCity: _billingAddress?.city,
+      billingPincode: _billingAddress?.pincode,
+      billingCountry: _billingAddress?.country,
+      billingState: _billingAddress?.state,
+      billingRegionId: _billingAddress?.regionId,
     );
   }
 
@@ -578,6 +633,10 @@ class _CheckoutScreenState extends State<CheckoutScreen>
         onChooseAddress: _showAddressPicker,
         onChoosePayment: (codAllowed) =>
             _showPaymentPicker(codAllowed: codAllowed),
+        billingSameAsShipping: _billingSameAsShipping,
+        billingAddress: _billingAddress,
+        onBillingToggle: _onBillingToggle,
+        onEditBillingAddress: _openBillingAddressSheet,
         prescriptions: _prescriptions,
         onPrescriptionPicked: _onPrescriptionPicked,
         onPrescriptionRemoved: _onPrescriptionRemoved,

@@ -78,7 +78,7 @@ class AppSnackBar {
         icon = AssetsConstants.infoCircleIcon;
         break;
     }
-    return AppSvgIcon(icon, color: context.cs.onPrimary, size: 22);
+    return AppSvgIcon(icon, color: context.cs.onPrimary, size: ThemeConstants.iconM);
   }
 
   /// Get background color based on snackbar type

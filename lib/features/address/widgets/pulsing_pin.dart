@@ -1,5 +1,6 @@
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
@@ -40,7 +41,7 @@ class PulsingPin extends StatelessWidget {
               AppSvgIcon(
                 AssetsConstants.addressIcon,
                 color: context.cs.primary,
-                size: 42,
+                size: ThemeConstants.iconXL,
               ),
             ],
           ),

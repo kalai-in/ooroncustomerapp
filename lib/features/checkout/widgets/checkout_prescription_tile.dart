@@ -121,7 +121,7 @@ class CheckoutPrescriptionTile extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingM),
-      padding: const EdgeInsetsDirectional.all(10),
+      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
       decoration: AppDecorations.box(
         color: context.cs.surfaceContainerLow,
         borderRadius: AppRadius.r10,
@@ -141,7 +141,7 @@ class CheckoutPrescriptionTile extends StatelessWidget {
         children: [
           AppSvgIcon(
             AssetsConstants.uploadIcon,
-            size: 20,
+            size: ThemeConstants.iconM,
             color: context.cs.primary,
           ),
           AppSpacing.w10,
@@ -195,7 +195,7 @@ class CheckoutPrescriptionTile extends StatelessWidget {
                   color: context.cs.error.withValues(alpha: 0.1),
                   child: AppSvgIcon(
                     AssetsConstants.fileIcon,
-                    size: 22,
+                    size: ThemeConstants.iconM,
                     color: context.cs.error,
                   ),
                 )
@@ -231,7 +231,7 @@ class CheckoutPrescriptionTile extends StatelessWidget {
           onTap: () => _pick(context),
           child: Padding(
             padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: 6,
+              horizontal: ThemeConstants.paddingXS,
               vertical: ThemeConstants.paddingXS,
             ),
             child: AppText(
@@ -250,7 +250,7 @@ class CheckoutPrescriptionTile extends StatelessWidget {
             padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
             child: AppSvgIcon(
               AssetsConstants.closeIcon,
-              size: 18,
+              size: ThemeConstants.iconS,
               color: context.cs.onSurfaceVariant,
             ),
           ),
@@ -272,8 +272,8 @@ class _StatusChip extends StatelessWidget {
     final color = isRequired ? context.cs.error : context.cs.onSurfaceVariant;
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: 6,
-        vertical: 2,
+        horizontal: ThemeConstants.paddingXS,
+        vertical: ThemeConstants.paddingXS,
       ),
       decoration: AppDecorations.box(
         color: color.withValues(alpha: 0.1),

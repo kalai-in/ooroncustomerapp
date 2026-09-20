@@ -371,12 +371,12 @@ class _HeroLoadingView extends StatelessWidget {
                     ),
                   ],
                 ),
-                padding: const EdgeInsetsDirectional.all(10),
+                padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
                 child: Transform.flip(
                   flipX: Directionality.of(context) == TextDirection.rtl,
                   child: AppSvgIcon(
                     AssetsConstants.arrowLeftIcon,
-                    size: 18,
+                    size: ThemeConstants.iconS,
                     color: context.cs.onSurface,
                   ),
                 ),
@@ -472,7 +472,7 @@ class _DetailBodySkeletonState extends State<_DetailBodySkeleton>
               _box(color, width: 100, height: 12),
               AppSpacing.h8,
               Row(
-                spacing: 8,
+                spacing: ThemeConstants.spaceS,
                 children: [
                   for (var i = 0; i < 3; i++)
                     _box(color, width: 64, height: 36, radius: AppRadius.r8),

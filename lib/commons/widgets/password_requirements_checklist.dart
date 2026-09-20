@@ -1,6 +1,7 @@
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/password_policy.dart';
 import 'package:customer/core/theme/app_spacing.dart';
@@ -24,7 +25,7 @@ class PasswordRequirementsChecklist extends StatelessWidget {
     return Column(
       crossAxisAlignment: .start,
       mainAxisSize: .min,
-      spacing: 4,
+      spacing: ThemeConstants.spaceXS,
       children: rules.map((rule) {
         return Row(
           mainAxisSize: .min,
@@ -33,7 +34,7 @@ class PasswordRequirementsChecklist extends StatelessWidget {
               rule.satisfied
                   ? AssetsConstants.checkIcon
                   : AssetsConstants.closeIcon,
-              size: 16,
+              size: ThemeConstants.iconXS,
               color: rule.satisfied ? green : context.cs.onSurfaceVariant,
             ),
             AppSpacing.w6,

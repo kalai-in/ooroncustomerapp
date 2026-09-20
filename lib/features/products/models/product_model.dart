@@ -115,6 +115,7 @@ class ProductDataModel {
   String? currency;
   int? decimalPoint;
   String? slabDiscountMessage;
+  String? estimatedDeliveryDate;
 
   /// Prescription upload applies only to medical products (product_type == 5).
   bool get isMedicalProduct => productType == 5;
@@ -159,6 +160,7 @@ class ProductDataModel {
     this.currency,
     this.decimalPoint,
     this.slabDiscountMessage,
+    this.estimatedDeliveryDate,
   });
 
   bool get isAvailable {
@@ -216,6 +218,7 @@ class ProductDataModel {
     currency = parseString(json['currency']) ?? '';
     decimalPoint = parseInt(json['decimal_point']) ?? 0;
     slabDiscountMessage = parseString(json['slab_discount_message']) ?? "";
+    estimatedDeliveryDate = parseString(json['estimated_delivery_date']);
   }
 
   Map<String, dynamic> toJson() {
@@ -259,6 +262,7 @@ class ProductDataModel {
     data['currency'] = currency;
     data['decimal_point'] = decimalPoint;
     data['slab_discount_message'] = slabDiscountMessage;
+    data['estimated_delivery_date'] = estimatedDeliveryDate;
     return data;
   }
 }

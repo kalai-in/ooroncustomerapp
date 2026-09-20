@@ -7,6 +7,7 @@ import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:customer/core/theme/app_decorations.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 
 class ProductDetailCircleBtn extends StatelessWidget {
   final String icon;
@@ -25,8 +26,8 @@ class ProductDetailCircleBtn extends StatelessWidget {
     if (isActive) {
       return IconButton(
         onPressed: onTap,
-        icon: AppSvgIcon(icon, size: 18, color: context.cs.onSurface),
-        padding: EdgeInsetsDirectional.all(10),
+        icon: AppSvgIcon(icon, size: ThemeConstants.iconS, color: context.cs.onSurface),
+        padding: EdgeInsetsDirectional.all(ThemeConstants.paddingS),
         visualDensity: VisualDensity.compact,
       );
     }
@@ -35,7 +36,7 @@ class ProductDetailCircleBtn extends StatelessWidget {
       child: Container(
         width: 38,
         height: 38,
-        padding: EdgeInsetsDirectional.all(10),
+        padding: EdgeInsetsDirectional.all(ThemeConstants.paddingS),
         decoration: AppDecorations.box(
           color: context.cs.surface.withValues(alpha: 0.9),
           shape: .circle,
@@ -46,7 +47,7 @@ class ProductDetailCircleBtn extends StatelessWidget {
             ),
           ],
         ),
-        child: AppSvgIcon(icon, size: 18, color: context.cs.onSurface),
+        child: AppSvgIcon(icon, size: ThemeConstants.iconS, color: context.cs.onSurface),
       ),
     );
   }
@@ -76,7 +77,7 @@ class ProductDetailShareBtn extends StatelessWidget {
         onPressed: _onTap,
         icon: AppSvgIcon(
           AssetsConstants.shareIcon,
-          size: 18,
+          size: ThemeConstants.iconS,
           color: context.cs.onSurface,
           fit: BoxFit.scaleDown,
         ),
@@ -101,7 +102,7 @@ class ProductDetailShareBtn extends StatelessWidget {
         ),
         child: AppSvgIcon(
           AssetsConstants.shareIcon,
-          size: 18,
+          size: ThemeConstants.iconS,
           color: context.cs.onSurface,
           fit: BoxFit.scaleDown,
         ),

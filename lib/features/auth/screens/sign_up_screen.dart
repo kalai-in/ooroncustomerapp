@@ -70,6 +70,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _referralController = TextEditingController();
+  final _scrollController = ScrollController();
 
   String _fullPhoneNumber = '';
   String _countryCode = '';
@@ -121,6 +122,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _referralController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -263,6 +265,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           applyBottomInset: false,
           appBar: CustomAppBar(
             title: context.translate(LanguageLabelKeys.createAccount),
+            scrollController: _scrollController,
             subtitle:
                 (widget.mode == AuthType.google ||
                     widget.mode == AuthType.apple)
@@ -336,6 +339,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ],
             child: SafeArea(
               child: SingleChildScrollView(
+                controller: _scrollController,
                 padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingXXL),
                 child: Column(
                   crossAxisAlignment: .stretch,
@@ -408,7 +412,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget _buildLoginRow() {
     return Row(
       mainAxisAlignment: .center,
-      spacing: 4,
+      spacing: ThemeConstants.spaceXS,
       children: [
         AppText(
           context.translate(LanguageLabelKeys.alreadyHaveAccount),

@@ -11,7 +11,9 @@ import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/routes/route_names.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_spacing.dart';
+import 'package:customer/utils/extensions/num_extensions.dart';
 import 'package:customer/features/orders/models/ecommerce_order_model.dart';
+import 'package:customer/features/orders/models/order_address_model.dart';
 import 'package:customer/features/orders/models/order_model.dart'
     show ItemRating;
 import 'package:customer/features/orders/widgets/order_status_timeline.dart';
@@ -28,6 +30,15 @@ import 'package:customer/commons/widgets/app_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/constants/theme_constants.dart';
+
+/// One-line summary of a billing address for the order-detail info card:
+/// name and street address.
+String formatBillingAddress(OrderAddressModel billing) {
+  return [
+    billing.name,
+    billing.address,
+  ].where((s) => s.hasValue).join(' • ');
+}
 
 class OrderDetailCard extends StatelessWidget {
   final Widget child;
@@ -67,7 +78,7 @@ class OrderDetailRefundCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return CashbackBanner(
       amountText:
-          '${context.translate(LanguageLabelKeys.refundAmount)} $currency${refundAmount.toStringAsFixed(2)}',
+          '${context.translate(LanguageLabelKeys.refundAmount)} $currency${refundAmount.formatPrice()}',
       subtitle: context.translate(LanguageLabelKeys.refundCreditedToWallet),
       icon: AssetsConstants.cashBackIcon,
       color: context.cs.inversePrimary,
@@ -88,39 +99,6 @@ class OrderDetailSectionTitle extends StatelessWidget {
   }
 }
 
-class OrderDetailInfoRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final int maxLines;
-  const OrderDetailInfoRow({
-    super.key,
-    required this.icon,
-    required this.text,
-    this.maxLines = 1,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: maxLines > 1 ? .start : .center,
-      spacing: 8,
-      children: [
-        Icon(icon, size: 15, color: context.cs.onSurfaceVariant),
-        Expanded(
-          child: AppText(
-            text,
-            style: context.tt.bodySmall?.copyWith(
-              fontSize: 13,
-              color: context.cs.onSurface,
-            ),
-            maxLines: maxLines,
-            overflow: .ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class OrderDetailPriceRow extends StatelessWidget {
   final String label;
@@ -128,6 +106,14 @@ class OrderDetailPriceRow extends StatelessWidget {
   final Color? valueColor;
   final bool? isRefundable;
   final String? suffixLabel;
+  final String? tooltipMessage;
+  final String? suffixTooltipMessage;
+  final String? suffixSheetTitle;
+  final WidgetBuilder? suffixContentBuilder;
+
+  /// Overrides the default plain-message tooltip body with structured
+  /// content (e.g. tax breakdown rows) for the main [label] tooltip.
+  final WidgetBuilder? detailContentBuilder;
   const OrderDetailPriceRow({
     super.key,
     required this.label,
@@ -135,14 +121,29 @@ class OrderDetailPriceRow extends StatelessWidget {
     this.valueColor,
     this.isRefundable,
     this.suffixLabel,
+    this.tooltipMessage,
+    this.suffixTooltipMessage,
+    this.suffixSheetTitle,
+    this.suffixContentBuilder,
+    this.detailContentBuilder,
   });
 
   @override
   Widget build(BuildContext context) {
-    final labelStyle = context.tt.bodySmall?.copyWith(
-      fontSize: 13,
+    final labelStyle = context.tt.labelMedium?.copyWith(
       color: context.cs.onSurfaceVariant,
     );
+    final refundableMessage = isRefundable != null
+        ? context.translate(
+            isRefundable!
+                ? LanguageLabelKeys.refundable
+                : LanguageLabelKeys.notRefundable,
+          )
+        : null;
+    final combinedMessage = [
+      ?refundableMessage,
+      ?tooltipMessage,
+    ].join('\n');
     return Row(
       mainAxisAlignment: .spaceBetween,
       children: [
@@ -150,14 +151,11 @@ class OrderDetailPriceRow extends StatelessWidget {
           child: Row(
             mainAxisSize: .min,
             children: [
-              if (isRefundable != null)
+              if (detailContentBuilder != null || combinedMessage.isNotEmpty)
                 DashedUnderlineTooltip(
                   text: label,
-                  message: context.translate(
-                    isRefundable!
-                        ? LanguageLabelKeys.refundable
-                        : LanguageLabelKeys.notRefundable,
-                  ),
+                  message: combinedMessage,
+                  contentBuilder: detailContentBuilder,
                   style: labelStyle,
                 )
               else
@@ -165,14 +163,29 @@ class OrderDetailPriceRow extends StatelessWidget {
               if (suffixLabel != null && suffixLabel!.isNotEmpty) ...[
                 AppSpacing.w4,
                 Flexible(
-                  child: AppText(
-                    suffixLabel!,
-                    style: labelStyle?.copyWith(
-                      fontSize: 11,
-                      color: context.cs.onSurfaceVariant.withValues(alpha: 0.7),
-                    ),
-                    overflow: .ellipsis,
-                  ),
+                  child:
+                      suffixTooltipMessage != null &&
+                          suffixTooltipMessage!.isNotEmpty
+                      ? DashedUnderlineTooltip(
+                          text: suffixLabel!,
+                          message: suffixTooltipMessage!,
+                          sheetTitle: suffixSheetTitle,
+                          contentBuilder: suffixContentBuilder,
+                          style: context.tt.labelSmall?.copyWith(
+                            color: context.cs.onSurfaceVariant.withValues(
+                              alpha: 0.7,
+                            ),
+                          ),
+                        )
+                      : AppText(
+                          suffixLabel!,
+                          style: context.tt.labelSmall?.copyWith(
+                            color: context.cs.onSurfaceVariant.withValues(
+                              alpha: 0.7,
+                            ),
+                          ),
+                          overflow: .ellipsis,
+                        ),
                 ),
               ],
             ],
@@ -209,18 +222,18 @@ class InvoiceDownloadAction extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingXS,
-          vertical: 2,
+          vertical: ThemeConstants.paddingXS,
         ),
         child: Row(
           mainAxisSize: .min,
-          spacing: 4,
+          spacing: ThemeConstants.spaceXS,
           children: [
             if (isLoading)
-              LoadingWidget(size: 14, color: context.cs.primary)
+              LoadingWidget(size: ThemeConstants.loaderSizeS, color: context.cs.primary)
             else
               AppSvgIcon(
                 AssetsConstants.downloadIcon,
-                size: 16,
+                size: ThemeConstants.iconXS,
                 color: context.cs.primary,
               ),
             AppText(
@@ -313,7 +326,7 @@ class OrderTimelineStatusCard extends StatelessWidget {
               child: AppSvgIcon(
                 icon,
                 color: context.cs.onPrimary,
-                size: 24,
+                size: ThemeConstants.iconL,
                 fit: BoxFit.scaleDown,
               ),
             ),
@@ -321,16 +334,15 @@ class OrderTimelineStatusCard extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: .start,
-                spacing: 3,
+                spacing: ThemeConstants.spaceXS,
                 children: [
                   AppText(
                     statusLabel,
                     maxLines: 2,
                     overflow: .ellipsis,
-                    style: context.tt.bodyMedium?.copyWith(
+                    style: context.tt.titleSmall?.copyWith(
                       color: context.cs.onPrimary,
                       fontWeight: FontWeight.w800,
-                      fontSize: 15,
                     ),
                   ),
                   if (date != null)
@@ -349,7 +361,7 @@ class OrderTimelineStatusCard extends StatelessWidget {
                 child: AppSvgIcon(
                   AssetsConstants.arrowRightIcon,
                   color: context.cs.onPrimary,
-                  size: 24,
+                  size: ThemeConstants.iconL,
                 ),
               ),
           ],
@@ -392,8 +404,7 @@ class OrderTimelineStatusCard extends StatelessWidget {
                             LanguageLabelKeys.moreItemInThisOrder,
                           )
                         : '$moreItemsCount ${context.translate(LanguageLabelKeys.moreItemsInThisOrder)}',
-                    style: context.tt.bodySmall?.copyWith(
-                      fontSize: 13,
+                    style: context.tt.labelMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: context.cs.onSurface,
                     ),
@@ -404,7 +415,7 @@ class OrderTimelineStatusCard extends StatelessWidget {
                     flipX: Directionality.of(context) == TextDirection.rtl,
                     child: AppSvgIcon(
                       AssetsConstants.arrowRightIcon,
-                      size: 18,
+                      size: ThemeConstants.iconS,
                       color: context.cs.onSurfaceVariant,
                     ),
                   ),
@@ -492,7 +503,7 @@ void showOrderTimelineSheet(BuildContext context, List<Timeline> timeline) {
     context,
     title: context.translate(LanguageLabelKeys.orderTimeline),
     backgroundColor: Theme.of(context).cardColor,
-    padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingL, ThemeConstants.paddingXL, 28),
+    padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingL, ThemeConstants.paddingXL, ThemeConstants.paddingXXL+ThemeConstants.paddingXS),
     builder: (sheetContext) => SingleChildScrollView(
       child: SlideAnimationList(
         crossAxisAlignment: .stretch,
@@ -527,12 +538,12 @@ class OrderDetailLabelValueRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: .start,
-      spacing: 8,
+      spacing: ThemeConstants.spaceS,
       children: [
         Expanded(
           child: Column(
             crossAxisAlignment: .start,
-            spacing: 3,
+            spacing: ThemeConstants.spaceXS,
             children: [
               AppText(
                 label,
@@ -593,7 +604,7 @@ class PrescriptionAttachmentRow extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingM,
-          vertical: 10,
+          vertical: ThemeConstants.paddingS,
         ),
         decoration: AppDecorations.box(
           color: context.cs.primaryContainer.withValues(alpha: 0.35),
@@ -601,11 +612,11 @@ class PrescriptionAttachmentRow extends StatelessWidget {
           border: Border.all(color: context.cs.primary.withValues(alpha: 0.3)),
         ),
         child: Row(
-          spacing: 8,
+          spacing: ThemeConstants.spaceS,
           children: [
             AppSvgIcon(
               _isPdf ? AssetsConstants.fileIcon : AssetsConstants.imageIcon,
-              size: 18,
+              size: ThemeConstants.iconS,
               color: context.cs.primary,
             ),
             Expanded(
@@ -627,7 +638,7 @@ class PrescriptionAttachmentRow extends StatelessWidget {
               flipX: Directionality.of(context) == TextDirection.rtl,
               child: AppSvgIcon(
                 AssetsConstants.arrowRightIcon,
-                size: 16,
+                size: ThemeConstants.iconXS,
                 color: context.cs.primary,
               ),
             ),
@@ -655,27 +666,33 @@ class RatingStarsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: .min,
-      children: List.generate(5, (i) {
-        final filled = i < currentRate;
-        return InkWell(
-          borderRadius: AppRadius.r6,
-          onTap: isSubmitting ? null : () => onRate(i + 1),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.all(2),
-            child: AppSvgIcon(
-              filled
-                  ? AssetsConstants.starFillIcon
-                  : AssetsConstants.starBorderIcon,
-              size: 26,
-              color: filled
-                  ? context.cs.onPrimaryFixedVariant
-                  : context.cs.onSurfaceVariant.withValues(alpha: 0.6),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: AlignmentDirectional.centerStart,
+      child: Row(
+        mainAxisSize: .min,
+        children: List.generate(5, (i) {
+          final filled = i < currentRate;
+          return InkWell(
+            borderRadius: AppRadius.r6,
+            onTap: isSubmitting ? null : () => onRate(i + 1),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.all(
+                ThemeConstants.paddingXS,
+              ),
+              child: AppSvgIcon(
+                filled
+                    ? AssetsConstants.starFillIcon
+                    : AssetsConstants.starBorderIcon,
+                size: ThemeConstants.iconL,
+                color: filled
+                    ? context.cs.onPrimaryFixedVariant
+                    : context.cs.onSurfaceVariant.withValues(alpha: 0.6),
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }
@@ -735,6 +752,8 @@ class OrderDetailBillSummaryCard extends StatelessWidget {
   final VoidCallback? onDownloadInvoice;
   final bool isDownloadingInvoice;
   final String? walletValue;
+  final String? remainingLabel;
+  final String? remainingValue;
   final String totalRowLabel;
   final String totalRowValue;
   final double saved;
@@ -748,6 +767,8 @@ class OrderDetailBillSummaryCard extends StatelessWidget {
     this.onDownloadInvoice,
     this.isDownloadingInvoice = false,
     this.walletValue,
+    this.remainingLabel,
+    this.remainingValue,
     required this.totalRowLabel,
     required this.totalRowValue,
     this.saved = 0,
@@ -760,7 +781,7 @@ class OrderDetailBillSummaryCard extends StatelessWidget {
     final dividerColor = context.cs.outlineVariant;
     return Column(
       crossAxisAlignment: .start,
-      spacing: 10,
+      spacing: ThemeConstants.spaceM,
       children: [
         ClipRRect(
           borderRadius: AppRadius.r12,
@@ -803,49 +824,53 @@ class OrderDetailBillSummaryCard extends StatelessWidget {
                       AppSpacing.h12,
                       Column(
                         crossAxisAlignment: .start,
-                        spacing: 8,
+                        spacing: ThemeConstants.spaceS,
                         children: rows,
                       ),
                       AppSpacing.h12,
                       Divider(height: 1, color: dividerColor),
                       AppSpacing.h12,
-                      if (walletValue != null) ...[
-                        OrderDetailPriceRow(
-                          label: context.translate(
-                            LanguageLabelKeys.walletUsed,
-                          ),
-                          value: '$currency$walletValue',
-                          valueColor: context.cs.onSecondaryContainer,
-                        ),
-                        AppSpacing.h12,
-                      ],
                       Row(
                         mainAxisAlignment: .spaceBetween,
                         children: [
                           AppText(
                             totalRowLabel,
-                            style: context.tt.bodyMedium?.copyWith(
+                            style: context.tt.titleSmall?.copyWith(
                               fontWeight: FontWeight.w700,
-                              fontSize: 15,
                               color: context.cs.onSurfaceVariant,
                             ),
                           ),
                           AppText(
                             totalRowValue,
-                            style: context.tt.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
+                            style: context.tt.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
                               color: context.cs.onSurface,
                             ),
                           ),
                         ],
                       ),
+                      if (walletValue != null) ...[
+                        AppSpacing.h12,
+                        OrderDetailPriceRow(
+                          label:
+                              '${context.translate(LanguageLabelKeys.paidVia)} ${context.translate(LanguageLabelKeys.wallet)}',
+                          value: '$currency$walletValue',
+                          valueColor: context.cs.onSecondaryContainer,
+                        ),
+                      ],
+                      if (remainingValue != null) ...[
+                        AppSpacing.h12,
+                        OrderDetailPriceRow(
+                          label: remainingLabel ?? '',
+                          value: '$currency$remainingValue',
+                        ),
+                      ],
                     ],
                   ),
                 ),
                 if (saved > 0)
                   SavedAmountBanner(
-                    amountText: '$currency${saved.toStringAsFixed(2)}',
+                    amountText: '$currency${saved.formatPrice()}',
                   ),
               ],
             ),
@@ -888,12 +913,12 @@ class OrderDetailDeliveryBoyView extends StatelessWidget {
         crossAxisAlignment: .start,
         children: [
           Row(
-            spacing: 12,
+            spacing: ThemeConstants.spaceM,
             children: [
               CircleAvatar(
                 radius: 22,
                 backgroundColor: context.cs.surfaceContainerHighest,
-                child: AppSvgIcon(AssetsConstants.deliveryBikeIcon, size: 22),
+                child: AppSvgIcon(AssetsConstants.deliveryBikeIcon, size: ThemeConstants.iconM),
               ),
               Expanded(
                 child: Column(
@@ -935,7 +960,7 @@ class OrderDetailDeliveryBoyView extends StatelessWidget {
                     child: AppSvgIcon(
                       AssetsConstants.phoneIcon,
                       color: context.cs.onPrimary,
-                      size: 18,
+                      size: ThemeConstants.iconS,
                       fit: BoxFit.scaleDown,
                     ),
                   ),
@@ -946,8 +971,7 @@ class OrderDetailDeliveryBoyView extends StatelessWidget {
             AppSpacing.h16,
             AppText(
               context.translate(LanguageLabelKeys.needHelpWithOrder),
-              style: context.tt.bodyMedium?.copyWith(
-                fontSize: 15,
+              style: context.tt.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -964,14 +988,14 @@ class OrderDetailDeliveryBoyView extends StatelessWidget {
                     backgroundColor: context.cs.surfaceContainerHighest,
                     child: AppSvgIcon(
                       AssetsConstants.supportChatIcon,
-                      size: 20,
+                      size: ThemeConstants.iconM,
                     ),
                   ),
                   AppSpacing.w12,
                   Expanded(
                     child: Column(
                       crossAxisAlignment: .start,
-                      spacing: 2,
+                      spacing: ThemeConstants. spaceXXS,
                       children: [
                         AppText(
                           context.translate(LanguageLabelKeys.chatWithUs),
@@ -993,7 +1017,7 @@ class OrderDetailDeliveryBoyView extends StatelessWidget {
                     child: AppSvgIcon(
                       AssetsConstants.arrowRightIcon,
                       color: context.cs.onSurfaceVariant,
-                      size: 24,
+                      size: ThemeConstants.iconL,
                     ),
                   ),
                 ],
@@ -1099,8 +1123,8 @@ class _EcommerceItemRatingControlState
     return Container(
       width: double.infinity,
       padding: labelKey == LanguageLabelKeys.rateThisProductNow
-          ? const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM, vertical: 10)
-          : const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM, vertical: 10),
+          ? const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM, vertical: ThemeConstants.paddingS)
+          : const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM, vertical: ThemeConstants.paddingS),
       decoration: AppDecorations.box(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.only(
@@ -1109,12 +1133,13 @@ class _EcommerceItemRatingControlState
         ),
       ),
       child: Row(
-        mainAxisSize: .min,
         children: [
-          RatingStarsRow(
-            currentRate: currentRate,
-            isSubmitting: _isSubmitting,
-            onRate: _quickRate,
+          Flexible(
+            child: RatingStarsRow(
+              currentRate: currentRate,
+              isSubmitting: _isSubmitting,
+              onRate: _quickRate,
+            ),
           ),
           const Spacer(),
           InkWell(

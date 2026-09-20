@@ -1,4 +1,5 @@
 import 'package:customer/commons/cubit/base_pagination_cubit.dart';
+import 'package:customer/commons/utils/pagination_scroll_controller.dart';
 import 'package:customer/features/category/cubit/sub_category_cubit.dart';
 import 'package:customer/features/category/models/category_model.dart';
 import 'package:customer/features/category/widgets/sub_category_sidebar.dart';
@@ -10,7 +11,7 @@ import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
 class SubCategorySidebarPanel extends StatelessWidget {
-  final ScrollController controller;
+  final PaginationScrollController pager;
   final String? selectedCategoryId;
   // Id of the category currently previewed as a right-side grid (only ever
   // the very first auto-selected category). That one item legitimately
@@ -22,7 +23,7 @@ class SubCategorySidebarPanel extends StatelessWidget {
 
   const SubCategorySidebarPanel({
     super.key,
-    required this.controller,
+    required this.pager,
     required this.selectedCategoryId,
     required this.onSelectCategory,
     required this.onAutoSelectCategory,
@@ -64,23 +65,25 @@ class SubCategorySidebarPanel extends StatelessWidget {
           if (state is PaginationLoaded<Category>) {
             return Container(
               color: sidebarBg,
-              child: ListView.builder(
-                controller: controller,
-                itemCount: state.data.length,
-                itemBuilder: (context, index) {
-                  final cat = state.data[index];
-                  return SidebarItem(
-                    category: cat,
-                    // A has_child item only reads as "selected" if it's the
-                    // one previewed as a grid on the right; otherwise tapping
-                    // it drills into its own page instead of showing content
-                    // here, so it shouldn't look selected.
-                    isSelected:
-                        selectedCategoryId == cat.id &&
-                        (cat.hasChild != true || cat.id == autoChildCategoryId),
-                    onTap: () => onSelectCategory(cat),
-                  );
-                },
+              child: pager.attach(
+                ListView.builder(
+                  controller: pager.controller,
+                  itemCount: state.data.length,
+                  itemBuilder: (context, index) {
+                    final cat = state.data[index];
+                    return SidebarItem(
+                      category: cat,
+                      // A has_child item only reads as "selected" if it's the
+                      // one previewed as a grid on the right; otherwise tapping
+                      // it drills into its own page instead of showing content
+                      // here, so it shouldn't look selected.
+                      isSelected:
+                          selectedCategoryId == cat.id &&
+                          (cat.hasChild != true || cat.id == autoChildCategoryId),
+                      onTap: () => onSelectCategory(cat),
+                    );
+                  },
+                ),
               ),
             );
           }

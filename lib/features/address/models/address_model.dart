@@ -50,6 +50,16 @@ class AddressData {
   String? longitude;
   String? isDefault;
 
+  /// Id of the state/region selected via the region dropdown. Only set when
+  /// the user picked [state] from that dropdown — omitted from the request
+  /// when [state] was typed manually into the free-text fallback field.
+  int? regionId;
+
+  /// Present on a `billing_address` payload (order detail apis) — not sent
+  /// or expected on the address-book add/edit apis.
+  String? regionCode;
+  String? regionTaxCode;
+
   AddressData({
     this.id,
     this.type,
@@ -69,6 +79,9 @@ class AddressData {
     this.latitude,
     this.longitude,
     this.isDefault,
+    this.regionId,
+    this.regionCode,
+    this.regionTaxCode,
   });
 
   AddressData.fromJson(Map<String, dynamic> json) {
@@ -90,6 +103,9 @@ class AddressData {
     latitude = json['latitude']?.toString() ?? "0";
     longitude = json['longitude']?.toString() ?? "0";
     isDefault = json['is_default']?.toString() ?? "";
+    regionId = int.tryParse(json['region_id']?.toString() ?? '');
+    regionCode = json['region_code']?.toString();
+    regionTaxCode = json['region_tax_code']?.toString();
   }
 
   /// Used for parsing round-trips; omits null/empty optional fields to
@@ -114,6 +130,7 @@ class AddressData {
     data['pincode'] = pincode;
     data['city'] = city;
     data['state'] = state;
+    if (regionId != null) data['region_id'] = regionId;
     data['country'] = country;
     data['type'] = type;
     data['latitude'] = latitude ?? '0';

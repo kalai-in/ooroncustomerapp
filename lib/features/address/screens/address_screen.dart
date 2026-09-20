@@ -83,6 +83,7 @@ class _AddressScreenState extends State<AddressScreen> {
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: CustomAppBar(
               title: context.translate(LanguageLabelKeys.myAddresses),
+              scrollController: _pager.controller,
             ),
             // Offline replaces the body only, so the app bar's back button
             // keeps working.
@@ -144,27 +145,29 @@ class _AddressScreenState extends State<AddressScreen> {
     return RefreshIndicator(
       color: context.cs.primary,
       onRefresh: () async => context.read<AddressCubit>().refresh(),
-      child: ListView.builder(
-        controller: _pager.controller,
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
-        itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == state.data.length) {
-            return PaginatedListFooter(
-              isLoadingMore: state.isFetchingMore,
-              hasMore: state.hasMore,
+      child: _pager.attach(
+        ListView.builder(
+          controller: _pager.controller,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+          itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == state.data.length) {
+              return PaginatedListFooter(
+                isLoadingMore: state.isFetchingMore,
+                hasMore: state.hasMore,
+              );
+            }
+            return Padding(
+              padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
+              child: AddressCard(
+                address: state.data[index],
+                onEdit: () => _goToEdit(state.data[index]),
+                onDelete: () => confirmDeleteAddress(context, state.data[index]),
+              ),
             );
-          }
-          return Padding(
-            padding: const EdgeInsetsDirectional.only(bottom: 10),
-            child: AddressCard(
-              address: state.data[index],
-              onEdit: () => _goToEdit(state.data[index]),
-              onDelete: () => confirmDeleteAddress(context, state.data[index]),
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }

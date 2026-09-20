@@ -1,7 +1,8 @@
-import 'package:customer/commons/cubit/settings_cubit.dart';
+import 'package:customer/commons/cubit/country_settings_cubit.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/theme/app_radius.dart';
@@ -24,7 +25,7 @@ class WalletTransactionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.read<SettingsCubit>();
+    final settings = context.read<CountrySettingsCubit>();
     final currencySymbol = txn.currency;
     final decimalPoint = settings.getDecimalPoint();
     final formattedAmount = (double.tryParse(txn.amount ?? '0') ?? 0.0)
@@ -42,19 +43,19 @@ class WalletTransactionItem extends StatelessWidget {
         paymentIcon == AssetsConstants.walletIcon;
 
     return Container(
-      margin: const EdgeInsetsDirectional.only(bottom: 10),
+      margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
       decoration: AppDecorations.shadowedCard(
         color: Theme.of(context).cardColor,
         shadowColor: context.theme.shadowColor.withValues(alpha: 0.08),
       ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(14),
+        padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
         child: Column(
           crossAxisAlignment: .start,
           children: [
             Row(
               crossAxisAlignment: .center,
-              spacing: 12,
+              spacing: ThemeConstants.spaceM,
               children: [
                 Container(
                   width: 40,
@@ -66,14 +67,14 @@ class WalletTransactionItem extends StatelessWidget {
                   alignment: Alignment.center,
                   child: AppSvgIcon(
                     paymentIcon,
-                    size: 20,
+                    size: ThemeConstants.iconM,
                     color: isTintableIcon ? context.cs.onSurfaceVariant : null,
                   ),
                 ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: .start,
-                    spacing: 2,
+                    spacing: ThemeConstants. spaceXXS,
                     children: [
                       AppText(
                         (txn.paymentType?.isNotEmpty == true)

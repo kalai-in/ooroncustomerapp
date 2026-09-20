@@ -58,7 +58,7 @@ void handleHomeRedirectTap(
       BlocProvider(
         create: (_) => ProductCubit(),
         child: ProductScreen(
-          title: context.translate(LanguageLabelKeys.viewMore),
+          title: context.translate(LanguageLabelKeys.brand),
           brandId: id.toString(),
         ),
       ),

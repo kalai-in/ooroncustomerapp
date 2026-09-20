@@ -2,6 +2,7 @@ import 'package:customer/core/api/api_client.dart';
 import 'package:customer/core/api/api_endpoints.dart';
 import 'package:customer/core/api/api_exception.dart';
 import 'package:customer/core/api/api_parameters.dart';
+import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/local_storage/settings_hive_box.dart';
 import 'package:customer/core/theme/app_sizes.dart';
 import 'package:customer/features/home/models/home_builder_model.dart';
@@ -12,7 +13,11 @@ class HomeLayoutRepository {
   HomeLayoutRepository({ApiClient? apiClient})
     : _apiClient = apiClient ?? ApiClient();
 
-  Future<HomeBuilderModel> getHomeLayout({String? categoryId}) async {
+  Future<HomeBuilderModel> getHomeLayout({
+    String? categoryId,
+    int offset = 0,
+    int limit = AppConstants.homeSectionsPageLimit,
+  }) async {
     try {
       final lat = SettingsHiveBox.instance.userLatitude;
       final lng = SettingsHiveBox.instance.userLongitude;
@@ -23,6 +28,8 @@ class HomeLayoutRepository {
             ? ApiParameters.tablet
             : ApiParameters.app,
         ApiParameters.categoryId: ?categoryId,
+        ApiParameters.offset: offset,
+        ApiParameters.limit: limit,
       };
       final response = await _apiClient.get(
         ApiEndpoints.homeLayout,

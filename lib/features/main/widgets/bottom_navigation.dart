@@ -53,7 +53,7 @@ class BottomNavBarState extends State<BottomNavBar> {
                       behavior: HitTestBehavior.opaque,
                       child: Column(
                         mainAxisAlignment: .center,
-                        spacing: 2,
+                        spacing: ThemeConstants. spaceXXS,
                         children: [
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 200),
@@ -131,7 +131,7 @@ class BottomNavBarState extends State<BottomNavBar> {
       return AppSvgIcon(
         path,
         key: ValueKey(path + (isActive ? '-active' : '-inactive')),
-        size: 24,
+        size: ThemeConstants.iconL,
         colorMapper: AppSvgColorMapper(
           cs.primary,
           cs.onSecondaryFixedVariant,

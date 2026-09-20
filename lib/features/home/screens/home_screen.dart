@@ -1,8 +1,10 @@
 import 'package:customer/commons/widgets/app_svg_icon.dart';
+import 'package:customer/commons/widgets/demo_data_disclaimer.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/commons/widgets/empty_state_widget.dart';
+import 'package:customer/commons/widgets/loading_widget.dart';
 import 'package:customer/features/cart/cubit/cart_action_cubit.dart';
 import 'package:customer/features/cart/cubit/cart_cubit.dart';
 import 'package:customer/features/category/cubit/sub_category_cubit.dart';
@@ -18,6 +20,7 @@ import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/services/notification_service.dart';
 import 'package:customer/features/address/widgets/location_permission_dialog.dart';
 import 'package:customer/commons/cubit/country_settings_cubit.dart';
+import 'package:customer/commons/cubit/settings_cubit.dart';
 import 'package:customer/commons/cubit/location_cubit.dart';
 import 'package:customer/features/home/cubits/home_layout_cubit.dart';
 import 'package:customer/features/home/models/home_builder_model.dart';
@@ -197,6 +200,8 @@ class _HomeScreenState extends State<HomeScreen>
     return topPadding + searchH;
   }
 
+  static const double _kLoadMoreThreshold = 300.0;
+
   void _onScroll() {
     final offset = _scrollController.offset;
     final scrollingUp = offset < _lastScrollOffset;
@@ -204,6 +209,12 @@ class _HomeScreenState extends State<HomeScreen>
 
     final shouldShow = offset > _kScrollThreshold && scrollingUp;
     if (shouldShow != _isScrolled.value) _isScrolled.value = shouldShow;
+
+    if (!_scrollController.hasClients) return;
+    final maxExtent = _scrollController.position.maxScrollExtent;
+    if (offset >= maxExtent - _kLoadMoreThreshold) {
+      context.read<HomeLayoutCubit>().loadMoreSections();
+    }
   }
 
   String? _categoryIdAt(int index) {
@@ -230,7 +241,11 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
-  Widget _buildSections(BuildContext context, List<Sections> sections) {
+  Widget _buildSections(
+    BuildContext context,
+    List<Sections> sections, {
+    bool isLoadingMore = false,
+  }) {
     return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: .start,
@@ -311,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen>
                     child: ProductScreen(
                       title: brand.name?.isNotEmpty == true
                           ? brand.name!
-                          : context.translate(LanguageLabelKeys.viewMore),
+                          : context.translate(LanguageLabelKeys.brand),
                       brandId: brand.id.toString(),
                     ),
                   ),
@@ -334,6 +349,28 @@ class _HomeScreenState extends State<HomeScreen>
                 );
               },
             ),
+          ),
+          if (isLoadingMore)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: ThemeConstants.paddingM,
+              ),
+              child: LoadingWidget(
+                size: ThemeConstants.iconM,
+                color: _currentHeaderColor(Theme.of(context)),
+              ),
+            ),
+          BlocBuilder<SettingsCubit, SettingsState>(
+            builder: (context, state) {
+              final demoMode = state is SettingsLoaded
+                  ? state.settings.data?.demoMode
+                  : SettingsHiveBox.instance.getAppSettings()?.demoMode;
+              final isDemo =
+                  demoMode == "1" || demoMode?.toLowerCase() == "true";
+              return isDemo
+                  ? const DemoDataDisclaimer()
+                  : const SizedBox.shrink();
+            },
           ),
           // The safe-area inset is only needed when the floating cart bar sits
           // above the bottom nav — without it the bar would cover the last row.
@@ -649,7 +686,11 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 );
               }
-              return _buildSections(context, sections);
+              return _buildSections(
+                context,
+                sections,
+                isLoadingMore: layoutState.isLoadingMore,
+              );
             }
             return const SliverToBoxAdapter(child: SizedBox.shrink());
           },
@@ -691,8 +732,8 @@ class _BackToTopButton extends StatelessWidget {
                   onTap: onTap,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 9,
+                      horizontal: ThemeConstants.paddingM,
+                      vertical: ThemeConstants.paddingS,
                     ),
                     child: Row(
                       mainAxisSize: .min,
@@ -700,7 +741,7 @@ class _BackToTopButton extends StatelessWidget {
                         AppSvgIcon(
                           AssetsConstants.arrowUpAndroidIcon,
                           color: context.cs.onInverseSurface,
-                          size: 18,
+                          size: ThemeConstants.iconS,
                         ),
                         const SizedBox(width: 6),
                         AppText(

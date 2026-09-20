@@ -7,6 +7,7 @@ import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/core/constants/theme_constants.dart';
+import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
@@ -26,11 +27,11 @@ class StoreClosedBanner extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Padding(
-              padding: const EdgeInsetsDirectional.only(
+              padding: EdgeInsetsDirectional.only(
                 start: ThemeConstants.paddingL,
                 top: ThemeConstants.paddingL,
                 bottom: ThemeConstants.paddingL,
-                end: ThemeConstants.paddingM + 80,
+                end: ThemeConstants.paddingM + context.widthFraction(0.2),
               ),
               child: Column(
                 crossAxisAlignment: .start,
@@ -72,8 +73,8 @@ class StoreClosedBanner extends StatelessWidget {
               end: 10,
               child: Lottie.asset(
                 AssetsConstants.storeClosed,
-                height: 80,
-                width: 80,
+                height: context.widthFraction(0.2),
+                width: context.widthFraction(0.2),
                 fit: BoxFit.cover,
               ),
             ),

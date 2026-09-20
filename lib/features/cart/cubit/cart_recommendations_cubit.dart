@@ -76,9 +76,9 @@ class CartRecommendationsCubit extends Cubit<CartRecommendationsState> {
         longitude: longitude,
         productId: productId,
         crossSellLimit: _pageLimit,
-        crossSellOffset: _crossSellPage,
+        crossSellOffset: (_crossSellPage - 1) * _pageLimit,
         upsellLimit: _pageLimit,
-        upsellOffset: _upsellPage,
+        upsellOffset: (_upsellPage - 1) * _pageLimit,
       );
       emit(CartRecommendationsLoaded(result));
     } on ApiException catch (e) {
@@ -113,16 +113,19 @@ class CartRecommendationsCubit extends Cubit<CartRecommendationsState> {
         longitude: _longitude,
         productId: _productId,
         crossSellLimit: _pageLimit,
-        crossSellOffset: nextPage,
+        crossSellOffset: (nextPage - 1) * _pageLimit,
         upsellLimit: _pageLimit,
-        upsellOffset: _upsellPage,
+        upsellOffset: (_upsellPage - 1) * _pageLimit,
       );
       _crossSellPage = nextPage;
       final existing = current.recommendations.data?.crossSell;
+      final existingIds = (existing?.products ?? []).map((p) => p.id).toSet();
       final merged = CartRecommendationBlock(
         products: [
           ...(existing?.products ?? []),
-          ...(result.data?.crossSell?.products ?? []),
+          ...(result.data?.crossSell?.products ?? []).where(
+            (p) => existingIds.add(p.id),
+          ),
         ],
         total: result.data?.crossSell?.total ?? existing?.total,
         limit: existing?.limit,
@@ -167,16 +170,19 @@ class CartRecommendationsCubit extends Cubit<CartRecommendationsState> {
         longitude: _longitude,
         productId: _productId,
         crossSellLimit: _pageLimit,
-        crossSellOffset: _crossSellPage,
+        crossSellOffset: (_crossSellPage - 1) * _pageLimit,
         upsellLimit: _pageLimit,
-        upsellOffset: nextPage,
+        upsellOffset: (nextPage - 1) * _pageLimit,
       );
       _upsellPage = nextPage;
       final existing = current.recommendations.data?.upsell;
+      final existingIds = (existing?.products ?? []).map((p) => p.id).toSet();
       final merged = CartRecommendationBlock(
         products: [
           ...(existing?.products ?? []),
-          ...(result.data?.upsell?.products ?? []),
+          ...(result.data?.upsell?.products ?? []).where(
+            (p) => existingIds.add(p.id),
+          ),
         ],
         total: result.data?.upsell?.total ?? existing?.total,
         limit: existing?.limit,

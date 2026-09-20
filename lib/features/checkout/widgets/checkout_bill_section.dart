@@ -4,12 +4,14 @@ import 'package:customer/utils/extensions/num_extensions.dart';
 import 'package:customer/commons/widgets/cashback_banner.dart';
 import 'package:customer/commons/widgets/dashed_underline_tooltip.dart';
 import 'package:customer/commons/widgets/saved_amount_banner.dart';
+import 'package:customer/commons/widgets/tax_breakdown_sheet.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/commons/models/additional_charges_model.dart';
 import 'package:customer/features/cart/models/cart_model.dart';
 import 'package:customer/commons/models/surge_charges_model.dart';
+import 'package:customer/commons/models/tax_charges_model.dart';
 import 'package:customer/features/checkout/widgets/checkout_shared_widgets.dart';
 import 'package:customer/features/promo_code/models/enums/promo_discount_type.dart';
 import 'package:customer/features/promo_code/models/promo_code_model.dart';
@@ -25,6 +27,7 @@ import 'package:customer/core/constants/theme_constants.dart';
 
 String _fmt(CartData cartData, num amount) =>
     '${cartData.currency}${amount.formatPrice(cartData.decimalPoint!)}';
+
 
 /// Shared promo math between the collapsed row and the full sheet: a flat
 /// promo is credited as wallet cashback after delivery instead of being
@@ -100,7 +103,7 @@ class CheckoutBillDetailsSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: ThemeConstants.paddingS,
-        vertical: 2,
+        vertical: ThemeConstants.paddingXS,
       ),
       decoration: AppDecorations.box(
         color: color.withValues(alpha: 0.1),
@@ -132,14 +135,14 @@ class CheckoutBillDetailsSection extends StatelessWidget {
           children: [
             AppSvgIcon(
               AssetsConstants.billIcon,
-              size: 20,
+              size: ThemeConstants.iconM,
               color: context.cs.onSurfaceVariant,
             ),
             AppSpacing.w10,
             Expanded(
               child: Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 6,
+                spacing: ThemeConstants.spaceS,
                 children: [
                   AppText(
                     context.translate(LanguageLabelKeys.totalAmount),
@@ -237,7 +240,7 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
 
     return _BillData(
       subTotal: cartData.subTotal ?? 0,
-      delivery: (cartData.deliveryCharge ?? 0).toDouble(),
+      delivery: cartData.deliveryCharges?.amount ?? 0,
       totals: totals,
       walletUsed: walletUsed,
       payable: totals.total - walletUsed,
@@ -267,10 +270,35 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
     final cartData = widget.cartData;
     final appliedPromo = widget.appliedPromo;
     final totals = data.totals;
+    final hasTax =
+        cartData.taxBreakdown?.any(
+          (TaxCharges c) => c.amount != null && c.amount != 0,
+        ) ??
+        false;
     return [
       CheckoutBillRow(
-        label: context.translate(LanguageLabelKeys.itemTotal),
+        label: context.translate(LanguageLabelKeys.subtotal),
         value: _fmt(cartData, data.subTotal),
+        suffixLabel: hasTax
+            ? context.translate(LanguageLabelKeys.inclTax)
+            : null,
+        suffixTooltipMessage: hasTax
+            ? taxBreakdownMessage(
+                context,
+                cartData.taxBreakdown!,
+                (amount) => _fmt(cartData, amount),
+              )
+            : null,
+        suffixSheetTitle: hasTax
+            ? context.translate(LanguageLabelKeys.taxBreakdown)
+            : null,
+        suffixContentBuilder: hasTax
+            ? (sheetContext) => taxBreakdownSheet(
+                sheetContext,
+                cartData.taxBreakdown!,
+                (amount) => _fmt(cartData, amount),
+              )
+            : null,
       ),
       AppSpacing.h8,
       if (appliedPromo != null &&
@@ -285,6 +313,23 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
         CheckoutBillRow(
           label: context.translate(LanguageLabelKeys.deliveryCharge),
           value: _fmt(cartData, data.delivery),
+          detailContentBuilder:
+              hasChargeTaxDetail(
+                taxName: cartData.deliveryCharges?.taxName,
+                taxAmount: cartData.deliveryCharges?.taxAmount,
+                taxableAmount: cartData.deliveryCharges?.taxableAmount,
+                taxRate: cartData.deliveryCharges?.taxRate,
+              )
+              ? (sheetContext) => additionalChargeDetailSheet(
+                  sheetContext,
+                  (amount) => _fmt(cartData, amount),
+                  label: context.translate(LanguageLabelKeys.deliveryCharge),
+                  totalAmount: data.delivery,
+                  taxName: cartData.deliveryCharges?.taxName,
+                  taxAmount: cartData.deliveryCharges?.taxAmount,
+                  taxRate: cartData.deliveryCharges?.taxRate,
+                )
+              : null,
         )
       else
         CheckoutBillRow(
@@ -292,26 +337,62 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
           value: context.translate(LanguageLabelKeys.free),
           valueColor: context.cs.onSecondaryContainer,
         ),
-      ...?(cartData.surgeCharges?.map(
-        (SurgeCharges c) => Padding(
+      ...?(cartData.surgeCharges?.map((SurgeCharges c) {
+        final hasTaxDetail = hasChargeTaxDetail(
+          taxName: c.taxName,
+          taxAmount: c.taxAmount,
+          taxableAmount: c.taxableAmount,
+          taxRate: c.taxRate,
+        );
+        return Padding(
           padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingS),
           child: CheckoutBillRow(
             label: c.label ?? '',
             value: _fmt(cartData, c.charge ?? 0),
-            isRefundable: c.isRefundable,
+            isRefundable: hasTaxDetail ? null : c.isRefundable,
+            detailContentBuilder: hasTaxDetail
+                ? (sheetContext) => additionalChargeDetailSheet(
+                    sheetContext,
+                    (amount) => _fmt(cartData, amount),
+                    label: c.label ?? '',
+                    totalAmount: c.charge ?? 0,
+                    isRefundable: c.isRefundable,
+                    taxName: c.taxName,
+                    taxAmount: c.taxAmount,
+                    taxRate: c.taxRate,
+                  )
+                : null,
           ),
-        ),
-      )),
-      ...?(cartData.zoneAdditionalCharges?.map(
-        (AdditionalCharges c) => Padding(
+        );
+      })),
+      ...?(cartData.zoneAdditionalCharges?.map((AdditionalCharges c) {
+        final hasTaxDetail = hasChargeTaxDetail(
+          taxName: c.taxName,
+          taxAmount: c.taxAmount,
+          taxableAmount: c.taxableAmount,
+          taxRate: c.taxRate,
+        );
+        return Padding(
           padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingS),
           child: CheckoutBillRow(
             label: c.name ?? '',
             value: _fmt(cartData, c.amount ?? 0),
-            isRefundable: c.isRefundable,
+            isRefundable: hasTaxDetail ? null : c.isRefundable,
+            detailContentBuilder: hasTaxDetail
+                ? (sheetContext) => additionalChargeDetailSheet(
+                    sheetContext,
+                    (amount) => _fmt(cartData, amount),
+                    label: c.name ?? '',
+                    totalAmount: c.amount ?? 0,
+                    isRefundable: c.isRefundable,
+                    taxName: c.taxName,
+                    taxAmount: c.taxAmount,
+                    taxRate: c.taxRate,
+                  )
+                : null,
           ),
-        ),
-      )),
+        );
+      })),
       if (appliedPromo != null &&
           (totals.isFlatPromo ||
               appliedPromo.discountTypeEnum ==
@@ -379,7 +460,7 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
             crossAxisAlignment: .start,
             children: [
               Padding(
-                padding: const EdgeInsetsDirectional.all(14),
+                padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
                 child: Column(
                   crossAxisAlignment: .start,
                   children: _buildCardRows(context, data),
@@ -420,7 +501,7 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
       ),
       child: SlideAnimationList(
         crossAxisAlignment: .start,
-        spacing: 14,
+        spacing: ThemeConstants.spaceL,
         children: [
           Center(
             child: Container(
@@ -443,33 +524,93 @@ class CheckoutBillRow extends StatelessWidget {
     required this.value,
     this.valueColor,
     this.isRefundable,
+    this.tooltipMessage,
+    this.detailContentBuilder,
+    this.suffixLabel,
+    this.suffixTooltipMessage,
+    this.suffixSheetTitle,
+    this.suffixContentBuilder,
   });
 
   final String label;
   final String value;
   final Color? valueColor;
   final bool? isRefundable;
+  final String? tooltipMessage;
+
+  /// Overrides the default plain-message tooltip body with structured
+  /// content (e.g. tax breakdown rows) for the main [label] tooltip.
+  final WidgetBuilder? detailContentBuilder;
+  final String? suffixLabel;
+  final String? suffixTooltipMessage;
+  final String? suffixSheetTitle;
+  final WidgetBuilder? suffixContentBuilder;
 
   @override
   Widget build(BuildContext context) {
     final labelStyle = context.tt.bodySmall?.copyWith(
       color: context.cs.onSurface.withValues(alpha: 0.7),
     );
+    final refundableMessage = isRefundable != null
+        ? context.translate(
+            isRefundable!
+                ? LanguageLabelKeys.refundable
+                : LanguageLabelKeys.notRefundable,
+          )
+        : null;
+    final combinedMessage = [
+      ?refundableMessage,
+      ?tooltipMessage,
+    ].join('\n');
     return Row(
       mainAxisAlignment: .spaceBetween,
       children: [
-        if (isRefundable != null)
-          DashedUnderlineTooltip(
-            text: label,
-            message: context.translate(
-              isRefundable!
-                  ? LanguageLabelKeys.refundable
-                  : LanguageLabelKeys.notRefundable,
-            ),
-            style: labelStyle,
-          )
-        else
-          AppText(label, style: labelStyle),
+        Flexible(
+          child: Row(
+            mainAxisSize: .min,
+            children: [
+              if (detailContentBuilder != null || combinedMessage.isNotEmpty)
+                DashedUnderlineTooltip(
+                  text: label,
+                  message: combinedMessage,
+                  contentBuilder: detailContentBuilder,
+                  style: labelStyle,
+                )
+              else
+                AppText(label, style: labelStyle),
+              if (suffixLabel != null && suffixLabel!.isNotEmpty) ...[
+                AppSpacing.w4,
+                Flexible(
+                  child:
+                      suffixTooltipMessage != null &&
+                          suffixTooltipMessage!.isNotEmpty
+                      ? DashedUnderlineTooltip(
+                          text: suffixLabel!,
+                          message: suffixTooltipMessage!,
+                          sheetTitle: suffixSheetTitle,
+                          contentBuilder: suffixContentBuilder,
+                          style: labelStyle?.copyWith(
+                            fontSize: 11,
+                            color: context.cs.onSurfaceVariant.withValues(
+                              alpha: 0.7,
+                            ),
+                          ),
+                        )
+                      : AppText(
+                          suffixLabel!,
+                          style: labelStyle?.copyWith(
+                            fontSize: 11,
+                            color: context.cs.onSurfaceVariant.withValues(
+                              alpha: 0.7,
+                            ),
+                          ),
+                          overflow: .ellipsis,
+                        ),
+                ),
+              ],
+            ],
+          ),
+        ),
         AppText(
           value,
           style: context.tt.bodySmall?.copyWith(

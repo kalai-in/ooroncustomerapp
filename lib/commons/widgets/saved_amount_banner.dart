@@ -21,11 +21,11 @@ class SavedAmountBanner extends StatelessWidget {
       clipper: const ZigzagTopClipper(),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsetsDirectional.fromSTEB(0, ThemeConstants.paddingL, 0, 10),
+        padding: const EdgeInsetsDirectional.fromSTEB(0, ThemeConstants.paddingL, 0, ThemeConstants.paddingS),
         color: context.cs.primary.withValues(alpha: 0.1),
         child: Row(
           mainAxisAlignment: .center,
-          spacing: 6,
+          spacing: ThemeConstants.spaceS,
           children: [
             AppText(AppConstants.celebrateSymbol, style: context.tt.bodyMedium),
             AppText(

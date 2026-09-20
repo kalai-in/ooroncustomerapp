@@ -1,5 +1,6 @@
 import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/features/orders/models/order_model.dart';
@@ -29,7 +30,7 @@ class OrderTrackingDeliveryPartnerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: .start,
-      spacing: 12,
+      spacing: ThemeConstants.spaceM,
       children: [
         Row(
           crossAxisAlignment: .start,
@@ -44,7 +45,7 @@ class OrderTrackingDeliveryPartnerRow extends StatelessWidget {
               child: AppSvgIcon(
                 AssetsConstants.userIcon,
                 color: context.cs.primary,
-                size: 24,
+                size: ThemeConstants.iconL,
                 fit: BoxFit.scaleDown,
               ),
             ),
@@ -52,7 +53,7 @@ class OrderTrackingDeliveryPartnerRow extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: .start,
-                spacing: 2,
+                spacing: ThemeConstants. spaceXXS,
                 children: [
                   AppText(
                     "${context.translate(LanguageLabelKeys.iAm)} "
@@ -89,7 +90,7 @@ class OrderTrackingDeliveryPartnerRow extends StatelessWidget {
                   child: AppSvgIcon(
                     AssetsConstants.phoneIcon,
                     color: context.cs.onPrimary,
-                    size: 18,
+                    size: ThemeConstants.iconS,
                     fit: BoxFit.scaleDown,
                   ),
                 ),

@@ -66,6 +66,7 @@ class _BlogScreenState extends State<BlogScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: CustomAppBar(
             title: context.translate(LanguageLabelKeys.blog),
+            scrollController: _pager.controller,
             bottom: PreferredSize(
               preferredSize: Size.fromHeight(
                 context.select<BlogCategoryCubit, bool>((cubit) {
@@ -121,20 +122,22 @@ class _BlogScreenState extends State<BlogScreen> {
       );
     }
 
-    return ListView.separated(
-      controller: _pager.controller,
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
-      itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
-      separatorBuilder: (context, index) => AppSpacing.h12,
-      itemBuilder: (context, index) {
-        if (index == state.data.length) {
-          return PaginatedListFooter(
-            isLoadingMore: state.isFetchingMore,
-            hasMore: state.hasMore,
-          );
-        }
-        return BlogCard(blog: state.data[index]);
-      },
+    return _pager.attach(
+      ListView.separated(
+        controller: _pager.controller,
+        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
+        separatorBuilder: (context, index) => AppSpacing.h12,
+        itemBuilder: (context, index) {
+          if (index == state.data.length) {
+            return PaginatedListFooter(
+              isLoadingMore: state.isFetchingMore,
+              hasMore: state.hasMore,
+            );
+          }
+          return BlogCard(blog: state.data[index]);
+        },
+      ),
     );
   }
 }

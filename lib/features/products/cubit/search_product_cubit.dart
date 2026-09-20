@@ -70,16 +70,22 @@ class SearchProductCubit
   void removeRecentSearch(String query) {
     _recentSearches.remove(query);
     Hive.box(settingsBox).put(kRecentProductSearches, _recentSearches);
-    if (state is PaginationInitial<ProductDataModel>) {
-      emit(const PaginationInitial());
-    }
+    _rebuildForRecentSearchesChange();
   }
 
   void clearRecentSearches() {
     _recentSearches = [];
     Hive.box(settingsBox).delete(kRecentProductSearches);
-    if (state is PaginationInitial<ProductDataModel>) {
-      emit(const PaginationInitial());
+    _rebuildForRecentSearchesChange();
+  }
+
+  // Recent-search chips render inline above the loaded product list (not as
+  // their own state), so mutating them needs a fresh state instance to make
+  // BlocBuilder rebuild — copyWith() on the same data does that cheaply.
+  void _rebuildForRecentSearchesChange() {
+    final current = state;
+    if (current is PaginationLoaded<ProductDataModel>) {
+      emit(current.copyWith());
     }
   }
 
@@ -106,24 +112,24 @@ class SearchProductCubit
     List<ProductDataModel> allData,
   ) => response.data.length >= _limit;
 
-  // Empty query shows recent searches instead of hitting the API.
-  @override
-  Future<void> fetchInitial() async {
-    if (currentFilters.query.isEmpty) {
-      emit(const PaginationInitial());
-      return;
-    }
-    await super.fetchInitial();
-  }
-
   // Live-as-you-type search (debounced) — fetches results but does NOT save
   // to recent-search history, or every intermediate keystroke ("pi", "piz",
   // "pizz"...) would show up as its own history entry.
   Future<void> search(String query) =>
       applyFilters(currentFilters.copyWith(query: query.trim()));
 
+  // Implicit save paths (mirrors Blinkit/Zomato-style history capture):
+  // tapping a result, or leaving the screen with a typed query — neither
+  // goes through submit/enter, so recent-search history would otherwise miss
+  // casual browsers who never explicitly submit.
+  void saveImplicitSearch(String query) {
+    final normalized = query.trim();
+    if (normalized.isEmpty) return;
+    _saveRecentSearch(normalized);
+  }
+
   // Explicit submit (search action/enter key, or re-tapping a recent-search
-  // chip) — this is the only path that writes to recent-search history.
+  // chip).
   Future<void> submitSearch(String query) async {
     final normalized = query.trim();
     await search(normalized);
@@ -136,12 +142,10 @@ class SearchProductCubit
     }
   }
 
-  // Re-fetches from the top with the other page size. No-op on the recent-
-  // searches screen (empty query) since that path never hits the API.
+  // Re-fetches from the top with the other page size.
   Future<void> setGridView(bool isGrid) {
     if (_isGrid == isGrid) return Future.value();
     _isGrid = isGrid;
-    if (currentFilters.query.isEmpty) return Future.value();
     return applyFilters(currentFilters);
   }
 

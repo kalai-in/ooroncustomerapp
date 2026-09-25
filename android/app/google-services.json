@@ -12,15 +12,90 @@
           "package_name": "app.ooron.customer"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "29465567254-17hnm82jakf3rb99orr69h74b2v8er2i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.ooron.customer",
+            "certificate_hash": "b965ae8a5d3adf495b8a2f8790d7e756b0741198"
+          }
+        },
+        {
+          "client_id": "29465567254-fq36a01brkfuuhi49mrnqrm1f2f2v1u8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBZzZdHPAgwkTjGSDIzRcHSPT079Ww36D4"
+        },
+        {
+          "current_key": "AIzaSyCqYKsgvjFZur_wdaUFzF7XLTw1egvA_DM"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "29465567254-fq36a01brkfuuhi49mrnqrm1f2f2v1u8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "29465567254-didobha4edeujtn9eq9dc607c3rubces.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "app.ooron.partners"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29465567254:android:97c03c8a73a10941695537",
+        "android_client_info": {
+          "package_name": "app.ooron.partners"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "29465567254-bi5aqt7bikqpm9rfdtu1nirajmhmk07s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.ooron.partners",
+            "certificate_hash": "b965ae8a5d3adf495b8a2f8790d7e756b0741198"
+          }
+        },
+        {
+          "client_id": "29465567254-fq36a01brkfuuhi49mrnqrm1f2f2v1u8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZzZdHPAgwkTjGSDIzRcHSPT079Ww36D4"
+        },
+        {
+          "current_key": "AIzaSyCqYKsgvjFZur_wdaUFzF7XLTw1egvA_DM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "29465567254-fq36a01brkfuuhi49mrnqrm1f2f2v1u8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "29465567254-didobha4edeujtn9eq9dc607c3rubces.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "app.ooron.partners"
+              }
+            }
+          ]
         }
       }
     }

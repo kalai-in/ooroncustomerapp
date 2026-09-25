@@ -62,6 +62,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '29465567254',
     projectId: 'ooron-82352',
     storageBucket: 'ooron-82352.firebasestorage.app',
+    androidClientId: '29465567254-17hnm82jakf3rb99orr69h74b2v8er2i.apps.googleusercontent.com',
+    iosClientId: '29465567254-o2vsm7jmrvm5nb5epi8aoomtkcvb9p25.apps.googleusercontent.com',
     iosBundleId: 'app.ooron.customer',
   );
 }

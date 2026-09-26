@@ -66,7 +66,7 @@
             android:value="2" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBZzZdHPAgwkTjGSDIzRcHSPT079Ww36D4" />
+            android:value="AIzaSyBZzZdHPAgwkTjGSDIzRcHSPT079    Ww36D4" />
         <!-- FCM default notification channel -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"

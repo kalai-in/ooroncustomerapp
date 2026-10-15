@@ -1,10 +1,7 @@
-import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/commons/widgets/demo_data_disclaimer.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/constants/theme_constants.dart';
-import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/commons/widgets/empty_state_widget.dart';
-import 'package:customer/commons/widgets/loading_widget.dart';
 import 'package:customer/features/cart/cubit/cart_action_cubit.dart';
 import 'package:customer/features/cart/cubit/cart_cubit.dart';
 import 'package:customer/features/category/cubit/sub_category_cubit.dart';
@@ -27,21 +24,21 @@ import 'package:customer/features/home/models/home_builder_model.dart';
 import 'package:customer/features/home/models/enums/home_type.dart';
 import 'package:customer/features/home/utils/home_hex_color.dart';
 import 'package:customer/core/routes/route_names.dart';
+import 'package:customer/features/home/widgets/back_to_top_button.dart';
 import 'package:customer/features/home/widgets/home_app_bar_delegate.dart';
 import 'package:customer/features/location/widgets/location_required_view.dart';
 import 'package:customer/commons/widgets/popup_dialog.dart';
-import 'package:customer/features/home/widgets/home_section_widget.dart';
-import 'package:customer/features/home/widgets/home_skeleton_loader.dart';
+import 'package:customer/features/home/widgets/section_widget.dart';
+import 'package:customer/features/spin_wheel/widgets/spin_wheel_dialog.dart';
+import 'package:customer/features/home/widgets/skeleton_loader.dart';
 import 'package:customer/commons/widgets/store_closed_banner.dart';
 import 'package:customer/features/location/screens/location_search_screen.dart';
 import 'package:customer/features/location/screens/location_setup_sheet.dart';
 import 'package:customer/features/products/cubit/product_cubit.dart';
 import 'package:customer/features/products/screens/product_screen.dart';
 import 'package:customer/features/main/cubit/nav_cubit.dart';
-import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/extensions/size_extensions.dart';
-import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -165,6 +162,20 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
+  // Guards against the spin wheel modal covering the home screen while
+  // loadHomeLayout (fired in initState) is still in flight — waits for it
+  // to resolve (loaded or errored) before the wheel shows, capped so a
+  // slow/hung request can't block the wheel indefinitely.
+  Future<void> _waitForHomeLayoutReady() async {
+    final cubit = context.read<HomeLayoutCubit>();
+    if (cubit.state is HomeLayoutLoaded || cubit.state is HomeLayoutError) {
+      return;
+    }
+    await cubit.stream
+        .firstWhere((s) => s is HomeLayoutLoaded || s is HomeLayoutError)
+        .timeout(const Duration(seconds: 5), onTimeout: () => cubit.state);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -178,7 +189,11 @@ class _HomeScreenState extends State<HomeScreen>
       await _checkAndRequestLocationPermission();
       if (!mounted) return;
       await NotificationService.instance.requestPermission();
-      if (mounted) PopupDialog.maybeShow(context);
+      if (!mounted) return;
+      await PopupDialog.maybeShow(context);
+      if (!mounted) return;
+      await _waitForHomeLayoutReady();
+      if (mounted) SpinWheelDialog.maybeShow(context);
     });
   }
 
@@ -200,7 +215,9 @@ class _HomeScreenState extends State<HomeScreen>
     return topPadding + searchH;
   }
 
-  static const double _kLoadMoreThreshold = 300.0;
+  // Fires loadMoreSections once 70% of the section list is scrolled
+  // (30% of scroll extent remaining), not just near the physical bottom.
+  static const double _kLoadMoreTriggerFraction = 0.7;
 
   void _onScroll() {
     final offset = _scrollController.offset;
@@ -212,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     if (!_scrollController.hasClients) return;
     final maxExtent = _scrollController.position.maxScrollExtent;
-    if (offset >= maxExtent - _kLoadMoreThreshold) {
+    if (maxExtent > 0 && offset >= maxExtent * _kLoadMoreTriggerFraction) {
       context.read<HomeLayoutCubit>().loadMoreSections();
     }
   }
@@ -251,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen>
         crossAxisAlignment: .start,
         children: [
           ...sections.map(
-            (s) => HomeSectionWidget(
+            (s) => SectionWidget(
               section: s,
               onCategoryTap: (cat) {
                 if (cat.id == null) return;
@@ -350,16 +367,7 @@ class _HomeScreenState extends State<HomeScreen>
               },
             ),
           ),
-          if (isLoadingMore)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: ThemeConstants.paddingM,
-              ),
-              child: LoadingWidget(
-                size: ThemeConstants.iconM,
-                color: _currentHeaderColor(Theme.of(context)),
-              ),
-            ),
+          if (isLoadingMore) const SkeletonLoader(),
           BlocBuilder<SettingsCubit, SettingsState>(
             builder: (context, state) {
               final demoMode = state is SettingsLoaded
@@ -428,6 +436,17 @@ class _HomeScreenState extends State<HomeScreen>
           final data = state.homeLayout.data;
           if (SettingsHiveBox.instance.channel == AppConstants.quick) {
             SettingsHiveBox.instance.setStoreClosed(data?.storeClosed ?? 0);
+          }
+          // Server declares a single available mode (not "both") — sync the
+          // persisted channel to match so the header stays consistent with
+          // what the API actually served, since the toggle is hidden here
+          // and can't let the user correct a stale channel manually.
+          final availableModes = data?.availableModes;
+          if ((availableModes == AppConstants.quick ||
+                  availableModes == AppConstants.ecommerce) &&
+              SettingsHiveBox.instance.channel != availableModes) {
+            SettingsHiveBox.instance.setChannel(availableModes!);
+            _selectedMode = availableModes == AppConstants.ecommerce ? 1 : 0;
           }
           final tabs = data?.categoryTabs ?? [];
           final old = _tabController;
@@ -508,7 +527,7 @@ class _HomeScreenState extends State<HomeScreen>
               left: 0,
               right: 0,
               child: Center(
-                child: _BackToTopButton(
+                child: BackToTopButton(
                   visibleListenable: _isScrolled,
                   onTap: () {
                     if (!_scrollController.hasClients) return;
@@ -637,7 +656,7 @@ class _HomeScreenState extends State<HomeScreen>
               if (cachedSections.isNotEmpty) {
                 return _buildSections(context, cachedSections);
               }
-              return const SliverToBoxAdapter(child: HomeSkeletonLoader());
+              return const SliverToBoxAdapter(child: SkeletonLoader());
             }
             if (layoutState is HomeLayoutError) {
               return SliverToBoxAdapter(
@@ -696,70 +715,6 @@ class _HomeScreenState extends State<HomeScreen>
           },
         ),
       ],
-    );
-  }
-}
-
-class _BackToTopButton extends StatelessWidget {
-  final ValueListenable<bool> visibleListenable;
-  final VoidCallback onTap;
-
-  const _BackToTopButton({
-    required this.visibleListenable,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: visibleListenable,
-      builder: (context, visible, _) {
-        return AnimatedSlide(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-          offset: visible ? Offset.zero : const Offset(0, -1),
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 200),
-            opacity: visible ? 1 : 0,
-            child: IgnorePointer(
-              ignoring: !visible,
-              child: Material(
-                color: context.cs.inverseSurface.withValues(alpha: 0.85),
-                shape: const StadiumBorder(),
-                elevation: 4,
-                child: InkWell(
-                  customBorder: const StadiumBorder(),
-                  onTap: onTap,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: ThemeConstants.paddingM,
-                      vertical: ThemeConstants.paddingS,
-                    ),
-                    child: Row(
-                      mainAxisSize: .min,
-                      children: [
-                        AppSvgIcon(
-                          AssetsConstants.arrowUpAndroidIcon,
-                          color: context.cs.onInverseSurface,
-                          size: ThemeConstants.iconS,
-                        ),
-                        const SizedBox(width: 6),
-                        AppText(
-                          context.translate(LanguageLabelKeys.backToTop),
-                          style: context.tt.labelMedium?.copyWith(
-                            color: context.cs.onInverseSurface,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

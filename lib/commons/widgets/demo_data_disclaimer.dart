@@ -24,7 +24,7 @@ class DemoDataDisclaimer extends StatelessWidget {
           horizontal: ThemeConstants.paddingM,
           vertical: ThemeConstants.paddingM,
         ),
-       decoration: AppDecorations.box(
+        decoration: AppDecorations.box(
           color: context.cs.surfaceContainerHigh,
           borderRadius: AppRadius.r8,
           border: Border.all(color: context.cs.outline, width: 1),

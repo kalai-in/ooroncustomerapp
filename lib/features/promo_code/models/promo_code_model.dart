@@ -1,3 +1,4 @@
+import 'enums/promo_apply_type.dart';
 import 'enums/promo_discount_type.dart';
 
 class PromoCode {
@@ -77,6 +78,9 @@ class PromoCodeData {
   PromoDiscountType get discountTypeEnum =>
       PromoDiscountType.fromRaw(discountType);
   late final String discountApplyType;
+
+  PromoApplyType get discountApplyTypeEnum =>
+      PromoApplyType.fromRaw(discountApplyType);
   late final double maxDiscountAmount;
   late final double minimumOrderAmount;
   late final int minProductQuantity;

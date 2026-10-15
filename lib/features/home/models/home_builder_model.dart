@@ -1,3 +1,4 @@
+import 'package:customer/features/home/models/enums/tab_style.dart';
 import 'package:customer/features/products/models/product_model.dart';
 import 'package:customer/utils/json_parsers.dart';
 
@@ -29,19 +30,25 @@ ResponsiveValue<int>? _parseResponsiveInt(dynamic raw) {
   return v == null ? null : ResponsiveValue<int>(app: v, tablet: v, web: v);
 }
 
+// A blank string in one device slot means "not set" for that device, not
+// "set to blank" — treat it as null so resolve() falls back to the other
+// device slots instead of returning an empty value.
+String? _nonEmptyString(dynamic raw) {
+  final v = parseString(raw);
+  return v == null || v.isEmpty ? null : v;
+}
+
 ResponsiveValue<String>? _parseResponsiveString(dynamic raw) {
   if (raw == null) return null;
   if (raw is Map) {
     return ResponsiveValue<String>(
-      app: parseString(raw['app']),
-      tablet: parseString(raw['tablet']),
-      web: parseString(raw['web']),
+      app: _nonEmptyString(raw['app']),
+      tablet: _nonEmptyString(raw['tablet']),
+      web: _nonEmptyString(raw['web']),
     );
   }
-  final v = parseString(raw);
-  return v == null || v.isEmpty
-      ? null
-      : ResponsiveValue<String>(app: v, tablet: v, web: v);
+  final v = _nonEmptyString(raw);
+  return v == null ? null : ResponsiveValue<String>(app: v, tablet: v, web: v);
 }
 
 class HomeBuilderModel {
@@ -181,7 +188,11 @@ class Layout {
     }
     backgroundTheme = parseString(json['background_theme']);
     backgroundColor = parseString(json['background_color']);
-    backgroundImageUrl = parseString(json['background_image_url']);
+    backgroundImageUrl = json['background_image_url'] is Map<String, dynamic>
+        ? Images.fromJson(
+            json['background_image_url'] as Map<String, dynamic>,
+          ).displayUrl
+        : parseString(json['background_image_url']);
     textColor = parseString(json['text_color']);
     headerIconUrl = parseString(json['header_icon_url']);
     imageAspect = _parseResponsiveString(json['image_aspect']);
@@ -299,10 +310,12 @@ class Blocks {
   String? redirectType;
   int? redirectId;
   String? redirectUrl;
+  String? redirectSlug;
   bool? hasChild;
   String? manualProductIds;
   int? categoryId;
   List<String>? viewMorePreviewImages;
+  List<ProductTabsData>? tabs;
 
   Blocks({
     this.id,
@@ -318,10 +331,12 @@ class Blocks {
     this.redirectType,
     this.redirectId,
     this.redirectUrl,
+    this.redirectSlug,
     this.hasChild,
     this.manualProductIds,
     this.categoryId,
     this.viewMorePreviewImages,
+    this.tabs,
   });
 
   Blocks.fromJson(Map<String, dynamic> json) {
@@ -362,6 +377,7 @@ class Blocks {
     redirectType = parseString(json['redirect_type']);
     redirectId = parseInt(json['redirect_id']);
     redirectUrl = parseString(json['redirect_url']);
+    redirectSlug = parseString(json['redirect_slug']);
     hasChild = parseBool(json['has_child']) ?? false;
     manualProductIds = parseString(json['manual_product_ids']) ?? "";
     categoryId = parseInt(json['category_id']) ?? 0;
@@ -370,6 +386,12 @@ class Blocks {
               .map((e) => e.toString())
               .toList()
         : <String>[];
+    final rawTabs = json['tabs'];
+    if (rawTabs is List) {
+      tabs = rawTabs
+          .map((v) => ProductTabsData.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -399,9 +421,13 @@ class Blocks {
     data['redirect_type'] = redirectType;
     data['redirect_id'] = redirectId;
     data['redirect_url'] = redirectUrl;
+    data['redirect_slug'] = redirectSlug;
     data['manual_product_ids'] = manualProductIds;
     data['category_id'] = categoryId;
     data['viewMorePreviewImages'] = viewMorePreviewImages;
+    if (tabs != null) {
+      data['tabs'] = tabs!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -438,6 +464,18 @@ class Config {
   ResponsiveValue<String>? imageAspect;
   ResponsiveValue<String>? bgImageAspect;
   String? itemTextColor;
+  String? tabStyle;
+  ResponsiveValue<String>? tabImageAspect;
+  String? activeTabColor;
+  String? tabTextColor;
+  String? activeTabTextColor;
+  TabActiveIndicator? activeIndicator;
+  TabActiveBgStyle? activeBgStyle;
+  String? activeTabColor2;
+  String? activeOutlineColor;
+  ResponsiveValue<String>? activeBgImageUrl;
+  ResponsiveValue<String>? activeBgImageAspect;
+  TabAnimation? tabAnimation;
 
   Config({
     this.carouselStyle,
@@ -471,6 +509,18 @@ class Config {
     this.imageAspect,
     this.bgImageAspect,
     this.itemTextColor,
+    this.tabStyle,
+    this.tabImageAspect,
+    this.activeTabColor,
+    this.tabTextColor,
+    this.activeTabTextColor,
+    this.activeIndicator,
+    this.activeBgStyle,
+    this.activeTabColor2,
+    this.activeOutlineColor,
+    this.activeBgImageUrl,
+    this.activeBgImageAspect,
+    this.tabAnimation,
   });
 
   Config.fromJson(Map<String, dynamic> json) {
@@ -492,7 +542,11 @@ class Config {
     productGridGap = _parseResponsiveInt(json['product_grid_gap']);
     productCardRadius = parseInt(json['product_card_radius']);
     blockPadding = parseInt(json['block_padding']);
-    backgroundImageUrl = parseString(json['background_image_url']);
+    backgroundImageUrl = json['background_image_url'] is Map<String, dynamic>
+        ? Images.fromJson(
+            json['background_image_url'] as Map<String, dynamic>,
+          ).displayUrl
+        : parseString(json['background_image_url']);
     showName = parseBool(json['show_name']);
     gridGap = _parseResponsiveInt(json['grid_gap']);
     tileRadius = parseInt(json['tile_radius']);
@@ -507,6 +561,24 @@ class Config {
     imageAspect = _parseResponsiveString(json['image_aspect']);
     bgImageAspect = _parseResponsiveString(json['bg_image_aspect']);
     itemTextColor = parseString(json['item_text_color']) ?? "";
+    tabStyle = parseString(json['tab_style']);
+    tabImageAspect = _parseResponsiveString(json['tab_image_aspect']);
+    activeTabColor = parseString(json['active_tab_color']);
+    tabTextColor = parseString(json['tab_text_color']);
+    activeTabTextColor = parseString(json['active_tab_text_color']);
+    activeIndicator = TabActiveIndicator.fromRaw(
+      parseString(json['active_indicator']),
+    );
+    activeBgStyle = TabActiveBgStyle.fromRaw(
+      parseString(json['active_bg_style']),
+    );
+    activeTabColor2 = parseString(json['active_tab_color_2']);
+    activeOutlineColor = parseString(json['active_outline_color']);
+    activeBgImageUrl = _parseResponsiveString(json['active_bg_image_url']);
+    activeBgImageAspect = _parseResponsiveString(
+      json['active_bg_image_aspect'],
+    );
+    tabAnimation = TabAnimation.fromRaw(parseString(json['tab_animation']));
   }
 
   Map<String, dynamic> toJson() {
@@ -542,6 +614,18 @@ class Config {
     data['image_aspect'] = imageAspect?.toJson();
     data['bg_image_aspect'] = bgImageAspect?.toJson();
     data['item_text_color'] = itemTextColor;
+    data['tab_style'] = tabStyle;
+    data['tab_image_aspect'] = tabImageAspect?.toJson();
+    data['active_tab_color'] = activeTabColor;
+    data['tab_text_color'] = tabTextColor;
+    data['active_tab_text_color'] = activeTabTextColor;
+    data['active_indicator'] = activeIndicator?.name;
+    data['active_bg_style'] = activeBgStyle?.name;
+    data['active_tab_color_2'] = activeTabColor2;
+    data['active_outline_color'] = activeOutlineColor;
+    data['active_bg_image_url'] = activeBgImageUrl?.toJson();
+    data['active_bg_image_aspect'] = activeBgImageAspect?.toJson();
+    data['tab_animation'] = tabAnimation?.name;
     return data;
   }
 }
@@ -552,6 +636,7 @@ class Items {
   String? redirectType;
   int? redirectId;
   String? redirectUrl;
+  String? redirectSlug;
   bool? hasChild;
 
   Items({
@@ -560,6 +645,7 @@ class Items {
     this.redirectType,
     this.redirectId,
     this.redirectUrl,
+    this.redirectSlug,
     this.hasChild,
   });
 
@@ -571,6 +657,7 @@ class Items {
     redirectType = parseString(json['redirect_type']);
     redirectId = parseInt(json['redirect_id']);
     redirectUrl = parseString(json['redirect_url']);
+    redirectSlug = parseString(json['redirect_slug']);
     hasChild = parseBool(json['has_child']) ?? false;
   }
 
@@ -583,6 +670,7 @@ class Items {
     data['redirect_type'] = redirectType;
     data['redirect_id'] = redirectId;
     data['redirect_url'] = redirectUrl;
+    data['redirect_slug'] = redirectSlug;
     return data;
   }
 }
@@ -602,12 +690,18 @@ class Images {
     imageUrl = parseString(json['image_url']);
   }
 
+  // app -> tablet -> web -> imageUrl, matching ResponsiveValue.resolve's
+  // fallback order: previously this skipped `tablet` entirely and checked
+  // the generic `imageUrl` before `web`, so an image set only in `tablet`
+  // (or only in `web`, with `imageUrl` also blank) never showed up.
   String? get displayUrl => app?.isNotEmpty == true
       ? app
-      : imageUrl?.isNotEmpty == true
-      ? imageUrl
+      : tablet?.isNotEmpty == true
+      ? tablet
       : web?.isNotEmpty == true
       ? web
+      : imageUrl?.isNotEmpty == true
+      ? imageUrl
       : null;
 
   Map<String, dynamic> toJson() {
@@ -670,6 +764,67 @@ class Brands {
   }
 }
 
+class ProductTabsData {
+  String? id;
+  String? title;
+  Images? images;
+  String? dataSource;
+  int? limit;
+  List<ProductDataModel>? products;
+  List<String>? viewMorePreviewImages;
+  String? categoryIds;
+
+  ProductTabsData({
+    this.id,
+    this.title,
+    this.images,
+    this.dataSource,
+    this.limit,
+    this.products,
+    this.viewMorePreviewImages,
+    this.categoryIds,
+  });
+
+  ProductTabsData.fromJson(Map<String, dynamic> json) {
+    id = parseString(json['id']);
+    title = parseString(json['title']);
+    images = json['images'] is Map<String, dynamic>
+        ? Images.fromJson(json['images'] as Map<String, dynamic>)
+        : null;
+    dataSource = parseString(json['data_source']);
+    limit = parseInt(json['limit']);
+    final rawProducts = json['products'];
+    if (rawProducts is List) {
+      products = rawProducts
+          .map((v) => ProductDataModel.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+    viewMorePreviewImages = json['viewMorePreviewImages'] is List
+        ? (json['viewMorePreviewImages'] as List)
+              .map((e) => e.toString())
+              .toList()
+        : <String>[];
+    categoryIds = parseString(json['category_ids']);
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['title'] = title;
+    if (images != null) {
+      data['images'] = images!.toJson();
+    }
+    data['data_source'] = dataSource;
+    data['limit'] = limit;
+    if (products != null) {
+      data['products'] = products!.map((v) => v.toJson()).toList();
+    }
+    data['viewMorePreviewImages'] = viewMorePreviewImages;
+    data['category_ids'] = categoryIds;
+    return data;
+  }
+}
+
 class CategoryTabs {
   String? id;
   String? name;
@@ -698,7 +853,11 @@ class CategoryTabs {
     name = parseString(json['name']);
     backgroundTheme = parseString(json['background_theme']);
     backgroundColor = parseString(json['background_color']);
-    backgroundImageUrl = parseString(json['background_image_url']);
+    backgroundImageUrl = json['background_image_url'] is Map<String, dynamic>
+        ? Images.fromJson(
+            json['background_image_url'] as Map<String, dynamic>,
+          ).displayUrl
+        : parseString(json['background_image_url']);
     textColor = parseString(json['text_color']);
     headerIconUrl = parseString(json['header_icon_url']);
     imageUrl = parseString(json['image_url']);

@@ -10,8 +10,13 @@ import 'package:customer/core/constants/theme_constants.dart';
 /// real cards swap in.
 class OrderListSkeletonLoader extends StatelessWidget {
   final int itemCount;
+  final bool shrinkWrap;
 
-  const OrderListSkeletonLoader({super.key, this.itemCount = 4});
+  const OrderListSkeletonLoader({
+    super.key,
+    this.itemCount = 4,
+    this.shrinkWrap = false,
+  });
 
   Widget _card(Color color) {
     return Container(
@@ -62,8 +67,14 @@ class OrderListSkeletonLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerBuilder(
       builder: (context, color) => ListView.separated(
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingS,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+        ),
         physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: shrinkWrap,
         itemCount: itemCount,
         separatorBuilder: (_, _) => AppSpacing.h12,
         itemBuilder: (_, _) => _card(color),

@@ -82,7 +82,12 @@ class CheckoutSkeletonLoader extends StatelessWidget {
     return ShimmerBuilder(
       builder: (context, color) => ListView(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, 0),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingL,
+          0,
+        ),
         children: [
           _cartItemsCard(color),
           AppSpacing.h12,

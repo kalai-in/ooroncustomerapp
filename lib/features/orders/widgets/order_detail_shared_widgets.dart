@@ -1,4 +1,5 @@
 import 'package:customer/commons/widgets/app_network_image.dart';
+import 'package:customer/commons/widgets/pickup_store_details.dart';
 import 'package:customer/commons/widgets/loading_widget.dart';
 import 'package:customer/commons/widgets/app_snack_bar.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
@@ -15,7 +16,7 @@ import 'package:customer/utils/extensions/num_extensions.dart';
 import 'package:customer/features/orders/models/ecommerce_order_model.dart';
 import 'package:customer/features/orders/models/order_address_model.dart';
 import 'package:customer/features/orders/models/order_model.dart'
-    show ItemRating;
+    show ItemRating, OrderPickupStore;
 import 'package:customer/features/orders/widgets/order_status_timeline.dart';
 import 'package:customer/features/orders/widgets/rate_product_sheet.dart';
 import 'package:customer/features/products/cubit/rating_add_update_cubit.dart';
@@ -34,10 +35,7 @@ import 'package:customer/core/constants/theme_constants.dart';
 /// One-line summary of a billing address for the order-detail info card:
 /// name and street address.
 String formatBillingAddress(OrderAddressModel billing) {
-  return [
-    billing.name,
-    billing.address,
-  ].where((s) => s.hasValue).join(' • ');
+  return [billing.name, billing.address].where((s) => s.hasValue).join(' • ');
 }
 
 class OrderDetailCard extends StatelessWidget {
@@ -99,7 +97,6 @@ class OrderDetailSectionTitle extends StatelessWidget {
   }
 }
 
-
 class OrderDetailPriceRow extends StatelessWidget {
   final String label;
   final String value;
@@ -140,10 +137,7 @@ class OrderDetailPriceRow extends StatelessWidget {
                 : LanguageLabelKeys.notRefundable,
           )
         : null;
-    final combinedMessage = [
-      ?refundableMessage,
-      ?tooltipMessage,
-    ].join('\n');
+    final combinedMessage = [?refundableMessage, ?tooltipMessage].join('\n');
     return Row(
       mainAxisAlignment: .spaceBetween,
       children: [
@@ -229,7 +223,10 @@ class InvoiceDownloadAction extends StatelessWidget {
           spacing: ThemeConstants.spaceXS,
           children: [
             if (isLoading)
-              LoadingWidget(size: ThemeConstants.loaderSizeS, color: context.cs.primary)
+              LoadingWidget(
+                size: ThemeConstants.loaderSizeS,
+                color: context.cs.primary,
+              )
             else
               AppSvgIcon(
                 AssetsConstants.downloadIcon,
@@ -503,7 +500,12 @@ void showOrderTimelineSheet(BuildContext context, List<Timeline> timeline) {
     context,
     title: context.translate(LanguageLabelKeys.orderTimeline),
     backgroundColor: Theme.of(context).cardColor,
-    padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingL, ThemeConstants.paddingXL, ThemeConstants.paddingXXL+ThemeConstants.paddingXS),
+    padding: const EdgeInsetsDirectional.fromSTEB(
+      ThemeConstants.paddingXL,
+      ThemeConstants.paddingL,
+      ThemeConstants.paddingXL,
+      ThemeConstants.paddingXXL + ThemeConstants.paddingXS,
+    ),
     builder: (sheetContext) => SingleChildScrollView(
       child: SlideAnimationList(
         crossAxisAlignment: .stretch,
@@ -564,6 +566,32 @@ class OrderDetailLabelValueRow extends StatelessWidget {
         ),
         ?trailing,
       ],
+    );
+  }
+}
+
+/// Pickup-store info card for a pickup order — same [PickupStoreDetails]
+/// rows used by the checkout bottom bar, boxed in the same white
+/// [OrderDetailCard] style as the other order-detail sections.
+/// Shared by the quick and ecommerce order-detail customer-info cards.
+class OrderPickupStoreCard extends StatelessWidget {
+  const OrderPickupStoreCard({super.key, required this.store});
+
+  final OrderPickupStore store;
+
+  @override
+  Widget build(BuildContext context) {
+    return OrderDetailCard(
+      child: PickupStoreDetails(
+        storeName: store.storeName,
+        address: store.address,
+        latitude: store.latitude,
+        longitude: store.longitude,
+        contactNumber: store.contactNumber,
+        preparationTime: store.preparationTime,
+        preparationMinutes: store.preparationMinutes,
+        isOpenNow: store.isOpenNow,
+      ),
     );
   }
 }
@@ -802,7 +830,9 @@ class OrderDetailBillSummaryCard extends StatelessWidget {
               crossAxisAlignment: .start,
               children: [
                 Padding(
-                  padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingL),
+                  padding: const EdgeInsetsDirectional.all(
+                    ThemeConstants.paddingL,
+                  ),
                   child: Column(
                     crossAxisAlignment: .start,
                     children: [
@@ -918,7 +948,10 @@ class OrderDetailDeliveryBoyView extends StatelessWidget {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: context.cs.surfaceContainerHighest,
-                child: AppSvgIcon(AssetsConstants.deliveryBikeIcon, size: ThemeConstants.iconM),
+                child: AppSvgIcon(
+                  AssetsConstants.deliveryBikeIcon,
+                  size: ThemeConstants.iconM,
+                ),
               ),
               Expanded(
                 child: Column(
@@ -995,7 +1028,7 @@ class OrderDetailDeliveryBoyView extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: .start,
-                      spacing: ThemeConstants. spaceXXS,
+                      spacing: ThemeConstants.spaceXXS,
                       children: [
                         AppText(
                           context.translate(LanguageLabelKeys.chatWithUs),
@@ -1122,9 +1155,10 @@ class _EcommerceItemRatingControlState
 
     return Container(
       width: double.infinity,
-      padding: labelKey == LanguageLabelKeys.rateThisProductNow
-          ? const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM, vertical: ThemeConstants.paddingS)
-          : const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM, vertical: ThemeConstants.paddingS),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: ThemeConstants.paddingM,
+        vertical: ThemeConstants.paddingS,
+      ),
       decoration: AppDecorations.box(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.only(

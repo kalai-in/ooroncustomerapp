@@ -168,12 +168,22 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
       ? widget.searchSuggestions!
       : const [''];
 
-  String _displayHint(BuildContext context) {
+  String _currentHint(BuildContext context) {
     final hints = _hints(context);
-    final hint = hints[_hintIndex % hints.length];
+    return hints[_hintIndex % hints.length];
+  }
+
+  /// Static "Search" prefix — only the quoted suggestion animates. Empty when
+  /// the suggestion is empty, since the fallback hint is a full sentence.
+  String _hintPrefix(BuildContext context) => _currentHint(context).isEmpty
+      ? ''
+      : '${context.translate(LanguageLabelKeys.search)} ';
+
+  String _animatedHint(BuildContext context) {
+    final hint = _currentHint(context);
     return hint.isEmpty
         ? context.translate(LanguageLabelKeys.searchProductsHint)
-        : '${context.translate(LanguageLabelKeys.search)} "$hint"';
+        : '"$hint"';
   }
 
   @override
@@ -195,12 +205,19 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
   @override
   Widget build(BuildContext context) {
     final searchH = context.screenHeight * 0.045;
+    final hintStyle = context.tt.bodySmall?.copyWith(
+      color: context.cs.onSurfaceVariant,
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+    );
     return GestureDetector(
       onTap: () => AppNavigator.push(
         context,
         BlocProvider(
           create: (_) => SearchProductCubit(),
-          child: ProductSearchScreen(searchSuggestions: widget.searchSuggestions),
+          child: ProductSearchScreen(
+            searchSuggestions: widget.searchSuggestions,
+          ),
         ),
       ),
       child: Container(
@@ -226,6 +243,8 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
               fit: BoxFit.scaleDown,
             ),
             AppSpacing.w8,
+            if (_hintPrefix(context).isNotEmpty)
+              AppText(_hintPrefix(context), style: hintStyle, maxLines: 1),
             Expanded(
               child: ClipRect(
                 child: AnimatedSwitcher(
@@ -257,12 +276,8 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                     key: ValueKey<int>(_hintIndex),
                     alignment: AlignmentDirectional.centerStart,
                     child: AppText(
-                      _displayHint(context),
-                      style: context.tt.bodySmall?.copyWith(
-                        color: context.cs.onSurfaceVariant,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      _animatedHint(context),
+                      style: hintStyle,
                       maxLines: 1,
                       overflow: .ellipsis,
                     ),
@@ -273,7 +288,9 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
             Container(
               width: 1,
               height: 22,
-              margin: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingS),
+              margin: const EdgeInsetsDirectional.symmetric(
+                horizontal: ThemeConstants.paddingS,
+              ),
               color: context.cs.outline,
             ),
             AppSvgIcon(
@@ -318,7 +335,9 @@ class HomeNavTabBar extends StatelessWidget {
       labelColor: resolvedTextColor,
       unselectedLabelColor: resolvedTextColor.withValues(alpha: 0.6),
       padding: EdgeInsetsDirectional.zero,
-      labelPadding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM),
+      labelPadding: const EdgeInsetsDirectional.symmetric(
+        horizontal: ThemeConstants.paddingM,
+      ),
       tabs: tabs.asMap().entries.map((e) {
         final sh = context.screenHeight;
         final sw = context.screenWidth;

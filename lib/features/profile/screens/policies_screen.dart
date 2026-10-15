@@ -11,9 +11,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import '../../../commons/cubit/settings_cubit.dart';
 import '../../../commons/widgets/custom_app_bar.dart';
-import '../../../commons/widgets/loading_widget.dart';
 import 'package:customer/commons/widgets/app_scaffold.dart';
 import 'package:customer/core/constants/theme_constants.dart';
+import '../widgets/policy_content_skeleton_loader.dart';
 
 enum PoliciesType {
   privacyPolicy,
@@ -87,10 +87,43 @@ Widget _getPolicyEmptyContent(BuildContext context, PoliciesType type) {
     imagePath: AssetsConstants.noSearchFound,
     title:
         '${_title(context, type)} ${context.translate(LanguageLabelKeys.contentNotAvailable)}',
-    subtitle: context.translate(
-      LanguageLabelKeys.contentCurrentlyUnavailable,
-    ),
+    subtitle: context.translate(LanguageLabelKeys.contentCurrentlyUnavailable),
   );
+}
+
+/// Pull-to-refresh that also works when [child] is shorter than the viewport
+/// (empty / error states).
+class _PolicyRefresh extends StatelessWidget {
+  final Future<void> Function() onRefresh;
+  final Widget child;
+  final ScrollController? controller;
+  final EdgeInsetsGeometry padding;
+
+  const _PolicyRefresh({
+    required this.onRefresh,
+    required this.child,
+    this.controller,
+    this.padding = EdgeInsets.zero,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      color: Theme.of(context).colorScheme.primary,
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          controller: controller,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: padding,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class PoliciesScreen extends StatelessWidget {
@@ -151,33 +184,43 @@ class _PoliciesGeneralViewState extends State<_PoliciesGeneralView> {
               : BlocBuilder<SettingsCubit, SettingsState>(
                   builder: (context, state) {
                     if (state is SettingsLoading) {
-                      return const LoadingWidget();
+                      return const PolicyContentSkeletonLoader();
                     }
 
                     if (state is SettingsError) {
-                      return EmptyStateWidget(
-                        imagePath: AssetsConstants.noSearchFound,
-                        title: state.message,
-                        subtitle: context.translate(
-                          LanguageLabelKeys.pullToRefresh,
-                        ),
-                        onRetry: () =>
+                      return _PolicyRefresh(
+                        onRefresh: () =>
                             context.read<SettingsCubit>().loadSettings(),
+                        child: EmptyStateWidget(
+                          imagePath: AssetsConstants.noSearchFound,
+                          title: state.message,
+                          subtitle: context.translate(
+                            LanguageLabelKeys.pullToRefresh,
+                          ),
+                          onRetry: () =>
+                              context.read<SettingsCubit>().loadSettings(),
+                        ),
                       );
                     }
 
                     if (state is SettingsInitial) {
                       context.read<SettingsCubit>().loadSettings();
-                      return const LoadingWidget();
+                      return const PolicyContentSkeletonLoader();
                     }
 
                     if (state is SettingsLoaded) {
                       final html = _contentFromSettings(state, widget.type);
+                      Future<void> refresh() =>
+                          context.read<SettingsCubit>().loadSettings();
                       if (html == null || html.isEmpty) {
-                        return _getPolicyEmptyContent(context, widget.type);
+                        return _PolicyRefresh(
+                          onRefresh: refresh,
+                          child: _getPolicyEmptyContent(context, widget.type),
+                        );
                       }
 
-                      return SingleChildScrollView(
+                      return _PolicyRefresh(
+                        onRefresh: refresh,
                         controller: _scrollController,
                         padding: const EdgeInsetsDirectional.symmetric(
                           horizontal: ThemeConstants.paddingM,
@@ -202,8 +245,7 @@ class _PoliciesDedicatedView extends StatefulWidget {
   const _PoliciesDedicatedView({required this.type});
 
   @override
-  State<_PoliciesDedicatedView> createState() =>
-      _PoliciesDedicatedViewState();
+  State<_PoliciesDedicatedView> createState() => _PoliciesDedicatedViewState();
 }
 
 class _PoliciesDedicatedViewState extends State<_PoliciesDedicatedView> {
@@ -238,29 +280,41 @@ class _PoliciesDedicatedViewState extends State<_PoliciesDedicatedView> {
                   builder: (context, state) {
                     if (state is CountrySettingsLoading ||
                         state is CountrySettingsInitial) {
-                      return const LoadingWidget();
+                      return const PolicyContentSkeletonLoader();
                     }
 
                     if (state is CountrySettingsError) {
-                      return EmptyStateWidget(
-                        imagePath: AssetsConstants.noSearchFound,
-                        title: state.message,
-                        subtitle: context.translate(
-                          LanguageLabelKeys.pullToRefresh,
-                        ),
-                        onRetry: () => context
+                      return _PolicyRefresh(
+                        onRefresh: () => context
                             .read<CountrySettingsCubit>()
                             .loadCountrySettings(force: true),
+                        child: EmptyStateWidget(
+                          imagePath: AssetsConstants.noSearchFound,
+                          title: state.message,
+                          subtitle: context.translate(
+                            LanguageLabelKeys.pullToRefresh,
+                          ),
+                          onRetry: () => context
+                              .read<CountrySettingsCubit>()
+                              .loadCountrySettings(force: true),
+                        ),
                       );
                     }
 
                     if (state is CountrySettingsLoaded) {
                       final html = _contentFromPolicies(state, widget.type);
+                      Future<void> refresh() => context
+                          .read<CountrySettingsCubit>()
+                          .loadCountrySettings(force: true);
                       if (html == null || html.isEmpty) {
-                        return _getPolicyEmptyContent(context, widget.type);
+                        return _PolicyRefresh(
+                          onRefresh: refresh,
+                          child: _getPolicyEmptyContent(context, widget.type),
+                        );
                       }
 
-                      return SingleChildScrollView(
+                      return _PolicyRefresh(
+                        onRefresh: refresh,
                         controller: _scrollController,
                         padding: const EdgeInsetsDirectional.symmetric(
                           horizontal: ThemeConstants.paddingM,

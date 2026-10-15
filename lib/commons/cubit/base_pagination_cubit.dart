@@ -125,6 +125,16 @@ abstract class BasePaginationCubit<T> extends Cubit<PaginationState<T>> {
 
   Future<void> refresh() => fetchInitial();
 
+  // Inserts a freshly-created item at the top of the list (e.g. a reward
+  // just won) without a refetch — bumps total to match.
+  void prependItem(T item) {
+    final current = state;
+    if (current is! PaginationLoaded<T>) return;
+    emit(
+      current.copyWith(data: [item, ...current.data], total: current.total + 1),
+    );
+  }
+
   void updateItem(bool Function(T) predicate, T updated) {
     final current = state;
     if (current is! PaginationLoaded<T>) return;

@@ -28,16 +28,19 @@ class PopupDialog extends StatelessWidget {
 
   static bool _shownThisSession = false;
 
-  static void maybeShow(BuildContext context) {
+  /// Returns a future that resolves once the popup (if shown) is dismissed,
+  /// or immediately if it wasn't shown — lets callers chain another dialog
+  /// (e.g. the spin wheel) after this one closes instead of stacking both.
+  static Future<void> maybeShow(BuildContext context) {
     final settings = SettingsHiveBox.instance.getAppSettings();
-    if (settings == null) return;
-    if (settings.popupEnabled != '1') return;
+    if (settings == null) return Future.value();
+    if (settings.popupEnabled != '1') return Future.value();
 
     final alwaysShow = settings.popupAlwaysShowHome == '1';
-    if (!alwaysShow && _shownThisSession) return;
+    if (!alwaysShow && _shownThisSession) return Future.value();
 
     _shownThisSession = true;
-    showDialog(
+    return showDialog(
       context: context,
       barrierColor: context.cs.scrim.withValues(alpha: 0.54),
       builder: (_) => PopupDialog(settings: settings),
@@ -129,15 +132,16 @@ class PopupDialog extends StatelessWidget {
               borderRadius: AppRadius.r16,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
-                child: SizedBox(
+                child: Container(
                   width: double.infinity,
                   // Capped so the popup reads as a promo card, not a
                   // full-screen takeover — source images vary in aspect
                   // ratio and would otherwise stretch the dialog to fit.
                   height: context.heightFraction(0.42),
+                  color: Colors.white,
                   child: AppNetworkImage(
                     url: settings.popupImage ?? '',
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     errorWidget: const SizedBox.shrink(),
                   ),
                 ),

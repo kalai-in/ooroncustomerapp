@@ -90,7 +90,10 @@ class ApiEndpoints {
   static const String filters = '$products/filters';
   static const String addRecentlyVisitedProduct =
       'products/add_recently_visited_product';
+  static const String notifyMe = '$products/notify_me';
+  static const String removeNotifyMe = '$products/notify_me/remove';
   static const String homeLayout = 'home_layout';
+  static const String pageBuilder = 'page_builder';
 
   // Chat
   static const String chat = "chat";
@@ -101,9 +104,20 @@ class ApiEndpoints {
   static const String sendChatMessage = "$chat/send";
   static const String broadcastingAuth = "broadcasting/auth";
 
+  // Spin Wheel
+  static const String spinWheel = "spin_wheel";
+  static const String spinWheelRewards = "$spinWheel/rewards";
+  static const String spinWheelSpin = "$spinWheel/spin";
 
   // OSRM public demo routing server — free, no API key. Used to snap the
   // delivery-boy-to-destination tracking line onto actual roads for both
   // the Google Map and OSM (flutter_map) tracking views.
-  static const String osrmRouteBaseUrl = "https://router.project-osrm.org/route/v1/driving/";
+  static const String osrmRouteBaseUrl =
+      "https://router.project-osrm.org/route/v1/driving/";
+
+  // Public Google Maps search deep link — no API key needed. Opens a
+  // location (lat,lng or address text) in the external Maps app/browser,
+  // e.g. for "get directions" to a pickup store.
+  static const String googleMapsSearchBaseUrl =
+      "https://www.google.com/maps/search/?api=1&query=";
 }

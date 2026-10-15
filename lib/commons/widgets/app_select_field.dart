@@ -67,7 +67,10 @@ class _AppSelectFieldState extends State<AppSelectField> {
       readOnly: true,
       validator: widget.validator,
       suffixIcon: Padding(
-        padding: const EdgeInsetsDirectional.only(end: ThemeConstants.paddingL, start: ThemeConstants.paddingS),
+        padding: const EdgeInsetsDirectional.only(
+          end: ThemeConstants.paddingL,
+          start: ThemeConstants.paddingS,
+        ),
         child: widget.isLoading
             ? const LoadingWidget(size: ThemeConstants.loaderSizeS)
             : AppSvgIcon(

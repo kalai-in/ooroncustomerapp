@@ -1,5 +1,4 @@
 import 'package:customer/commons/utils/pagination_scroll_controller.dart';
-import 'package:customer/commons/widgets/loading_widget.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_sizes.dart';
@@ -8,6 +7,7 @@ import 'package:customer/features/cart/cubit/cart_recommendations_cubit.dart';
 import 'package:customer/features/checkout/widgets/checkout_shared_widgets.dart';
 import 'package:customer/features/products/models/product_model.dart';
 import 'package:customer/features/products/widgets/product_card.dart';
+import 'package:customer/features/products/widgets/product_card_skeleton.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:flutter/material.dart';
@@ -100,20 +100,33 @@ class _RecommendationRowState extends State<_RecommendationRow> {
   @override
   Widget build(BuildContext context) {
     return CheckoutCard(
+      padding: const EdgeInsetsDirectional.symmetric(
+        vertical: ThemeConstants.paddingM,
+      ),
       child: Column(
         crossAxisAlignment: .start,
         spacing: ThemeConstants.spaceM,
         children: [
-          AppText(
-            widget.title,
-            style: context.tt.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: ThemeConstants.paddingM,
+            ),
+            child: AppText(
+              widget.title,
+              style: context.tt.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
           LayoutBuilder(
             builder: (context, constraints) {
               const gap = 10.0;
+              const listPadding = ThemeConstants.paddingM;
               final visibleCount = AppSizes.isTablet(context) ? 4 : 3;
               final itemWidth =
-                  (constraints.maxWidth - gap * (visibleCount - 1)) /
+                  (constraints.maxWidth -
+                      listPadding * 2 -
+                      gap * (visibleCount - 1)) /
                   visibleCount;
               final itemCount =
                   widget.products.length + (widget.isLoadingMore ? 1 : 0);
@@ -123,13 +136,16 @@ class _RecommendationRowState extends State<_RecommendationRow> {
                   ListView.separated(
                     controller: _pager.controller,
                     scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: listPadding,
+                    ),
                     itemCount: itemCount,
                     separatorBuilder: (_, _) => AppSpacing.w10,
                     itemBuilder: (context, i) {
                       if (i >= widget.products.length) {
                         return SizedBox(
                           width: itemWidth,
-                          child: const Center(child: LoadingWidget()),
+                          child: const ProductCardSkeleton(),
                         );
                       }
                       return SizedBox(

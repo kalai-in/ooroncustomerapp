@@ -25,8 +25,7 @@ final class NotificationSettingsSaveError
 }
 
 // ── Cubit ────────────────────────────────────────────────────────────────────
-class NotificationSettingsSaveCubit
-    extends Cubit<NotificationSettingsSaveState>
+class NotificationSettingsSaveCubit extends Cubit<NotificationSettingsSaveState>
     with ApiErrorGuard<NotificationSettingsSaveState> {
   final NotificationSettingsRepository _repository;
 

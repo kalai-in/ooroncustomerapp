@@ -13,6 +13,7 @@ import 'package:customer/features/cart/models/cart_model.dart';
 import 'package:customer/commons/models/surge_charges_model.dart';
 import 'package:customer/commons/models/tax_charges_model.dart';
 import 'package:customer/features/checkout/widgets/checkout_shared_widgets.dart';
+import 'package:customer/features/promo_code/models/enums/promo_apply_type.dart';
 import 'package:customer/features/promo_code/models/enums/promo_discount_type.dart';
 import 'package:customer/features/promo_code/models/promo_code_model.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
@@ -28,26 +29,26 @@ import 'package:customer/core/constants/theme_constants.dart';
 String _fmt(CartData cartData, num amount) =>
     '${cartData.currency}${amount.formatPrice(cartData.decimalPoint!)}';
 
-
-/// Shared promo math between the collapsed row and the full sheet: a flat
-/// promo is credited as wallet cashback after delivery instead of being
-/// subtracted from the bill like a percentage discount is.
+/// Shared promo math between the collapsed row and the full sheet: a wallet
+/// promo (`discount_apply_type: wallet`) is credited as cashback after
+/// delivery instead of being subtracted from the bill like an instant
+/// discount is.
 class _PromoTotals {
   factory _PromoTotals(CartData cartData, PromoCodeData? appliedPromo) {
-    final isFlatPromo =
+    final isWalletPromo =
         appliedPromo != null &&
-        appliedPromo.discountTypeEnum == PromoDiscountType.flat;
+        appliedPromo.discountApplyTypeEnum == PromoApplyType.wallet;
     final saved =
         (cartData.savedAmount ?? 0) +
-        (appliedPromo != null && !isFlatPromo ? appliedPromo.discount : 0);
-    final cashback = isFlatPromo ? appliedPromo.discount : 0;
+        (appliedPromo != null && !isWalletPromo ? appliedPromo.discount : 0);
+    final cashback = isWalletPromo ? appliedPromo.discount : 0;
     final total = appliedPromo != null
-        ? (isFlatPromo
+        ? (isWalletPromo
               ? cartData.totalAmount!
               : cartData.totalAmount! - appliedPromo.discount)
         : (cartData.totalAmount ?? 0);
     return _PromoTotals._(
-      isFlatPromo: isFlatPromo,
+      isWalletPromo: isWalletPromo,
       saved: saved,
       cashback: cashback,
       total: total,
@@ -55,13 +56,13 @@ class _PromoTotals {
   }
 
   const _PromoTotals._({
-    required this.isFlatPromo,
+    required this.isWalletPromo,
     required this.saved,
     required this.cashback,
     required this.total,
   });
 
-  final bool isFlatPromo;
+  final bool isWalletPromo;
   final num saved;
   final num cashback;
   final num total;
@@ -74,12 +75,14 @@ class CheckoutBillDetailsSection extends StatelessWidget {
     required this.currency,
     this.appliedPromo,
     this.useWallet = false,
+    this.isPickup = false,
   });
 
   final CartData cartData;
   final String currency;
   final PromoCodeData? appliedPromo;
   final bool useWallet;
+  final bool isPickup;
 
   Future<void> _openSummarySheet(BuildContext context) {
     return showAppBottomSheet(
@@ -91,6 +94,7 @@ class CheckoutBillDetailsSection extends StatelessWidget {
         cartData: cartData,
         appliedPromo: appliedPromo,
         useWallet: useWallet,
+        isPickup: isPickup,
       ),
     );
   }
@@ -132,6 +136,8 @@ class CheckoutBillDetailsSection extends StatelessWidget {
       onTap: () => _openSummarySheet(context),
       child: CheckoutCard(
         child: Row(
+          crossAxisAlignment: .start,
+          mainAxisAlignment: .center,
           children: [
             AppSvgIcon(
               AssetsConstants.billIcon,
@@ -202,11 +208,13 @@ class _BillSummarySheet extends StatefulWidget {
     required this.cartData,
     this.appliedPromo,
     this.useWallet = false,
+    this.isPickup = false,
   });
 
   final CartData cartData;
   final PromoCodeData? appliedPromo;
   final bool useWallet;
+  final bool isPickup;
 
   @override
   State<_BillSummarySheet> createState() => _BillSummarySheetState();
@@ -301,7 +309,8 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
             : null,
       ),
       AppSpacing.h8,
-      if (appliedPromo != null &&
+      if (widget.isPickup) ...[]
+      else if (appliedPromo != null &&
           appliedPromo.discountTypeEnum == PromoDiscountType.freeDelivery)
         CheckoutBillRow(
           label: context.translate(LanguageLabelKeys.deliveryCharge),
@@ -345,7 +354,9 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
           taxRate: c.taxRate,
         );
         return Padding(
-          padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingS),
+          padding: const EdgeInsetsDirectional.only(
+            top: ThemeConstants.paddingS,
+          ),
           child: CheckoutBillRow(
             label: c.label ?? '',
             value: _fmt(cartData, c.charge ?? 0),
@@ -373,7 +384,9 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
           taxRate: c.taxRate,
         );
         return Padding(
-          padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingS),
+          padding: const EdgeInsetsDirectional.only(
+            top: ThemeConstants.paddingS,
+          ),
           child: CheckoutBillRow(
             label: c.name ?? '',
             value: _fmt(cartData, c.amount ?? 0),
@@ -394,10 +407,10 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
         );
       })),
       if (appliedPromo != null &&
-          (totals.isFlatPromo ||
+          (totals.isWalletPromo ||
               appliedPromo.discountTypeEnum ==
                   PromoDiscountType.freeDelivery)) ...[
-        // Flat promos: cashback isn't part of this bill — it's credited to
+        // Wallet promos: cashback isn't part of this bill — it's credited to
         // the wallet after delivery — so it gets its own highlighted callout
         // below instead of sitting in the itemized total like a discount.
         // Free-delivery promos: already reflected above on the delivery
@@ -407,7 +420,7 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
         CheckoutBillRow(
           label:
               '${context.translate(LanguageLabelKeys.promo)} (${appliedPromo.promoCode})',
-          value: '-${_fmt(cartData, totals.saved)}',
+          value: '-${_fmt(cartData, appliedPromo.discount)}',
           valueColor: context.cs.onSecondaryContainer,
         ),
       ],
@@ -460,7 +473,9 @@ class _BillSummarySheetState extends State<_BillSummarySheet> {
             crossAxisAlignment: .start,
             children: [
               Padding(
-                padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
+                padding: const EdgeInsetsDirectional.all(
+                  ThemeConstants.paddingM,
+                ),
                 child: Column(
                   crossAxisAlignment: .start,
                   children: _buildCardRows(context, data),
@@ -558,10 +573,7 @@ class CheckoutBillRow extends StatelessWidget {
                 : LanguageLabelKeys.notRefundable,
           )
         : null;
-    final combinedMessage = [
-      ?refundableMessage,
-      ?tooltipMessage,
-    ].join('\n');
+    final combinedMessage = [?refundableMessage, ?tooltipMessage].join('\n');
     return Row(
       mainAxisAlignment: .spaceBetween,
       children: [

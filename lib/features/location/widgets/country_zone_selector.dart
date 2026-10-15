@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:customer/commons/cubit/countries_cubit.dart';
 import 'package:customer/commons/cubit/zones_cubit.dart';
 import 'package:customer/commons/models/countries_model.dart';
@@ -8,6 +10,7 @@ import 'package:customer/commons/widgets/country_dropdown_field.dart';
 import 'package:customer/commons/widgets/zone_dropdown_field.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/constants/navigation_service.dart';
+import 'package:customer/core/local_storage/settings_hive_box.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/theme/app_spacing.dart';
@@ -19,18 +22,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Country + delivery-zone picker shown on the location setup screens.
-/// Auto-selects the country flagged `is_default` (falls back to the first
-/// one) as soon as [CountriesCubit] has data, then loads that country's zones
-/// into the zone dropdown and pre-selects the first of them — reloading and
-/// re-selecting whenever the country changes. Picking a zone (or re-picking
-/// the pre-selected one) opens [ZoneLocationPickerScreen] to pin-drop within it;
+/// Auto-selects the user's last-picked country (if still present in the
+/// list), else the one flagged `is_default` (falls back to the first one),
+/// as soon as [CountriesCubit] has data, then — unless [autoSelectZone] is
+/// false — loads that country's zones into the zone dropdown and
+/// pre-selects the first of them — reloading and re-selecting whenever the
+/// country changes. Picking a zone (or re-picking the pre-selected one)
+/// opens [ZoneLocationPickerScreen] to pin-drop within it;
 /// [onLocationConfirmed] fires once that screen saves a location and pops, so
 /// the caller can close the sheet / navigate home the same way the
 /// search-manually flow does.
 class CountryZoneSelector extends StatefulWidget {
   final VoidCallback? onLocationConfirmed;
+  // False on the first-run "no location" screen — the very first zone
+  // pick there should always be a deliberate, hand-made choice.
+  final bool autoSelectZone;
 
-  const CountryZoneSelector({super.key, this.onLocationConfirmed});
+  const CountryZoneSelector({
+    super.key,
+    this.onLocationConfirmed,
+    this.autoSelectZone = true,
+  });
 
   @override
   State<CountryZoneSelector> createState() => _CountryZoneSelectorState();
@@ -40,6 +52,10 @@ class _CountryZoneSelectorState extends State<CountryZoneSelector> {
   late final ZonesCubit _zonesCubit = ZonesCubit();
   CountriesData? _selectedCountry;
   ZonesData? _selectedZone;
+  // Only true for the sheet's initial country pick — a user-driven country
+  // switch within the same sheet session must never auto-fill the zone, it
+  // has to be picked by hand again.
+  bool _allowAutoZone = false;
 
   @override
   void initState() {
@@ -60,24 +76,57 @@ class _CountryZoneSelectorState extends State<CountryZoneSelector> {
   void _maybeSelectDefault(CountriesState state) {
     if (_selectedCountry != null) return;
     if (state is! CountriesLoaded || state.countries.isEmpty) return;
-    final defaultCountry = state.countries.firstWhere(
-      (c) => c.isDefault == 1,
-      orElse: () => state.countries.first,
-    );
-    _selectCountry(defaultCountry);
+    final lastCountryId = SettingsHiveBox.instance.selectedCountryId;
+    CountriesData? lastCountry;
+    if (lastCountryId != null) {
+      for (final c in state.countries) {
+        if (c.id == lastCountryId) {
+          lastCountry = c;
+          break;
+        }
+      }
+    }
+    final defaultCountry =
+        lastCountry ??
+        state.countries.firstWhere(
+          (c) => c.isDefault == 1,
+          orElse: () => state.countries.first,
+        );
+    _selectCountry(defaultCountry, allowAutoZone: widget.autoSelectZone);
   }
 
-  void _selectCountry(CountriesData country) {
+  /// [allowAutoZone] is true only for the sheet's own initial pick (default
+  /// or last-used country) — a country the user picks by hand from the
+  /// dropdown always leaves the zone for them to pick by hand too.
+  void _selectCountry(CountriesData country, {bool allowAutoZone = false}) {
     if (_selectedCountry?.id == country.id) return;
     setState(() {
       _selectedCountry = country;
       _selectedZone = null;
     });
+    _allowAutoZone = allowAutoZone;
+    unawaited(SettingsHiveBox.instance.saveSelectedCountryId(country.id));
     if (country.id != null) _zonesCubit.fetchZones(country.id!);
+  }
+
+  void _maybeSelectDefaultZone(ZonesState state) {
+    if (!_allowAutoZone) return;
+    if (_selectedZone != null) return;
+    if (state is! ZonesLoaded || state.zones.isEmpty) return;
+    _allowAutoZone = false;
+    final lastZoneId = SettingsHiveBox.instance.zoneId;
+    final defaultZone = state.zones.firstWhere(
+      (z) => z.id == lastZoneId,
+      orElse: () => state.zones.first,
+    );
+    // Only the display default — no navigation/save until the user actually
+    // taps a zone, same as the country field pre-fill.
+    setState(() => _selectedZone = defaultZone);
   }
 
   Future<void> _selectZone(ZonesData zone) async {
     setState(() => _selectedZone = zone);
+    unawaited(SettingsHiveBox.instance.saveZoneId(zone.id));
     final confirmed = await AppNavigator.push<bool>(
       context,
       ZoneLocationPickerScreen(zone: zone),
@@ -89,8 +138,15 @@ class _CountryZoneSelectorState extends State<CountryZoneSelector> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _zonesCubit,
-      child: BlocListener<CountriesCubit, CountriesState>(
-        listener: (context, state) => _maybeSelectDefault(state),
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<CountriesCubit, CountriesState>(
+            listener: (context, state) => _maybeSelectDefault(state),
+          ),
+          BlocListener<ZonesCubit, ZonesState>(
+            listener: (context, state) => _maybeSelectDefaultZone(state),
+          ),
+        ],
         child: BlocBuilder<CountriesCubit, CountriesState>(
           builder: (context, countriesState) {
             // A lone country is not a choice — drop its field and let the

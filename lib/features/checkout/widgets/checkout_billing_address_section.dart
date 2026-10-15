@@ -85,7 +85,9 @@ class CheckoutBillingAddressSection extends StatelessWidget {
           ),
           if (!sameAsShipping && billingAddress != null)
             Padding(
-              padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingXS),
+              padding: const EdgeInsetsDirectional.only(
+                top: ThemeConstants.paddingXS,
+              ),
               child: Row(
                 children: [
                   const SizedBox(width: 22 + ThemeConstants.paddingS),

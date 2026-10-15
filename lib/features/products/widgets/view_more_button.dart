@@ -21,12 +21,22 @@ class ViewMoreButton extends StatelessWidget {
   /// driven by this list instead of [products] — empty list hides the button.
   final List<String>? previewImageUrls;
 
+  /// Left/right margin. Defaults to [ThemeConstants.paddingL]; callers that
+  /// wrap product listings with a different horizontal padding can pass it
+  /// here to keep the button aligned with the listing above it.
+  final double? horizontalMargin;
+
+  /// Overrides the default "View More" label.
+  final String? label;
+
   const ViewMoreButton({
     super.key,
     required this.products,
     this.shownCount = 6,
     required this.onTap,
     this.previewImageUrls,
+    this.horizontalMargin,
+    this.label,
   });
 
   @override
@@ -53,7 +63,12 @@ class ViewMoreButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingXS, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        margin: EdgeInsetsDirectional.fromSTEB(
+          horizontalMargin ?? ThemeConstants.paddingL,
+          ThemeConstants.paddingXS,
+          horizontalMargin ?? ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+        ),
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingL,
           vertical: ThemeConstants.paddingS,
@@ -83,7 +98,7 @@ class ViewMoreButton extends StatelessWidget {
               AppSpacing.w8,
             ],
             AppText(
-              context.translate(LanguageLabelKeys.viewMore),
+              label ?? context.translate(LanguageLabelKeys.viewMore),
               style: context.tt.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: context.cs.onSurface,

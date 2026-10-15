@@ -4,16 +4,23 @@ import 'package:flutter/widgets.dart';
 class PaginationScrollController {
   final ScrollController controller = ScrollController();
   final VoidCallback onLoadMore;
-  final double threshold;
 
-  PaginationScrollController({required this.onLoadMore, this.threshold = 200}) {
+  /// Fraction of the scroll extent (0-1) after which [onLoadMore] fires.
+  /// Default 0.7 triggers once 70% is scrolled (30% remaining).
+  final double triggerFraction;
+
+  PaginationScrollController({
+    required this.onLoadMore,
+    this.triggerFraction = 0.7,
+  }) {
     controller.addListener(_onScroll);
   }
 
   void _onScroll() {
     if (!controller.hasClients) return;
-    if (controller.position.pixels >=
-        controller.position.maxScrollExtent - threshold) {
+    final max = controller.position.maxScrollExtent;
+    if (max <= 0) return;
+    if (controller.position.pixels >= max * triggerFraction) {
       onLoadMore();
     }
   }

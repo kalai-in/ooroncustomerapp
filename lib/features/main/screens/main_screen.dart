@@ -51,11 +51,14 @@ class MainScreen extends StatefulWidget {
     required ThemeMode newTheme,
     required Offset position,
   }) async {
-    await context.findAncestorStateOfType<_MainScreenState>()?._changeTheme(newTheme, position);
+    await context.findAncestorStateOfType<_MainScreenState>()?._changeTheme(
+      newTheme,
+      position,
+    );
   }
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   final _shellBoundaryKey = GlobalKey();
 
   // Theme-reveal animation state (mirrors animation_theme.dart's MyApp).
@@ -68,8 +71,12 @@ class _MainScreenState extends State<MainScreen> {
     final themeCubit = context.read<ThemeCubit>();
     if (themeCubit.state.themeMode == newTheme || _isAnimating) return;
 
-    final boundary = _shellBoundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    final oldSnapshot = await boundary?.toImage(pixelRatio: MediaQuery.of(context).devicePixelRatio);
+    final boundary =
+        _shellBoundaryKey.currentContext?.findRenderObject()
+            as RenderRepaintBoundary?;
+    final oldSnapshot = await boundary?.toImage(
+      pixelRatio: MediaQuery.of(context).devicePixelRatio,
+    );
     if (!mounted || oldSnapshot == null) return;
 
     // Switch the real tree to the new theme immediately — it renders live
@@ -106,6 +113,7 @@ class _MainScreenState extends State<MainScreen> {
       _pendingTheme = null;
     });
   }
+
   final _homeLayoutCubit = HomeLayoutCubit();
   final _categoryCubit = CategoryCubit();
   late final _screens = [
@@ -138,18 +146,53 @@ class _MainScreenState extends State<MainScreen> {
     ),
   ];
 
+  // Cart is REST-only with no push channel, so a change made elsewhere
+  // (website, another device) while this screen stays foregrounded is only
+  // ever picked up by polling — kept slow (30s) and paused whenever the app
+  // isn't resumed, so it never fights with a just-tapped add/remove's own
+  // optimistic update or debounced sync.
+  static const _cartPollInterval = Duration(seconds: 30);
+  Timer? _cartPollTimer;
+
+  void _startCartPolling() {
+    _cartPollTimer?.cancel();
+    if (!AuthHiveBox.instance.isLoggedIn) return;
+    _cartPollTimer = Timer.periodic(
+      _cartPollInterval,
+      (_) => context.read<CartCubit>().loadFromApi(),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (AuthHiveBox.instance.isLoggedIn) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => context.read<CartCubit>().loadFromApi(),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<CartCubit>().loadFromApi();
+        _startCartPolling();
+      });
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Cart can change server-side (e.g. removed from the website) while the
+    // app is backgrounded; the cart is REST-only with no push channel, so
+    // refresh on resume to pick up out-of-app changes.
+    if (state == AppLifecycleState.resumed &&
+        AuthHiveBox.instance.isLoggedIn) {
+      context.read<CartCubit>().loadFromApi();
+      _startCartPolling();
+    } else if (state != AppLifecycleState.resumed) {
+      _cartPollTimer?.cancel();
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _cartPollTimer?.cancel();
     _homeLayoutCubit.close();
     _categoryCubit.close();
     _oldSnapshot?.dispose();
@@ -173,7 +216,10 @@ class _MainScreenState extends State<MainScreen> {
         // Covers the whole shell (tab content + bottom nav bar) so the
         // punched-hole reveal sweeps over everything, same as
         // animation_theme.dart's sample.
-        if (_isAnimating && _animationPosition != null && _oldSnapshot != null && _pendingTheme != null)
+        if (_isAnimating &&
+            _animationPosition != null &&
+            _oldSnapshot != null &&
+            _pendingTheme != null)
           Positioned.fill(
             child: IgnorePointer(
               child: ThemeRevealAnimation(

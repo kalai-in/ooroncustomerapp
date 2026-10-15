@@ -45,6 +45,7 @@ class EmptyStateWidget extends StatelessWidget {
   Widget _buildContent(BuildContext context) {
     return Center(
       child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsetsDirectional.all(ThemeConstants.spaceXXXL),
         child: Column(
           mainAxisSize: .min,

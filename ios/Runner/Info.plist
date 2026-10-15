@@ -29,7 +29,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>REVERSED_CLIENT_ID</string>
+				<string>com.googleusercontent.apps.YOUR_REVERSED_CLIENT_ID_HERE</string>
 			</array>
 		</dict>
 		<dict>
@@ -39,7 +39,7 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER).deeplink</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>ooron</string>
+				<string>snapbuy</string>
 			</array>
 		</dict>
 	</array>

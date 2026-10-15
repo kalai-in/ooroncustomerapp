@@ -160,11 +160,9 @@ class AppDecorations {
     image: image,
   );
 
-  // Selectable option tile — flat, no border, no background fill
+  // Selectable option tile — flat, no border, no background fill regardless
+  // of selection state (Radio + text color already convey selection).
   static BoxDecoration selectableOption({
-    required Color primaryColor,
-    required Color outlineColor,
-    required bool selected,
     BorderRadius borderRadius = AppRadius.r12,
   }) => BoxDecoration(color: AppColors.transparent, borderRadius: borderRadius);
 }

@@ -16,7 +16,12 @@ void showAppearanceSheet(BuildContext context) {
   showAppBottomSheet(
     context,
     title: context.translate(LanguageLabelKeys.appearance),
-    padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.spaceXXXL),
+    padding: const EdgeInsetsDirectional.fromSTEB(
+      ThemeConstants.paddingL,
+      ThemeConstants.paddingM,
+      ThemeConstants.paddingL,
+      ThemeConstants.spaceXXXL,
+    ),
     builder: (_) => BlocProvider.value(
       value: context.read<ThemeCubit>(),
       child: const _AppearanceSheet(),

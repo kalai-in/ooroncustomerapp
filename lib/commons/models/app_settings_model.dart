@@ -55,12 +55,12 @@ class AppSettingsData {
   String? appstoreUrl;
   String? deliveryBoyPlaystoreUrl;
   String? deliveryBoyAppstoreUrl;
-  String? isVersionSystemOn;
-  String? requiredForceUpdate;
-  String? currentVersion;
-  String? iosIsVersionSystemOn;
-  String? iosRequiredForceUpdate;
-  String? iosCurrentVersion;
+  String? isVersionSystemOnCustomer;
+  String? requiredForceUpdateCustomer;
+  String? currentVersionCustomer;
+  String? iosIsVersionSystemOnCustomer;
+  String? iosRequiredForceUpdateCustomer;
+  String? iosCurrentVersionCustomer;
   String? customerLightModeColor;
   String? customerDarkModeColor;
   String? generateOtp;
@@ -97,6 +97,8 @@ class AppSettingsData {
   String? broadcastDriver;
   BroadcastConfig? broadcastConfig;
   String? mapProvider;
+  // 1 / 0 flag — home screen shows the spin-wheel popup only when 1.
+  int? spinWheelAvailable;
 
   AppSettingsData({
     this.appName,
@@ -127,12 +129,12 @@ class AppSettingsData {
     this.appstoreUrl,
     this.deliveryBoyPlaystoreUrl,
     this.deliveryBoyAppstoreUrl,
-    this.isVersionSystemOn,
-    this.requiredForceUpdate,
-    this.currentVersion,
-    this.iosIsVersionSystemOn,
-    this.iosRequiredForceUpdate,
-    this.iosCurrentVersion,
+    this.isVersionSystemOnCustomer,
+    this.requiredForceUpdateCustomer,
+    this.currentVersionCustomer,
+    this.iosIsVersionSystemOnCustomer,
+    this.iosRequiredForceUpdateCustomer,
+    this.iosCurrentVersionCustomer,
     this.customerLightModeColor,
     this.customerDarkModeColor,
     this.generateOtp,
@@ -169,6 +171,7 @@ class AppSettingsData {
     this.broadcastDriver,
     this.broadcastConfig,
     this.mapProvider,
+    this.spinWheelAvailable,
   });
 
   AppSettingsData.fromJson(Map<String, dynamic> json) {
@@ -189,7 +192,9 @@ class AppSettingsData {
     phoneAuthOtp = parseString(json['phone_auth_otp']);
     phoneAuthPassword = parseString(json['phone_auth_password']);
     firebaseAuthentication = parseString(json['firebase_authentication']);
-    customSmsGatewayOtpBased = parseString(json['custom_sms_gateway_otp_based']);
+    customSmsGatewayOtpBased = parseString(
+      json['custom_sms_gateway_otp_based'],
+    );
     passwordMinLength = parseString(json['password_min_length']);
     passwordMaxLength = parseString(json['password_max_length']);
     passwordRequireUppercase = parseString(json['password_require_uppercase']);
@@ -200,12 +205,22 @@ class AppSettingsData {
     appstoreUrl = parseString(json['appstore_url']);
     deliveryBoyPlaystoreUrl = parseString(json['delivery_boy_playstore_url']);
     deliveryBoyAppstoreUrl = parseString(json['delivery_boy_appstore_url']);
-    isVersionSystemOn = parseString(json['is_version_system_on']);
-    requiredForceUpdate = parseString(json['required_force_update']);
-    currentVersion = parseString(json['current_version']);
-    iosIsVersionSystemOn = parseString(json['ios_is_version_system_on']);
-    iosRequiredForceUpdate = parseString(json['ios_required_force_update']);
-    iosCurrentVersion = parseString(json['ios_current_version']);
+    isVersionSystemOnCustomer = parseString(
+      json['is_version_system_on_customer'],
+    );
+    requiredForceUpdateCustomer = parseString(
+      json['required_force_update_customer'],
+    );
+    currentVersionCustomer = parseString(json['current_version_customer']);
+    iosIsVersionSystemOnCustomer = parseString(
+      json['ios_is_version_system_on_customer'],
+    );
+    iosRequiredForceUpdateCustomer = parseString(
+      json['ios_required_force_update_customer'],
+    );
+    iosCurrentVersionCustomer = parseString(
+      json['ios_current_version_customer'],
+    );
     customerLightModeColor = parseString(json['customer_light_mode_color']);
     customerDarkModeColor = parseString(json['customer_dark_mode_color']);
     generateOtp = parseString(json['generate_otp']);
@@ -228,7 +243,9 @@ class AppSettingsData {
     appModeCustomer = parseString(json['app_mode_customer']);
     appModeCustomerRemark = parseString(json['app_mode_customer_remark']);
     appModeDeliveryBoy = parseString(json['app_mode_delivery_boy']);
-    appModeDeliveryBoyRemark = parseString(json['app_mode_delivery_boy_remark']);
+    appModeDeliveryBoyRemark = parseString(
+      json['app_mode_delivery_boy_remark'],
+    );
     commonMetaKeywords = parseString(json['common_meta_keywords']);
     color = parseString(json['color']);
     googlePlay = parseString(json['google_play']);
@@ -241,9 +258,12 @@ class AppSettingsData {
     demoMode = parseString(json['demo_mode']);
     broadcastDriver = parseString(json['broadcast_driver']);
     broadcastConfig = json['broadcast_config'] is Map<String, dynamic>
-        ? BroadcastConfig.fromJson(json['broadcast_config'] as Map<String, dynamic>)
+        ? BroadcastConfig.fromJson(
+            json['broadcast_config'] as Map<String, dynamic>,
+          )
         : null;
     mapProvider = parseString(json['map_provider']);
+    spinWheelAvailable = parseInt(json['spin_wheel_available']);
   }
 
   Map<String, dynamic> toJson() {
@@ -276,12 +296,12 @@ class AppSettingsData {
     data['appstore_url'] = appstoreUrl;
     data['delivery_boy_playstore_url'] = deliveryBoyPlaystoreUrl;
     data['delivery_boy_appstore_url'] = deliveryBoyAppstoreUrl;
-    data['is_version_system_on'] = isVersionSystemOn;
-    data['required_force_update'] = requiredForceUpdate;
-    data['current_version'] = currentVersion;
-    data['ios_is_version_system_on'] = iosIsVersionSystemOn;
-    data['ios_required_force_update'] = iosRequiredForceUpdate;
-    data['ios_current_version'] = iosCurrentVersion;
+    data['is_version_system_on_customer'] = isVersionSystemOnCustomer;
+    data['required_force_update_customer'] = requiredForceUpdateCustomer;
+    data['current_version_customer'] = currentVersionCustomer;
+    data['ios_is_version_system_on_customer'] = iosIsVersionSystemOnCustomer;
+    data['ios_required_force_update_customer'] = iosRequiredForceUpdateCustomer;
+    data['ios_current_version_customer'] = iosCurrentVersionCustomer;
     data['customer_light_mode_color'] = customerLightModeColor;
     data['customer_dark_mode_color'] = customerDarkModeColor;
     data['generate_otp'] = generateOtp;
@@ -320,6 +340,7 @@ class AppSettingsData {
       data['broadcast_config'] = broadcastConfig!.toJson();
     }
     data['map_provider'] = mapProvider;
+    data['spin_wheel_available'] = spinWheelAvailable;
     return data;
   }
 }

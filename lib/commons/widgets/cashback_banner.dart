@@ -78,7 +78,7 @@ class CashbackBanner extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: .start,
-              spacing: ThemeConstants. spaceXXS,
+              spacing: ThemeConstants.spaceXXS,
               children: [
                 AppText(
                   amountText,

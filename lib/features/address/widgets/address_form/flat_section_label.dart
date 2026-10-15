@@ -12,7 +12,9 @@ class FlatSectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingM),
+      padding: const EdgeInsetsDirectional.only(
+        bottom: ThemeConstants.paddingM,
+      ),
       child: AppText(
         title,
         style: context.tt.labelMedium?.copyWith(

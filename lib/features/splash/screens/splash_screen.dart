@@ -2,6 +2,7 @@ import 'package:customer/commons/cubit/connectivity_cubit.dart';
 import 'package:customer/core/constants/navigation_service.dart';
 import 'package:customer/commons/models/app_settings_model.dart';
 import 'package:customer/commons/utils/force_update_helper.dart';
+import 'package:customer/commons/widgets/force_update_dialog.dart';
 import 'package:customer/commons/widgets/app_no_internet_widget.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/localization/cubit/language_cubit.dart';
@@ -28,6 +29,7 @@ class _SplashScreenState extends State<SplashScreen>
     with WidgetsBindingObserver {
   AppSettingsData? _pendingForceUpdateData;
   bool _dialogShowing = false;
+  bool _navigated = false;
 
   @override
   void initState() {
@@ -53,7 +55,8 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigateToMaintenance(String? remark) {
-    if (!mounted) return;
+    if (!mounted || _navigated) return;
+    _navigated = true;
     AppNavigator.pushReplacementNamed(
       context,
       RouteNames.maintenance,
@@ -63,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigate() {
-    if (!mounted) return;
+    if (!mounted || _navigated) return;
     final settingsState = context.read<SettingsCubit>().state;
     if (settingsState is! SettingsLoaded) return;
     final data = settingsState.settings.data;
@@ -73,6 +76,7 @@ class _SplashScreenState extends State<SplashScreen>
     }
     _pendingForceUpdateData = null;
     if (!mounted) return;
+    _navigated = true;
     if (!SettingsHiveBox.instance.onboardingSeen) {
       AppNavigator.pushReplacementNamed(context, RouteNames.onboarding);
     } else if (!SettingsHiveBox.instance.hasLocation) {

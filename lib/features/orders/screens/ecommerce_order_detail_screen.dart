@@ -14,11 +14,13 @@ import 'package:customer/features/orders/widgets/order_detail_cards.dart'
 import 'package:customer/features/orders/widgets/order_detail_shared_widgets.dart';
 import 'package:customer/features/orders/widgets/order_detail_skeleton_loader.dart';
 import 'package:customer/features/orders/widgets/order_help_button.dart';
+import 'package:customer/utils/ensure_visible_and_flash.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/extensions/string_extensions.dart';
 import 'package:customer/utils/order_status_labels.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:open_file/open_file.dart';
 import 'package:customer/commons/widgets/app_scaffold.dart';
@@ -53,12 +55,10 @@ class _EcommerceOrderDetailScreenState
   }
 
   void _scrollToOtherItems() {
-    final sectionContext = _otherItemsSectionKey.currentContext;
-    if (sectionContext == null) return;
-    Scrollable.ensureVisible(
-      sectionContext,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOut,
+    ensureVisibleAndFlash(
+      context,
+      _otherItemsSectionKey,
+      color: context.cs.primary,
     );
   }
 
@@ -182,7 +182,8 @@ class _EcommerceOrderDetailScreenState
                       (order.courierAgency ?? '').isNotEmpty &&
                       (order.trackingId ?? '').isNotEmpty &&
                       (order.trackingUrl ?? '').isNotEmpty;
-                  final hasReturnRejectReason = order.returnRejectReason.hasValue;
+                  final hasReturnRejectReason =
+                      order.returnRejectReason.hasValue;
 
                   return RefreshIndicator(
                     onRefresh: () => context
@@ -190,7 +191,20 @@ class _EcommerceOrderDetailScreenState
                         .loadOrderDetail(widget.orderItemId),
                     child: ListView(
                       controller: _scrollController,
-                      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingL),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      // Keep every child built regardless of scroll
+                      // position — otherwise a target card outside the
+                      // default cacheExtent gets unmounted, and its
+                      // GlobalKey.currentContext goes null, silently
+                      // breaking Scrollable.ensureVisible.
+                      // A literal `double.infinity` here makes the viewport
+                      // compute a non-finite paint/semantics rect and
+                      // crashes with accessibility/semantics enabled — use
+                      // a large finite value instead.
+                      scrollCacheExtent: const ScrollCacheExtent.pixels(10000),
+                      padding: const EdgeInsetsDirectional.all(
+                        ThemeConstants.paddingL,
+                      ),
                       children: [
                         OrderTimelineStatusCard(
                           statusLabel:
@@ -210,6 +224,13 @@ class _EcommerceOrderDetailScreenState
                               ? _scrollToOtherItems
                               : null,
                         ),
+                        if (EcommerceOrderDetailExpectedDeliveryCard
+                            .shouldShow(order)) ...[
+                          AppSpacing.h12,
+                          EcommerceOrderDetailExpectedDeliveryCard(
+                            order: order,
+                          ),
+                        ],
                         if (hasReturnRejectReason) ...[
                           AppSpacing.h12,
                           EcommerceOrderDetailReturnRejectCard(order: order),
@@ -230,6 +251,10 @@ class _EcommerceOrderDetailScreenState
                         if (hasTrackingInfo) ...[
                           AppSpacing.h12,
                           EcommerceOrderDetailTrackingCard(order: order),
+                        ],
+                        if (order.pickupStore != null) ...[
+                          AppSpacing.h12,
+                          EcommerceOrderDetailPickupStoreCard(order: order),
                         ],
                         AppSpacing.h12,
                         EcommerceOrderDetailItemsCard(

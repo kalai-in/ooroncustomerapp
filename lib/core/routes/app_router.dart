@@ -13,6 +13,7 @@ import 'package:customer/core/routes/order_detail_args.dart';
 import 'package:customer/core/routes/product_detail_args.dart';
 import 'package:customer/features/products/models/product_model.dart';
 import 'package:customer/features/products/screens/product_detail_pager.dart';
+import 'package:customer/features/products/screens/product_all_reviews_screen.dart';
 import 'package:customer/features/products/screens/full_screen_image_viewer.dart';
 import 'package:customer/features/promo_code/cubit/promo_code_cubit.dart';
 import 'package:customer/features/promo_code/cubit/promo_code_validate_cubit.dart';
@@ -59,6 +60,9 @@ import 'package:customer/features/blog/screens/blog_detail_screen.dart';
 import 'package:customer/features/blog/screens/blog_screen.dart';
 import 'package:customer/features/faq/cubit/faq_cubit.dart';
 import 'package:customer/features/faq/screens/faq_screen.dart';
+import 'package:customer/features/spin_wheel/cubit/spin_wheel_config_cubit.dart';
+import 'package:customer/features/spin_wheel/cubit/spin_wheel_rewards_cubit.dart';
+import 'package:customer/features/spin_wheel/screens/spin_wheel_rewards_screen.dart';
 import 'package:customer/features/wallet/cubit/transaction_cubit.dart';
 import 'package:customer/features/wallet/cubit/wallet_transaction_cubit.dart';
 import 'package:customer/features/wallet/screens/transactions_screen.dart';
@@ -195,6 +199,17 @@ class AppRouter {
       case RouteNames.faq:
         return _materialRoute(
           BlocProvider(create: (_) => FaqCubit(), child: const FaqScreen()),
+        );
+
+      case RouteNames.spinWheelRewards:
+        return _materialRoute(
+          MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (_) => SpinWheelRewardsCubit()),
+              BlocProvider(create: (_) => SpinWheelConfigCubit()),
+            ],
+            child: const SpinWheelRewardsScreen(),
+          ),
         );
 
       case RouteNames.promoCodes:
@@ -376,8 +391,7 @@ class AppRouter {
           // screen) — load the order first, then hand it to the tracking screen.
           return _materialRoute(
             BlocProvider(
-              create: (_) =>
-                  OrderDetailCubit()..loadOrderDetail(trackingArgs),
+              create: (_) => OrderDetailCubit()..loadOrderDetail(trackingArgs),
               child: BlocBuilder<OrderDetailCubit, OrderDetailState>(
                 builder: (context, state) {
                   if (state is OrderDetailLoaded) {
@@ -430,6 +444,7 @@ class AppRouter {
           OrderSuccessScreen(
             orderId: orderSuccessArgs.orderId,
             orderItemId: orderSuccessArgs.orderItemId,
+            deliveryType: orderSuccessArgs.deliveryType,
           ),
         );
 
@@ -493,6 +508,11 @@ class AppRouter {
               ),
         );
 
+      case RouteNames.productAllReviews:
+        final args = settings.arguments;
+        if (args is! ProductAllReviewsArgs) return _invalidArgsRoute(settings);
+        return _materialRoute(ProductAllReviewsScreen(args: args));
+
       case RouteNames.fullScreenImageViewer:
         final args = settings.arguments as (List<String>, int)?;
         final images = args?.$1 ?? <String>[];
@@ -535,7 +555,10 @@ class AppRouter {
     );
   }
 
-  static CupertinoPageRoute _materialRoute(Widget child, {RouteSettings? settings}) {
+  static CupertinoPageRoute _materialRoute(
+    Widget child, {
+    RouteSettings? settings,
+  }) {
     return CupertinoPageRoute(builder: (_) => child, settings: settings);
   }
 }

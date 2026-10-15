@@ -26,7 +26,11 @@ class ProductDetailCircleBtn extends StatelessWidget {
     if (isActive) {
       return IconButton(
         onPressed: onTap,
-        icon: AppSvgIcon(icon, size: ThemeConstants.iconS, color: context.cs.onSurface),
+        icon: AppSvgIcon(
+          icon,
+          size: ThemeConstants.iconS,
+          color: context.cs.onSurface,
+        ),
         padding: EdgeInsetsDirectional.all(ThemeConstants.paddingS),
         visualDensity: VisualDensity.compact,
       );
@@ -47,7 +51,11 @@ class ProductDetailCircleBtn extends StatelessWidget {
             ),
           ],
         ),
-        child: AppSvgIcon(icon, size: ThemeConstants.iconS, color: context.cs.onSurface),
+        child: AppSvgIcon(
+          icon,
+          size: ThemeConstants.iconS,
+          color: context.cs.onSurface,
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:customer/commons/utils/app_log.dart';
+import 'package:customer/core/api/api_exception.dart';
 import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/local_storage/auth_hive_box.dart';
 import 'package:customer/core/local_storage/guest_cart_hive_box.dart';
@@ -84,6 +85,20 @@ class CartCubit extends Cubit<CartState> {
       if (generation != _loadGeneration) return;
       final items = cart.data?.cart;
       seedFromApi(items ?? []);
+    } on ApiException catch (e) {
+      if (generation != _loadGeneration) return;
+      // Backend responds with a non-1 status ("No item(s) found in users
+      // cart") — not a real HTTP/API failure — whenever the cart is
+      // genuinely empty (e.g. emptied from the website), so ApiClient's
+      // status!=1 check throws here instead of just handing back an empty
+      // list. Only treat it as empty when the HTTP call itself succeeded
+      // (status 200/201); a real network/auth failure must leave the last
+      // known cart alone instead of wiping it.
+      if (e.statusCode == 200 || e.statusCode == 201) {
+        seedFromApi(const []);
+      } else {
+        logDebug('CartCubit.loadFromApi error: $e');
+      }
     } catch (e) {
       logDebug('CartCubit.loadFromApi error: $e');
     }

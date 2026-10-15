@@ -35,7 +35,7 @@ class ApiParameters {
   static const String oldPassword = 'old_password';
   static const String newPassword = 'new_password';
   static const String confirmPassword = 'confirm_password';
-  static const String passwordConfirmation = 'password_confirmation';
+  static const String passwordConfirmation = 'new_password_confirmation';//'password_confirmation';
   static const String otpVerifyMethod = 'otp_verify_method';
 
   // ── Profile Update ────────────────────────────────────────────────────────
@@ -71,6 +71,10 @@ class ApiParameters {
   // ── Date Filters ──────────────────────────────────────────────────────────
   static const String startDate = 'start_date';
   static const String endDate = 'end_date';
+
+  // ── Spin Wheel ────────────────────────────────────────────────────────────
+  static const String rewardType = 'reward_type';
+  static const String requestToken = 'request_token';
 
   // ── Wallet ────────────────────────────────────────────────────────────────
   static const String amount = 'amount';
@@ -178,6 +182,7 @@ class ApiParameters {
   static const String upsellOffset = 'upsell_offset';
 
   // ── Checkout / Place Order ────────────────────────────────────────────────
+  static const String deliveryType = 'delivery_type';
   static const String addressId = 'address_id';
   static const String quantity = 'quantity';
   static const String deliveryCharge = 'delivery_charge';

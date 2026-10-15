@@ -1,12 +1,8 @@
 import 'package:customer/commons/widgets/app_button.dart';
-import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/commons/widgets/app_text_field.dart';
 import 'package:customer/commons/widgets/password_requirements_checklist.dart';
-import 'package:customer/core/constants/assets_constants.dart';
-import 'package:customer/core/constants/theme_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_spacing.dart';
-import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/input_validators.dart';
 import 'package:customer/utils/password_policy.dart';
@@ -44,11 +40,6 @@ class _ForgotPasswordPasswordSectionState
           controller: widget.passwordController,
           labelText: context.translate(LanguageLabelKeys.newPassword),
           hintText: context.translate(LanguageLabelKeys.enterNewPassword),
-          prefixIcon: AppSvgIcon(
-            AssetsConstants.lockIcon,
-            color: context.cs.primary,
-            size: ThemeConstants.iconM,
-          ),
           isPassword: true,
           validator: (v) => v.validateNewPassword(context),
         ),
@@ -67,11 +58,6 @@ class _ForgotPasswordPasswordSectionState
           controller: widget.confirmPasswordController,
           labelText: context.translate(LanguageLabelKeys.confirmPassword),
           hintText: context.translate(LanguageLabelKeys.reEnterPassword),
-          prefixIcon: AppSvgIcon(
-            AssetsConstants.lockIcon,
-            color: context.cs.primary,
-            size: ThemeConstants.iconM,
-          ),
           isPassword: true,
           validator: (v) => v.validateConfirmPassword(
             context,

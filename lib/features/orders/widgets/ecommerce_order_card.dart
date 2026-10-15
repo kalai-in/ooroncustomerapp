@@ -84,7 +84,7 @@ class EcommerceOrderCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: .start,
-                  spacing: ThemeConstants. spaceXXS,
+                  spacing: ThemeConstants.spaceXXS,
                   children: [
                     AppText(
                       order.orderItemStatus ??
@@ -152,7 +152,7 @@ class EcommerceOrderCard extends StatelessWidget {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: .start,
-                          spacing: ThemeConstants. spaceXXS,
+                          spacing: ThemeConstants.spaceXXS,
                           children: [
                             AppText(
                               order.productName ?? '',
@@ -297,7 +297,10 @@ class _StatusIcon extends StatelessWidget {
                 shape: .circle,
               ),
               alignment: Alignment.center,
-              child: AppSvgIcon(AssetsConstants.orderIcon, size: ThemeConstants.iconL,),
+              child: AppSvgIcon(
+                AssetsConstants.orderIcon,
+                size: ThemeConstants.iconL,
+              ),
             ),
           ),
           PositionedDirectional(
@@ -314,7 +317,9 @@ class _StatusIcon extends StatelessWidget {
                   width: 2,
                 ),
               ),
-              padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
+              padding: const EdgeInsetsDirectional.all(
+                ThemeConstants.paddingXS,
+              ),
               child: AppSvgIcon(
                 icon,
                 size: ThemeConstants.iconXXS,

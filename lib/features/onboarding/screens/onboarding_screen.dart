@@ -131,7 +131,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             child: Align(
               alignment: AlignmentDirectional.topEnd,
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0, ThemeConstants.paddingS, ThemeConstants.paddingL, 0),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  0,
+                  ThemeConstants.paddingS,
+                  ThemeConstants.paddingL,
+                  0,
+                ),
                 child: OnboardingSkipButton(onTap: _skip),
               ),
             ),

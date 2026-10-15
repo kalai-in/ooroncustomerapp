@@ -81,7 +81,9 @@ class AddressCard extends StatelessWidget {
               onTap: onTap,
               borderRadius: AppRadius.r16,
               child: Padding(
-                padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
+                padding: const EdgeInsetsDirectional.all(
+                  ThemeConstants.paddingM,
+                ),
                 child: Row(
                   crossAxisAlignment: .start,
                   spacing: ThemeConstants.spaceM,
@@ -163,7 +165,10 @@ class AddressCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingXS, end: ThemeConstants.paddingXS),
+            padding: const EdgeInsetsDirectional.only(
+              top: ThemeConstants.paddingXS,
+              end: ThemeConstants.paddingXS,
+            ),
             child: InkWell(
               onTap: () => showAddressOptionsSheet(
                 context,
@@ -172,7 +177,9 @@ class AddressCard extends StatelessWidget {
               ),
               borderRadius: AppRadius.r20,
               child: Padding(
-                padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
+                padding: const EdgeInsetsDirectional.all(
+                  ThemeConstants.paddingXS,
+                ),
                 child: AppSvgIcon(
                   AssetsConstants.menuIcon,
                   size: ThemeConstants.iconM,

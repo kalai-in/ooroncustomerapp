@@ -45,6 +45,7 @@ class AppTextField extends StatefulWidget {
   final Color? cursorColor;
   final bool enabled;
   final bool autofocus;
+
   /// When true, ignores [obscureText]/[suffixIcon] and manages its own
   /// obscure state with a built-in show/hide eye-icon toggle.
   final bool isPassword;
@@ -220,14 +221,6 @@ class _MobilePrefix extends StatelessWidget {
       mainAxisSize: .min,
       children: [
         AppSpacing.w14,
-        AppText(
-          '',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        AppSpacing.w4,
         AppSvgIcon(
           AssetsConstants.arrowDownIcon,
           size: ThemeConstants.iconS,

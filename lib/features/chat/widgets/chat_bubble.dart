@@ -40,9 +40,7 @@ class ChatBubble extends StatelessWidget {
           ? AlignmentDirectional.centerEnd
           : AlignmentDirectional.centerStart,
       child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: context.screenWidth * 0.72,
-        ),
+        constraints: BoxConstraints(maxWidth: context.screenWidth * 0.72),
         child: Container(
           margin: EdgeInsetsDirectional.only(
             top: ThemeConstants.paddingXS,
@@ -100,7 +98,12 @@ class ChatBubble extends StatelessWidget {
                     ),
                   ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, 0, ThemeConstants.paddingM, ThemeConstants.paddingS),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    ThemeConstants.paddingM,
+                    0,
+                    ThemeConstants.paddingM,
+                    ThemeConstants.paddingS,
+                  ),
                   child: Row(
                     mainAxisSize: .min,
                     children: [
@@ -307,7 +310,12 @@ class _AudioAttachmentState extends State<_AudioAttachment> {
     );
 
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, ThemeConstants.paddingS, ThemeConstants.paddingM, ThemeConstants.paddingXS),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingS,
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingXS,
+      ),
       child: Row(
         mainAxisSize: .min,
         children: [
@@ -409,7 +417,12 @@ class _FileAttachmentState extends State<_FileAttachment> {
     return InkWell(
       onTap: _open,
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, ThemeConstants.paddingS, ThemeConstants.paddingM, ThemeConstants.paddingXS),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingS,
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingXS,
+        ),
         child: Row(
           mainAxisSize: .min,
           children: [
@@ -424,7 +437,9 @@ class _FileAttachmentState extends State<_FileAttachment> {
               ),
               child: _downloading
                   ? Padding(
-                      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
+                      padding: const EdgeInsetsDirectional.all(
+                        ThemeConstants.paddingS,
+                      ),
                       child: LoadingWidget(),
                     )
                   : AppSvgIcon(
@@ -479,7 +494,8 @@ class _FullScreenImage extends StatelessWidget {
               : AppSvgIcon(
                   AssetsConstants.fileBrokenIcon,
                   color: context.cs.onInverseSurface,
-                  size: ThemeConstants.iconL, fit: BoxFit.scaleDown,
+                  size: ThemeConstants.iconL,
+                  fit: BoxFit.scaleDown,
                 ),
         ),
       ),
@@ -533,12 +549,16 @@ class ChatDateDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingM),
+      padding: const EdgeInsetsDirectional.symmetric(
+        vertical: ThemeConstants.paddingM,
+      ),
       child: Row(
         children: [
           Expanded(child: Divider(color: context.cs.outlineVariant, height: 1)),
           Padding(
-            padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: ThemeConstants.paddingM,
+            ),
             child: AppText(
               _label(context),
               style: context.tt.labelSmall?.copyWith(

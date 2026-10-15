@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:customer/features/cart/cubit/cart_cubit.dart';
 import 'package:customer/commons/widgets/cart_button.dart';
+import 'package:customer/commons/widgets/notify_me_button.dart';
 import 'package:customer/features/products/models/product_model.dart';
 import 'package:customer/features/products/widgets/product_card_details.dart';
 import 'package:customer/features/products/widgets/product_card_media.dart';
@@ -178,134 +179,166 @@ class _ProductCardState extends State<ProductCard> {
         }
       }
 
-      final cardChild = Opacity(
-          // sold-out opacity logic untouched; store-closed greys the card the same way, independently.
-          opacity: (isProductOutOfStock || isStoreClosedQuick) ? 0.65 : 1,
-          child: Column(
-            crossAxisAlignment: .start,
-            mainAxisSize: .min,
-            children: [
-              Padding(
-                padding: isCardWrapped
-                    ? const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingS, ThemeConstants.paddingS, ThemeConstants.paddingS, 0)
-                    : EdgeInsets.zero,
-                child: SizedBox(
-                  height: imageHeight,
-                  child: Hero(
-                    tag: 'product_hero_${product.id}${widget.heroSuffix}',
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Positioned.fill(
-                            child: ProductCardMedia(
-                              product: product,
-                              pageController: _pageController,
-                              currentPage: _page,
-                              onPageChanged: (p) => setState(() => _page = p),
-                              measurement: measurement,
-                              isOutOfStock: isProductOutOfStock,
-                              isCompact: isCompact,
-                              isDark: isDark,
-                              onFavoriteTap: widget.onFavoriteTap,
-                              embedded: isCardWrapped,
-                              topRadius: widget.cardRadius,
-                            ),
+      final dimOpacity = (isProductOutOfStock || isStoreClosedQuick)
+          ? 0.65
+          : 1.0;
+
+      final cardChild = Column(
+        crossAxisAlignment: .start,
+        mainAxisSize: .min,
+        children: [
+          Padding(
+            padding: isCardWrapped
+                ? const EdgeInsetsDirectional.fromSTEB(
+                    ThemeConstants.paddingS,
+                    ThemeConstants.paddingS,
+                    ThemeConstants.paddingS,
+                    0,
+                  )
+                : EdgeInsets.zero,
+            child: SizedBox(
+              height: imageHeight,
+              child: Hero(
+                tag: 'product_hero_${product.id}${widget.heroSuffix}',
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned.fill(
+                        child: Opacity(
+                          // sold-out opacity logic untouched; store-closed greys the card the same way, independently.
+                          opacity: dimOpacity,
+                          child: ProductCardMedia(
+                            product: product,
+                            pageController: _pageController,
+                            currentPage: _page,
+                            onPageChanged: (p) => setState(() => _page = p),
+                            measurement: measurement,
+                            isOutOfStock: isProductOutOfStock,
+                            isCompact: isCompact,
+                            isDark: isDark,
+                            onFavoriteTap: widget.onFavoriteTap,
+                            embedded: isCardWrapped,
+                            topRadius: widget.cardRadius,
                           ),
-                          if (!isProductOutOfStock)
-                            PositionedDirectional(
-                              end: -5,
-                              bottom: -4,
-                              child: BlocBuilder<CartCubit, CartState>(
-                                builder: (context, cartState) {
-                                  final isMulti = variants.length > 1;
-                                  final multiTotal = isMulti
-                                      ? variants.fold<int>(
-                                          0,
-                                          (s, v) =>
-                                              s +
-                                              cartState.countFor(
-                                                v.id?.toString() ?? '',
-                                              ),
-                                        )
-                                      : 0;
-                                  final cartButton = CartButton(
-                                    key: ValueKey(
-                                      'cart_btn_${product.id}_${activeV?.id}',
-                                    ),
-                                    width: addBtnW,
-                                    height: addBtnH,
-                                    fontSize: addFontSize,
-                                    optionsFontSize: optionsFontSize,
-                                    optionCount: variants.length,
-                                    initialCount: isMulti
-                                        ? multiTotal
-                                        : cartState.countFor(variantId),
-                                    productId: product.id?.toString() ?? '',
-                                    variantId: variantId,
-                                    price: hasDiscount
-                                        ? rawDiscounted
-                                        : rawPrice,
-                                    imageUrl: product.images?.isNotEmpty == true
-                                        ? (product.images!.first.imageUrl ?? '')
-                                        : '',
-                                    totalAllowedQuantity:
-                                        product.totalAllowedQuantity ?? 0,
-                                    onFirstAdd: () => _handleAddTap(variants),
-                                    onLastRemove: () {
-                                      if (variants.length == 1 &&
-                                          variants.isNotEmpty) {
-                                        widget.onRemoveVariant?.call(
-                                          variants.first,
-                                        );
-                                      } else {
-                                        widget.onRemoveTap?.call();
-                                      }
-                                    },
-                                  );
-                                  if (!isStoreClosedQuick) return cartButton;
-                                  return GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: () => showStoreClosedDialog(context),
-                                    child: IgnorePointer(child: cartButton),
-                                  );
-                                },
-                              ),
-                            ),
-                        ],
+                        ),
                       ),
-                    ),
+                      // Notify button stays at full opacity even though
+                      // the sold-out image beneath it is dimmed.
+                      if (isProductOutOfStock)
+                        PositionedDirectional(
+                          end: -5,
+                          bottom: -4,
+                          child: NotifyMeButton(
+                            key: ValueKey(
+                              'notify_btn_${product.id}_${activeV?.id}',
+                            ),
+                            productVariantId: variantId,
+                            width: addBtnW,
+                            height: addBtnH,
+                            fontSize: addFontSize,
+                            initiallyNotified: activeV?.isNotified ?? false,
+                          ),
+                        ),
+                      if (!isProductOutOfStock)
+                        PositionedDirectional(
+                          end: -5,
+                          bottom: -4,
+                          child: BlocBuilder<CartCubit, CartState>(
+                            builder: (context, cartState) {
+                              final isMulti = variants.length > 1;
+                              final multiTotal = isMulti
+                                  ? variants.fold<int>(
+                                      0,
+                                      (s, v) =>
+                                          s +
+                                          cartState.countFor(
+                                            v.id?.toString() ?? '',
+                                          ),
+                                    )
+                                  : 0;
+                              final cartButton = CartButton(
+                                key: ValueKey(
+                                  'cart_btn_${product.id}_${activeV?.id}',
+                                ),
+                                width: addBtnW,
+                                height: addBtnH,
+                                fontSize: addFontSize,
+                                optionsFontSize: optionsFontSize,
+                                optionCount: variants.length,
+                                initialCount: isMulti
+                                    ? multiTotal
+                                    : cartState.countFor(variantId),
+                                productId: product.id?.toString() ?? '',
+                                variantId: variantId,
+                                price: hasDiscount ? rawDiscounted : rawPrice,
+                                imageUrl: product.images?.isNotEmpty == true
+                                    ? (product.images!.first.imageUrl ?? '')
+                                    : '',
+                                totalAllowedQuantity:
+                                    product.totalAllowedQuantity ?? 0,
+                                onFirstAdd: () => _handleAddTap(variants),
+                                onLastRemove: () {
+                                  if (variants.length == 1 &&
+                                      variants.isNotEmpty) {
+                                    widget.onRemoveVariant?.call(
+                                      variants.first,
+                                    );
+                                  } else {
+                                    widget.onRemoveTap?.call();
+                                  }
+                                },
+                              );
+                              if (!isStoreClosedQuick) return cartButton;
+                              return GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => showStoreClosedDialog(context),
+                                child: IgnorePointer(child: cartButton),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
-              Padding(
-                padding: isCardWrapped
-                    ? const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingS, ThemeConstants.paddingS, ThemeConstants.paddingS, ThemeConstants.paddingS)
-                    : EdgeInsets.zero,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: widget.minDetailsHeight ?? 0,
-                  ),
-                  child: ProductCardDetails(
-                    product: product,
-                    isCompact: isCompact,
-                    isDark: isDark,
-                    displayPrice: displayPrice,
-                    rawPrice: rawPrice,
-                    hasDiscount: hasDiscount,
-                    discountPct: discountPct,
-                    displayName: displayName,
-                    avgRating: avgRating,
-                    ratingCount: ratingCount,
-                    isUnlimited: isUnlimited,
-                    stockVal: stockVal,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        );
+          Padding(
+            padding: isCardWrapped
+                ? const EdgeInsetsDirectional.fromSTEB(
+                    ThemeConstants.paddingS,
+                    ThemeConstants.paddingS,
+                    ThemeConstants.paddingS,
+                    ThemeConstants.paddingS,
+                  )
+                : EdgeInsets.zero,
+            child: Opacity(
+              opacity: dimOpacity,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: widget.minDetailsHeight ?? 0,
+                ),
+                child: ProductCardDetails(
+                  product: product,
+                  isCompact: isCompact,
+                  isDark: isDark,
+                  displayPrice: displayPrice,
+                  rawPrice: rawPrice,
+                  hasDiscount: hasDiscount,
+                  discountPct: discountPct,
+                  displayName: displayName,
+                  avgRating: avgRating,
+                  ratingCount: ratingCount,
+                  isUnlimited: isUnlimited,
+                  stockVal: stockVal,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
 
       final Widget decoratedCard = isCardWrapped
           ? Container(

@@ -240,7 +240,9 @@ class ChatSocketService {
       _subscribeTimeoutTimer?.cancel();
       _subscribeTimeoutTimer = Timer(_subscribeTimeout, () {
         if (_state == SocketConnectionState.connected) return;
-        logDebug('ChatSocketService: subscription ack timed out for $channelName');
+        logDebug(
+          'ChatSocketService: subscription ack timed out for $channelName',
+        );
         _setState(SocketConnectionState.disconnected);
         _scheduleReconnect();
       });

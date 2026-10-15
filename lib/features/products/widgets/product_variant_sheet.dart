@@ -41,9 +41,7 @@ class ProductVariantSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: context.screenHeight * 0.75,
-      ),
+      constraints: BoxConstraints(maxHeight: context.screenHeight * 0.75),
       child: Column(
         mainAxisSize: .min,
         crossAxisAlignment: .start,
@@ -61,7 +59,9 @@ class ProductVariantSheet extends StatelessWidget {
             child: SlideAnimationScope(
               builder: (context, animationController) => ListView.separated(
                 shrinkWrap: true,
-                padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingS),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  vertical: ThemeConstants.paddingS,
+                ),
                 itemCount: activeVariants.length,
                 separatorBuilder: (_, _) => AppSpacing.h10,
                 itemBuilder: (_, i) {
@@ -84,7 +84,9 @@ class ProductVariantSheet extends StatelessWidget {
                     itemCount: activeVariants.length,
                     animationController: animationController,
                     child: Container(
-                      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
+                      padding: const EdgeInsetsDirectional.all(
+                        ThemeConstants.paddingM,
+                      ),
                       decoration: AppDecorations.box(
                         color: context.cs.surface,
                         borderRadius: AppRadius.r12,
@@ -226,7 +228,11 @@ void showProductVariantSheet({
   showAppBottomSheet<void>(
     context,
     backgroundColor: context.cs.surfaceContainer,
-    padding: const EdgeInsetsDirectional.only(start: ThemeConstants.paddingL, end: ThemeConstants.paddingL, top: ThemeConstants.paddingM),
+    padding: const EdgeInsetsDirectional.only(
+      start: ThemeConstants.paddingL,
+      end: ThemeConstants.paddingL,
+      top: ThemeConstants.paddingM,
+    ),
     builder: (_) => BlocProvider.value(
       value: context.read<CartCubit>(),
       child: ProductVariantSheet(

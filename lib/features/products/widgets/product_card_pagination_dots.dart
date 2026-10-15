@@ -26,13 +26,9 @@ class ProductCardPaginationDots extends StatelessWidget {
         dotHeight + 1; // dot diameter + horizontal margin (0.5 each side)
     final maxStart = pageCount - visibleCount;
     final windowStart = (currentPage - 1).clamp(0, maxStart < 0 ? 0 : maxStart);
-    final inactiveColor = isDark
-        ? context.cs.onSurfaceVariant
-        : context.cs.onSurfaceVariant;
+    final inactiveColor = context.cs.onSurfaceVariant;
     final activeBgColor = context.cs.surface;
-    final activeBorderColor = isDark
-        ? context.cs.onSurfaceVariant
-        : context.cs.onSurfaceVariant;
+    final activeBorderColor = context.cs.onSurfaceVariant;
     final isRTL = Directionality.of(context) == TextDirection.rtl;
     final slideSign = isRTL ? 1.0 : -1.0;
 

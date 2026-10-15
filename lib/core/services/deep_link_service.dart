@@ -37,10 +37,22 @@ class DeepLinkService {
         : AppConfig.deeplinkScheme;
   }
 
+  bool get _websiteEnabled {
+    final v = SettingsHiveBox.instance.getAppSettings()?.websiteMode;
+    return v == '1' || v?.toLowerCase() == 'true';
+  }
+
   /// Returns the share URL for a product.
+  ///
+  /// Uses the HTTPS App Link when a website is configured (`website_mode`
+  /// from settings API), otherwise falls back to the custom scheme so
+  /// sharing still works without a website to host the link.
   String buildShareUrl(String slug, String productName) {
-    return '${AppConfig.webUrl}/${AppConstants.deepLinkProductSegment}/$slug'
-        '?${AppConstants.deepLinkIsMobileParam}=true';
+    if (_websiteEnabled) {
+      return '${AppConfig.webUrl}/${AppConstants.deepLinkProductSegment}/$slug'
+          '?${AppConstants.deepLinkIsMobileParam}=true';
+    }
+    return '$_scheme://${AppConstants.deepLinkProductSegment}/$slug';
   }
 
   Future<void> init(GlobalKey<NavigatorState> navigatorKey) async {

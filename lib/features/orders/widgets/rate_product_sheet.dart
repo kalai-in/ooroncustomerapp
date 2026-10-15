@@ -207,7 +207,9 @@ class _RateProductSheetState extends State<RateProductSheet> {
                   children: [
                     ..._existingImages.map(
                       (img) => Padding(
-                        padding: const EdgeInsetsDirectional.only(end: ThemeConstants.paddingS),
+                        padding: const EdgeInsetsDirectional.only(
+                          end: ThemeConstants.paddingS,
+                        ),
                         child: Stack(
                           children: [
                             ClipRRect(
@@ -241,7 +243,9 @@ class _RateProductSheetState extends State<RateProductSheet> {
                     ),
                     ..._imagePaths.map(
                       (path) => Padding(
-                        padding: const EdgeInsetsDirectional.only(end: ThemeConstants.paddingS),
+                        padding: const EdgeInsetsDirectional.only(
+                          end: ThemeConstants.paddingS,
+                        ),
                         child: Stack(
                           children: [
                             ClipRRect(

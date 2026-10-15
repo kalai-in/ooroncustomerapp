@@ -104,6 +104,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         context.read<ChatCubit>().loadOlderMessages(),
                     child: ListView.builder(
                       controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsetsDirectional.fromSTEB(
                         ThemeConstants.paddingM,
                         ThemeConstants.paddingM,
@@ -124,10 +125,9 @@ class _ChatScreenState extends State<ChatScreen> {
                             if (showDate) ChatDateDivider(date: msg.timestamp),
                             ChatBubble(
                               message: msg,
-                              onRetry: () =>
-                                  context.read<ChatCubit>().retryMessage(
-                                    msg.id,
-                                  ),
+                              onRetry: () => context
+                                  .read<ChatCubit>()
+                                  .retryMessage(msg.id),
                             ),
                           ],
                         );

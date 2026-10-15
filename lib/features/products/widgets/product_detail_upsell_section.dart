@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/theme_constants.dart';
+import 'package:customer/core/theme/app_decorations.dart';
 
 /// "Upgrade your order" upsell grid, shown above Similar Products. Backed
 /// by the same cart-wide [CartRecommendationsCubit] used at checkout (no
@@ -40,48 +41,71 @@ class ProductDetailUpsellSection extends StatelessWidget {
         final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
         final crossAxisCount = isTablet ? 5 : 3;
 
-        return Column(
+        return Container(
           key: sectionKey,
-          crossAxisAlignment: .start,
-          children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingM),
-              child: AppText(
-                context.translate(LanguageLabelKeys.upgradeYourOrder),
-                style: context.tt.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: context.cs.onSurface,
+          margin: const EdgeInsetsDirectional.symmetric(
+            horizontal: ThemeConstants.paddingL,
+            vertical: ThemeConstants.paddingS,
+          ),
+          clipBehavior: Clip.antiAlias,
+          decoration: AppDecorations.shadowedCard(
+            color: context.cs.surface,
+            shadowColor: context.theme.shadowColor.withValues(alpha: 0.08),
+          ),
+          child: Column(
+            crossAxisAlignment: .start,
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  ThemeConstants.paddingM,
+                  ThemeConstants.paddingL,
+                  ThemeConstants.paddingM,
+                  ThemeConstants.paddingM,
                 ),
-              ),
-            ),
-            ProductCardGrid(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingS, 0, ThemeConstants.paddingS, ThemeConstants.paddingS),
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: 10 * (isTablet ? 1.75 : 1.0),
-              mainAxisSpacing: 10 * (isTablet ? 1.75 : 1.0),
-              itemCount: displayProducts.length,
-              itemBuilder: (context, i, cardWidth) => ProductCard(
-                product: displayProducts[i],
-                heroSuffix: heroSuffix,
-                siblingProducts: displayProducts,
-                index: i,
-                cardWidth: cardWidth,
-              ),
-            ),
-            if (hasMore)
-              ViewMoreButton(
-                products: products,
-                onTap: () => AppNavigator.push(
-                  context,
-                  ProductScreen(
-                    title: context.translate(LanguageLabelKeys.upgradeYourOrder),
-                    products: products,
+                child: AppText(
+                  context.translate(LanguageLabelKeys.upgradeYourOrder),
+                  style: context.tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: context.cs.onSurface,
                   ),
                 ),
               ),
-          ],
+              ProductCardGrid(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  ThemeConstants.paddingM,
+                  0,
+                  ThemeConstants.paddingM,
+                  ThemeConstants.paddingS,
+                ),
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 10 * (isTablet ? 1.75 : 1.0),
+                mainAxisSpacing: 10 * (isTablet ? 1.75 : 1.0),
+                itemCount: displayProducts.length,
+                itemBuilder: (context, i, cardWidth) => ProductCard(
+                  product: displayProducts[i],
+                  heroSuffix: heroSuffix,
+                  siblingProducts: displayProducts,
+                  index: i,
+                  cardWidth: cardWidth,
+                ),
+              ),
+              if (hasMore)
+                ViewMoreButton(
+                  products: products,
+                  onTap: () => AppNavigator.push(
+                    context,
+                    ProductScreen(
+                      title: context.translate(
+                        LanguageLabelKeys.upgradeYourOrder,
+                      ),
+                      products: products,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         );
       },
     );

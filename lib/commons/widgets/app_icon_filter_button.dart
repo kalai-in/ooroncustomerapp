@@ -107,7 +107,9 @@ class AppIconFilterButtonGroup extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM),
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: ThemeConstants.paddingM,
+        ),
         child: Row(
           mainAxisSize: .min,
           children: [

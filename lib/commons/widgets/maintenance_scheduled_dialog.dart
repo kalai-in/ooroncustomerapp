@@ -188,7 +188,10 @@ class _MaintenanceScheduledDialogState
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.transparent,
       elevation: 0,
-      insetPadding: const EdgeInsets.symmetric(horizontal: ThemeConstants.paddingXXL, vertical: ThemeConstants.paddingXXL),
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: ThemeConstants.paddingXXL,
+        vertical: ThemeConstants.paddingXXL,
+      ),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 340),
@@ -375,7 +378,10 @@ class _CountdownPill extends StatelessWidget {
     final accent = context.cs.primary;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: ThemeConstants.paddingXL, vertical: ThemeConstants.paddingM),
+      padding: const EdgeInsets.symmetric(
+        horizontal: ThemeConstants.paddingXL,
+        vertical: ThemeConstants.paddingM,
+      ),
       decoration: AppDecorations.box(
         color: accent.withValues(alpha: 0.1),
         borderRadius: AppRadius.r16,
@@ -386,7 +392,9 @@ class _CountdownPill extends StatelessWidget {
           for (var i = 0; i < segments.length; i++) ...[
             if (i > 0)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: ThemeConstants.paddingS),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: ThemeConstants.paddingS,
+                ),
                 child: Text(
                   ':',
                   style: tt.titleLarge?.copyWith(

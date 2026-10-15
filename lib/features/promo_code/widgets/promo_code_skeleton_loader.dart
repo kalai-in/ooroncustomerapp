@@ -44,12 +44,7 @@ class PromoCodeSkeletonLoader extends StatelessWidget {
                 ),
               ),
               AppSpacing.w10,
-              ShimmerBox(
-                color,
-                width: 70,
-                height: 30,
-                radius: AppRadius.r8,
-              ),
+              ShimmerBox(color, width: 70, height: 30, radius: AppRadius.r8),
             ],
           ),
           AppSpacing.h12,
@@ -67,7 +62,12 @@ class PromoCodeSkeletonLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerBuilder(
       builder: (context, color) => ListView.builder(
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, 0, ThemeConstants.paddingL, ThemeConstants.paddingXXL),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          0,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingXXL,
+        ),
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
         itemBuilder: (_, index) => _tile(context, color),

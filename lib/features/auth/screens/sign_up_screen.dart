@@ -340,7 +340,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: SafeArea(
               child: SingleChildScrollView(
                 controller: _scrollController,
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingXXL),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: ThemeConstants.paddingXXL,
+                ),
                 child: Column(
                   crossAxisAlignment: .stretch,
                   children: [

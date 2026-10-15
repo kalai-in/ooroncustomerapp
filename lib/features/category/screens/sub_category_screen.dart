@@ -53,7 +53,6 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
   );
 
   late final _sidebarPager = PaginationScrollController(
-    threshold: 100,
     onLoadMore: () {
       final s = context.read<SubCategoryCubit>().state;
       if (s is PaginationLoaded<Category>) {

@@ -108,7 +108,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       foregroundColor: titleColor,
       elevation: scrolled ? 4 : 0,
       surfaceTintColor: Colors.transparent,
-      shadowColor: scrolled ? Colors.black.withValues(alpha: 0.15) : Colors.transparent,
+      shadowColor: scrolled
+          ? Colors.black.withValues(alpha: 0.15)
+          : Colors.transparent,
       centerTitle: false, //!isSearching,
       titleSpacing: titleWidget != null
           ? 0
@@ -116,62 +118,67 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ? 16
           : NavigationToolbar.kMiddleSpacing,
       toolbarHeight: subtitle != null ? kToolbarHeight + 20 : kToolbarHeight,
-      automaticallyImplyLeading: showBackButton && !(inlineSearchCancel && isSearching),
-      title: titleWidget ?? (subtitle != null
-          ? Column(
-              crossAxisAlignment: .start,
-              mainAxisAlignment: .center,
-              children: [
-                AppText(
-                  title ?? '',
-                  style: context.tt.titleLarge?.copyWith(color: titleColor),
-                ),
-                AppText(
-                  subtitle!,
-                  style: context.tt.bodySmall?.copyWith(
-                    color: context.cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            )
-          : _hasSearch
-          ? AnimatedSwitcher(
-              duration: const Duration(milliseconds: 240),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (child, animation) => FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(
-                  scale: Tween<double>(
-                    begin: 0.92,
-                    end: 1.0,
-                  ).animate(animation),
-                  child: child,
-                ),
-              ),
-              child: isSearching
-                  ? _AppBarSearchField(
-                      key: const ValueKey('search'),
-                      controller: searchController!,
-                      hint: searchHint ?? context.translate(LanguageLabelKeys.search),
-                      onChanged: onSearchChanged ?? (_) {},
-                      onCancel: inlineSearchCancel ? onSearchCancel : null,
-                    )
-                  : AppText(
+      automaticallyImplyLeading:
+          showBackButton && !(inlineSearchCancel && isSearching),
+      title:
+          titleWidget ??
+          (subtitle != null
+              ? Column(
+                  crossAxisAlignment: .start,
+                  mainAxisAlignment: .center,
+                  children: [
+                    AppText(
                       title ?? '',
-                      key: const ValueKey('title'),
-                      style: context.tt.titleLarge?.copyWith(
-                        color: titleColor,
-                        letterSpacing: 0.2,
+                      style: context.tt.titleLarge?.copyWith(color: titleColor),
+                    ),
+                    AppText(
+                      subtitle!,
+                      style: context.tt.bodySmall?.copyWith(
+                        color: context.cs.onSurfaceVariant,
                       ),
                     ),
-            )
-          : title != null
-          ? AppText(
-              title!,
-              style: context.tt.titleLarge?.copyWith(color: titleColor),
-            )
-          : null),
+                  ],
+                )
+              : _hasSearch
+              ? AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 240),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(
+                      scale: Tween<double>(
+                        begin: 0.92,
+                        end: 1.0,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  ),
+                  child: isSearching
+                      ? _AppBarSearchField(
+                          key: const ValueKey('search'),
+                          controller: searchController!,
+                          hint:
+                              searchHint ??
+                              context.translate(LanguageLabelKeys.search),
+                          onChanged: onSearchChanged ?? (_) {},
+                          onCancel: inlineSearchCancel ? onSearchCancel : null,
+                        )
+                      : AppText(
+                          title ?? '',
+                          key: const ValueKey('title'),
+                          style: context.tt.titleLarge?.copyWith(
+                            color: titleColor,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                )
+              : title != null
+              ? AppText(
+                  title!,
+                  style: context.tt.titleLarge?.copyWith(color: titleColor),
+                )
+              : null),
       leading: showBackButton && !(inlineSearchCancel && isSearching)
           ? IconButton(
               icon: Transform.flip(
@@ -318,7 +325,9 @@ class _AppBarSearchField extends StatelessWidget {
                     onChanged('');
                   },
                   child: Padding(
-                    padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
+                    padding: const EdgeInsetsDirectional.all(
+                      ThemeConstants.paddingS,
+                    ),
                     child: AppSvgIcon(
                       AssetsConstants.closeCircleIcon,
                       size: ThemeConstants.iconS,

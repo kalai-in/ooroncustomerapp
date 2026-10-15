@@ -6,7 +6,6 @@ import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/constants/navigation_service.dart';
 import 'package:customer/core/localization/language_label_key.dart';
-import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/features/products/models/product_model.dart';
@@ -54,12 +53,43 @@ class CheckoutPrescriptionTile extends StatelessWidget {
   }
 
   Future<void> _pick(BuildContext context) async {
+    final tooltipKey = GlobalKey<TooltipState>();
     final source = await showAppBottomSheet<_PrescriptionSource>(
       context,
-      padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingS),
       builder: (ctx) => SlideAnimationList(
+        crossAxisAlignment: .start,
         children: [
+          Row(
+            mainAxisSize: .min,
+            children: [
+              AppText(
+                context.translate(LanguageLabelKeys.uploadPrescription),
+                style: ctx.tt.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: ctx.cs.onSurface,
+                ),
+              ),
+              AppSpacing.w6,
+              GestureDetector(
+                onTap: () => tooltipKey.currentState?.ensureTooltipVisible(),
+                child: Tooltip(
+                  key: tooltipKey,
+                  message: context.translate(
+                    LanguageLabelKeys.imageOrPdfSupported,
+                  ),
+                  triggerMode: TooltipTriggerMode.manual,
+                  child: AppSvgIcon(
+                    AssetsConstants.infoCircleIcon,
+                    size: ThemeConstants.iconXS,
+                    color: ctx.cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.h16,
           ListTile(
+            contentPadding: EdgeInsets.zero,
             leading: AppSvgIcon(
               AssetsConstants.cameraIcon,
               color: ctx.cs.primary,
@@ -68,6 +98,7 @@ class CheckoutPrescriptionTile extends StatelessWidget {
             onTap: () => AppNavigator.pop(context, _PrescriptionSource.camera),
           ),
           ListTile(
+            contentPadding: EdgeInsets.zero,
             leading: AppSvgIcon(
               AssetsConstants.galleryIcon,
               color: ctx.cs.primary,
@@ -78,6 +109,7 @@ class CheckoutPrescriptionTile extends StatelessWidget {
             onTap: () => AppNavigator.pop(context, _PrescriptionSource.gallery),
           ),
           ListTile(
+            contentPadding: EdgeInsets.zero,
             leading: AppSvgIcon(
               AssetsConstants.fileIcon,
               color: ctx.cs.primary,
@@ -119,14 +151,8 @@ class CheckoutPrescriptionTile extends StatelessWidget {
         file != null && p.extension(file!.path).toLowerCase() == '.pdf';
     final isRequired = item.requiresPrescription;
 
-    return Container(
-      margin: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingM),
-      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
-      decoration: AppDecorations.box(
-        color: context.cs.surfaceContainerLow,
-        borderRadius: AppRadius.r10,
-        border: Border.all(color: context.cs.outline.withValues(alpha: 0.15)),
-      ),
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(top: 0),
       child: file == null
           ? _buildEmpty(context, isRequired)
           : _buildPicked(context, isPdf),
@@ -138,45 +164,30 @@ class CheckoutPrescriptionTile extends StatelessWidget {
       borderRadius: AppRadius.r8,
       onTap: () => _pick(context),
       child: Row(
+        mainAxisSize: .min,
+        spacing: ThemeConstants.spaceXS,
         children: [
           AppSvgIcon(
             AssetsConstants.uploadIcon,
-            size: ThemeConstants.iconM,
-            color: context.cs.primary,
+            size: ThemeConstants.iconXS,
+            color: context.cs.onSurfaceVariant,
           ),
-          AppSpacing.w10,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: .start,
-              mainAxisSize: .min,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: AppText(
-                        context.translate(LanguageLabelKeys.uploadPrescription),
-                        style: context.tt.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: context.cs.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: .ellipsis,
-                      ),
-                    ),
-                    AppSpacing.w6,
-                    _StatusChip(isRequired: isRequired),
-                  ],
-                ),
-                AppSpacing.h2,
-                AppText(
-                  context.translate(LanguageLabelKeys.imageOrPdfSupported),
-                  style: context.tt.labelSmall?.copyWith(
-                    color: context.cs.onSurfaceVariant,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
+          Flexible(
+            child: AppText(
+              context.translate(LanguageLabelKeys.uploadPrescription),
+              style: context.tt.labelSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: context.cs.onSurface,
+              ),
+              maxLines: 1,
+              overflow: .ellipsis,
+              isRequired: isRequired,
             ),
+          ),
+          AppSvgIcon(
+            AssetsConstants.arrowRightIcon,
+            size: ThemeConstants.iconXS,
+            color: context.cs.onSurfaceVariant,
           ),
         ],
       ),
@@ -186,20 +197,63 @@ class CheckoutPrescriptionTile extends StatelessWidget {
   Widget _buildPicked(BuildContext context, bool isPdf) {
     return Row(
       children: [
-        ClipRRect(
-          borderRadius: AppRadius.r8,
-          child: isPdf
-              ? Container(
-                  width: 40,
-                  height: 40,
-                  color: context.cs.error.withValues(alpha: 0.1),
-                  child: AppSvgIcon(
-                    AssetsConstants.fileIcon,
-                    size: ThemeConstants.iconM,
-                    color: context.cs.error,
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            InkWell(
+              borderRadius: AppRadius.r8,
+              onTap: () => _pick(context),
+              child: ClipRRect(
+                borderRadius: AppRadius.r8,
+                child: isPdf
+                    ? Container(
+                        width: 40,
+                        height: 40,
+                        color: context.cs.error.withValues(alpha: 0.1),
+                        child: AppSvgIcon(
+                          AssetsConstants.fileIcon,
+                          size: ThemeConstants.iconM,
+                          color: context.cs.error,
+                        ),
+                      )
+                    : Image.file(
+                        file!,
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                      ),
+              ),
+            ),
+            PositionedDirectional(
+              top: -5,
+              end: -5,
+              child: InkWell(
+                borderRadius: AppRadius.r10,
+                onTap: onRemove,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: context.cs.primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: context.cs.shadow.withValues(alpha: 0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
                   ),
-                )
-              : Image.file(file!, width: 40, height: 40, fit: BoxFit.cover),
+                  child: AppSvgIcon(
+                    AssetsConstants.closeIcon,
+                    size: 12,
+                    color: context.cs.onPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         AppSpacing.w10,
         Expanded(
@@ -243,54 +297,9 @@ class CheckoutPrescriptionTile extends StatelessWidget {
             ),
           ),
         ),
-        InkWell(
-          borderRadius: AppRadius.r8,
-          onTap: onRemove,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
-            child: AppSvgIcon(
-              AssetsConstants.closeIcon,
-              size: ThemeConstants.iconS,
-              color: context.cs.onSurfaceVariant,
-            ),
-          ),
-        ),
       ],
     );
   }
 }
 
 enum _PrescriptionSource { camera, gallery, pdf }
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.isRequired});
-
-  final bool isRequired;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isRequired ? context.cs.error : context.cs.onSurfaceVariant;
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: ThemeConstants.paddingXS,
-        vertical: ThemeConstants.paddingXS,
-      ),
-      decoration: AppDecorations.box(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: AppRadius.r6,
-      ),
-      child: AppText(
-        context.translate(
-          isRequired
-              ? LanguageLabelKeys.prescriptionRequired
-              : LanguageLabelKeys.prescriptionOptional,
-        ),
-        style: context.tt.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w700,
-          fontSize: 9,
-        ),
-      ),
-    );
-  }
-}

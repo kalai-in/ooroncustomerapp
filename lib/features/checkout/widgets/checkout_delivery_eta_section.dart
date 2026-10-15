@@ -16,6 +16,8 @@ class CheckoutDeliveryEtaSection extends StatelessWidget {
     required this.itemCount,
     this.timeToDeliver,
     this.estimatedDeliveryDate,
+    this.isPickup = false,
+    this.pickupPreparationTime,
   });
 
   /// Raw distance string from API, e.g. "7.1 km".
@@ -30,8 +32,23 @@ class CheckoutDeliveryEtaSection extends StatelessWidget {
   /// Number of items in the cart, shown in the subtitle.
   final int itemCount;
 
+  /// Cart was priced in pickup mode — `time_to_deliver`/
+  /// `estimated_delivery_date` are blank for pickup, so show the pickup
+  /// store's prep time instead of falling back to a bare "Delivery" title.
+  final bool isPickup;
+
+  /// `cartData.pickup.preparation_time`, e.g. "15 mins".
+  final String? pickupPreparationTime;
+
   @override
   Widget build(BuildContext context) {
+    if (isPickup) {
+      final prep = pickupPreparationTime ?? '';
+      final title = prep.isNotEmpty
+          ? '${context.translate(LanguageLabelKeys.readyForPickupIn)} $prep'
+          : context.translate(LanguageLabelKeys.pickUp);
+      return _buildRow(context, title);
+    }
     final eta = timeToDeliver ?? '';
     final estimatedDate = estimatedDeliveryDate ?? '';
     final title = eta.isNotEmpty
@@ -39,11 +56,17 @@ class CheckoutDeliveryEtaSection extends StatelessWidget {
         : estimatedDate.isNotEmpty
         ? '${context.translate(LanguageLabelKeys.estimatedDeliveryBy)} ${AppDateFormatter.formatDate(estimatedDate)}'
         : context.translate(LanguageLabelKeys.delivery);
+    return _buildRow(context, title);
+  }
 
+  Widget _buildRow(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingM),
+      padding: const EdgeInsetsDirectional.only(
+        bottom: ThemeConstants.paddingM,
+      ),
       child: Row(
-        spacing: ThemeConstants.spaceM, crossAxisAlignment: .start,
+        spacing: ThemeConstants.spaceM,
+        crossAxisAlignment: .start,
         children: [
           Container(
             width: 36,

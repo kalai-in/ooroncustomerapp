@@ -36,7 +36,12 @@ class AttachmentPreviewBar extends StatelessWidget {
         : context.translate(LanguageLabelKeys.fileReadyToSend);
 
     return Container(
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, ThemeConstants.paddingS, ThemeConstants.paddingS, ThemeConstants.paddingS),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingS,
+        ThemeConstants.paddingS,
+        ThemeConstants.paddingS,
+      ),
       decoration: AppDecorations.box(
         color: context.cs.primaryContainer,
         border: Border(
@@ -113,7 +118,11 @@ class _Thumbnail extends StatelessWidget {
         color: context.cs.primary.withValues(alpha: 0.1),
         borderRadius: AppRadius.r8,
       ),
-      child: AppSvgIcon(icon, color: context.cs.primary, size: ThemeConstants.iconL,),
+      child: AppSvgIcon(
+        icon,
+        color: context.cs.primary,
+        size: ThemeConstants.iconL,
+      ),
     );
   }
 }

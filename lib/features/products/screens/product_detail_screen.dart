@@ -20,6 +20,7 @@ import 'package:customer/core/routes/route_names.dart';
 import 'package:customer/features/main/widgets/floating_cart_bar.dart';
 import 'package:customer/features/products/widgets/product_detail_bottom_bar.dart';
 import 'package:customer/features/products/widgets/product_detail_view.dart';
+import 'package:customer/utils/ensure_visible_and_flash.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/extensions/size_extensions.dart';
@@ -82,6 +83,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
   final PageController _imageController = PageController();
   final GlobalKey _upsellSectionKey = GlobalKey();
+  final GlobalKey _similarSectionKey = GlobalKey();
+  final GlobalKey _recentlyVisitedSectionKey = GlobalKey();
   final GlobalKey _bottomBarKey = GlobalKey();
   int _imagePage = 0;
 
@@ -142,13 +145,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   /// section. Scrolling there naturally also drives the page past the
   /// expand threshold, so it ends up full screen too.
   void _scrollToUpsell() {
-    final upsellContext = _upsellSectionKey.currentContext;
-    if (upsellContext == null) return;
-    Scrollable.ensureVisible(
-      upsellContext,
-      duration: const Duration(milliseconds: 450),
-      curve: Curves.easeOut,
+    // Upsell first; if it's empty/unmounted fall back to Similar, then
+    // Recently Visited.
+    final target = [
+      _upsellSectionKey,
+      _similarSectionKey,
+      _recentlyVisitedSectionKey,
+    ].where((k) => k.currentContext != null).firstOrNull;
+    if (target == null) return;
+    ensureVisibleAndFlash(
+      context,
+      target,
       alignment: 0.1,
+      color: context.cs.primary,
     );
   }
 
@@ -236,6 +245,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     onToggleExpand: toggleExpand,
                     onImagePageChanged: (p) => setState(() => _imagePage = p),
                     upsellSectionKey: _upsellSectionKey,
+                    similarSectionKey: _similarSectionKey,
+                    recentlyVisitedSectionKey: _recentlyVisitedSectionKey,
                   );
                 }
                 return const SizedBox.shrink();
@@ -371,7 +382,9 @@ class _HeroLoadingView extends StatelessWidget {
                     ),
                   ],
                 ),
-                padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
+                padding: const EdgeInsetsDirectional.all(
+                  ThemeConstants.paddingS,
+                ),
                 child: Transform.flip(
                   flipX: Directionality.of(context) == TextDirection.rtl,
                   child: AppSvgIcon(

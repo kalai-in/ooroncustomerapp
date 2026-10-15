@@ -61,6 +61,8 @@ class _SignUpFormState extends State<SignUpForm> {
   bool get _isSocial =>
       widget.mode == AuthType.google || widget.mode == AuthType.apple;
 
+  bool get _isPhoneRequired => widget.mode != AuthType.email && !_isSocial;
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -105,7 +107,7 @@ class _SignUpFormState extends State<SignUpForm> {
               children: [
                 AppText(
                   context.translate(LanguageLabelKeys.phoneNumber),
-                  isRequired: !_isSocial,
+                  isRequired: _isPhoneRequired,
                   style: context.tt.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -117,7 +119,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     child: ApiCountryPhoneField(
                       controller: widget.phoneController,
                       selectedCountry: widget.selectedCountry,
-                      isRequired: !_isSocial,
+                      isRequired: _isPhoneRequired,
                       hintText: context.translate(
                         LanguageLabelKeys.enterPhoneNumber,
                       ),
@@ -129,8 +131,9 @@ class _SignUpFormState extends State<SignUpForm> {
                       ),
                       validator: (v) => v.validateMobile(
                         context,
-                        minLength: widget.selectedCountry?.minMobileLength ?? 10,
-                        required: !_isSocial,
+                        minLength:
+                            widget.selectedCountry?.minMobileLength ?? 10,
+                        required: _isPhoneRequired,
                       ),
                     ),
                   ),

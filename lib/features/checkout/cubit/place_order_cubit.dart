@@ -2,6 +2,7 @@ import 'package:customer/core/api/api_exception.dart';
 import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/services/analytics_service.dart';
 import 'package:customer/core/services/crashlytics_service.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 import 'package:customer/features/checkout/repositories/checkout_repository.dart';
 import 'package:customer/features/payment_method/models/enums/order_payment_method.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,14 +46,17 @@ class PlaceOrderCubit extends Cubit<PlaceOrderState> {
   final CheckoutRepository _repository;
 
   Future<void> placeOrder({
-    required String addressId,
+    // Required for delivery; may be omitted for pickup — see
+    // CheckoutRepository.placeOrder.
+    String? addressId,
     required String paymentMethod,
     String? promoCodeId,
     String? walletUsed,
     String? walletBalance,
     String? orderNote,
     Map<String, String>? prescriptions,
-    bool billingSameAsShipping = true,
+    // Null for pickup — omits the key from the request entirely.
+    bool? billingSameAsShipping,
     String? billingName,
     String? billingMobile,
     String? billingAddress,
@@ -61,6 +65,9 @@ class PlaceOrderCubit extends Cubit<PlaceOrderState> {
     String? billingCountry,
     String? billingState,
     int? billingRegionId,
+    DeliveryType? deliveryType,
+    String? latitude,
+    String? longitude,
   }) async {
     emit(PlaceOrderLoading());
     try {
@@ -84,6 +91,9 @@ class PlaceOrderCubit extends Cubit<PlaceOrderState> {
         billingCountry: billingCountry,
         billingState: billingState,
         billingRegionId: billingRegionId,
+        deliveryType: deliveryType,
+        latitude: latitude,
+        longitude: longitude,
       );
 
       final responseStatus = map['status']?.toString() ?? '0';

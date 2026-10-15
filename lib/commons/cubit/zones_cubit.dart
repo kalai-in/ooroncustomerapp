@@ -43,16 +43,21 @@ class ZonesCubit extends Cubit<ZonesState> with ApiErrorGuard<ZonesState> {
     if (!force && _countryId == countryId && state is! ZonesError) return;
     _countryId = countryId;
     emit(ZonesLoading());
-    await guard(() async {
-      final response = await _repository.getZones(
-        countryId: countryId.toString(),
-      );
-      if (_countryId != countryId) return; // a newer country was selected meanwhile
-      emit(ZonesLoaded(zones: response.data ?? []));
-    }, onError: (msg) {
-      if (_countryId != countryId) return;
-      emit(ZonesError(message: msg));
-    });
+    await guard(
+      () async {
+        final response = await _repository.getZones(
+          countryId: countryId.toString(),
+        );
+        if (_countryId != countryId) {
+          return; // a newer country was selected meanwhile
+        }
+        emit(ZonesLoaded(zones: response.data ?? []));
+      },
+      onError: (msg) {
+        if (_countryId != countryId) return;
+        emit(ZonesError(message: msg));
+      },
+    );
   }
 
   void reset() {

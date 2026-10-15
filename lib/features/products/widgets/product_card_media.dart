@@ -7,6 +7,7 @@ import 'package:customer/features/products/models/product_model.dart';
 import 'package:customer/features/products/widgets/product_card_pagination_dots.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
+import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
@@ -64,6 +65,13 @@ class ProductCardMedia extends StatelessWidget {
     final cardPadH = isCompact ? 7.0 : 10.0;
     final cardPadV = isCompact ? 6.0 : 8.0;
     final measureFontSize = isCompact ? 10.0 : 13.0;
+    // Match product_detail_view's hero memCache dims exactly — the Hero tag
+    // shared with this image only reuses the already-decoded bitmap (no
+    // placeholder flash mid-flight) when both sides resolve to the same
+    // ResizeImage cache key.
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final heroMemCacheWidth = (context.screenWidth * dpr).round();
+    final heroMemCacheHeight = (context.screenHeight * 0.38 * dpr).round();
 
     return Container(
       decoration: embedded
@@ -100,7 +108,9 @@ class ProductCardMedia extends StatelessWidget {
                           color: cardBg,
                           child: AppNetworkImage(
                             url: _imageFor(pageIndex, images),
-                            fit: BoxFit.contain,
+                            fit: BoxFit.cover,
+                            memCacheWidth: heroMemCacheWidth,
+                            memCacheHeight: heroMemCacheHeight,
                           ),
                         );
                       },
@@ -124,7 +134,9 @@ class ProductCardMedia extends StatelessWidget {
                   end: isCompact ? 6 : 8,
                   child: ProductTypeIcon(
                     productType: product.productType,
-                    size: isCompact ? ThemeConstants.iconXS : ThemeConstants.iconS,
+                    size: isCompact
+                        ? ThemeConstants.iconXS
+                        : ThemeConstants.iconS,
                   ),
                 ),
                 PositionedDirectional(

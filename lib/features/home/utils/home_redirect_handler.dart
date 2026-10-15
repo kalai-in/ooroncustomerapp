@@ -3,7 +3,9 @@ import 'package:customer/core/constants/navigation_service.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/routes/category_redirect_args.dart';
 import 'package:customer/core/routes/route_names.dart';
+import 'package:customer/features/home/cubits/page_builder_cubit.dart';
 import 'package:customer/features/home/models/enums/redirect_type.dart';
+import 'package:customer/features/home/screens/page_builder_screen.dart';
 import 'package:customer/features/products/cubit/product_cubit.dart';
 import 'package:customer/features/products/screens/product_screen.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
@@ -24,6 +26,7 @@ void handleHomeRedirectTap(
   required String? redirectType,
   required int? redirectId,
   required String? redirectUrl,
+  String? redirectSlug,
   bool? hasChild,
   bool skipUrlWhenTypeNone = false,
 }) {
@@ -48,6 +51,16 @@ void handleHomeRedirectTap(
       arguments: CategoryRedirectArgs(
         categoryId: id.toString(),
         hasChild: hasChild ?? true,
+      ),
+    );
+    return;
+  }
+  if (type == RedirectType.page && id != null) {
+    AppNavigator.push(
+      context,
+      BlocProvider(
+        create: (_) => PageBuilderCubit(),
+        child: PageBuilderScreen(id: id.toString()),
       ),
     );
     return;

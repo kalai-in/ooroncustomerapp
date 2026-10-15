@@ -25,7 +25,12 @@ import 'package:customer/core/constants/theme_constants.dart';
 void showLanguageSheet(BuildContext context) {
   showAppBottomSheet(
     context,
-    padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, 0),
+    padding: const EdgeInsetsDirectional.fromSTEB(
+      ThemeConstants.paddingL,
+      ThemeConstants.paddingM,
+      ThemeConstants.paddingL,
+      0,
+    ),
     builder: (_) => MultiBlocProvider(
       providers: [
         BlocProvider.value(value: context.read<LanguageCubit>()),
@@ -188,7 +193,9 @@ class _LanguageSheetState extends State<_LanguageSheet> {
                                       ),
                                       trailing:
                                           isSelecting && _pendingId == lang.id
-                                          ? LoadingWidget(size: ThemeConstants.loaderSize)
+                                          ? LoadingWidget(
+                                              size: ThemeConstants.loaderSize,
+                                            )
                                           : null,
                                       onTap: () {
                                         setState(() => _pendingId = lang.id);

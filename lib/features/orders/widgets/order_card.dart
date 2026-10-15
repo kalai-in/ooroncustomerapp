@@ -3,6 +3,7 @@ import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_decorations.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 import 'package:customer/features/orders/models/order_model.dart';
 import 'package:customer/features/orders/utils/order_payment_utils.dart';
 import 'package:customer/utils/app_date_formatter.dart';
@@ -46,12 +47,18 @@ class OrderCard extends StatelessWidget {
     // Track button: quick orders only (ecommerce has no live rider to
     // track) and only while the order is still active — hidden once
     // delivered/cancelled/returned. Cancel now lives on the order detail
-    // screen.
+    // screen. Also hidden for pickup orders — no delivery boy/live GPS ever
+    // exists for one (its status flow never reaches out-for-delivery), so
+    // there's nothing on the tracking map worth showing.
     final isQuickOrder = order.channel == AppConstants.quick;
-    final isActiveOrder = order.activeStatus != OrderStatus.delivered &&
+    final isPickupOrder =
+        DeliveryType.fromApiValue(order.deliveryType) == DeliveryType.pickup;
+    final isActiveOrder =
+        order.activeStatus != OrderStatus.delivered &&
         order.activeStatus != OrderStatus.cancelled &&
         order.activeStatus != OrderStatus.returned;
-    final showTrackButton = isQuickOrder && isActiveOrder && onTrack != null;
+    final showTrackButton =
+        isQuickOrder && !isPickupOrder && isActiveOrder && onTrack != null;
     final paymentInfo = resolveOrderPaymentInfo(
       context: context,
       walletUsed: order.paidWallet,
@@ -63,7 +70,9 @@ class OrderCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingM),
+        margin: const EdgeInsetsDirectional.only(
+          bottom: ThemeConstants.paddingM,
+        ),
         padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingL),
         decoration: AppDecorations.shadowedCard(
           color: Theme.of(context).cardColor,
@@ -79,7 +88,7 @@ class OrderCard extends StatelessWidget {
               children: [
                 Column(
                   crossAxisAlignment: .start,
-                  spacing: ThemeConstants. spaceXXS,
+                  spacing: ThemeConstants.spaceXXS,
                   children: [
                     AppText(
                       order.orderNumber ?? '',
@@ -110,7 +119,9 @@ class OrderCard extends StatelessWidget {
 
             // ── Divider ──
             Padding(
-              padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingS),
+              padding: const EdgeInsetsDirectional.symmetric(
+                vertical: ThemeConstants.paddingS,
+              ),
               child: Divider(height: 1, color: dividerColor),
             ),
 
@@ -122,7 +133,9 @@ class OrderCard extends StatelessWidget {
               ),
               if (extraCount > 0)
                 Padding(
-                  padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingXS),
+                  padding: const EdgeInsetsDirectional.only(
+                    top: ThemeConstants.paddingXS,
+                  ),
                   child: AppText(
                     '+$extraCount ${context.translate(extraCount > 1 ? LanguageLabelKeys.moreItems : LanguageLabelKeys.moreItem)}',
                     style: context.tt.bodySmall?.copyWith(
@@ -135,7 +148,9 @@ class OrderCard extends StatelessWidget {
 
             // ── Divider ──
             Padding(
-              padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingS),
+              padding: const EdgeInsetsDirectional.symmetric(
+                vertical: ThemeConstants.paddingS,
+              ),
               child: Divider(height: 1, color: dividerColor),
             ),
 
@@ -166,7 +181,9 @@ class OrderCard extends StatelessWidget {
             // ── Action buttons ──
             if (onReorder != null || showTrackButton) ...[
               Padding(
-                padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingS),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  vertical: ThemeConstants.paddingS,
+                ),
                 child: Divider(height: 1, color: dividerColor),
               ),
               Row(
@@ -232,7 +249,9 @@ class _ItemRow extends StatelessWidget {
     final price = item.price ?? 0;
 
     return Padding(
-      padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingXS),
+      padding: const EdgeInsetsDirectional.only(
+        bottom: ThemeConstants.paddingXS,
+      ),
       child: Row(
         crossAxisAlignment: .start,
         spacing: ThemeConstants.spaceS,

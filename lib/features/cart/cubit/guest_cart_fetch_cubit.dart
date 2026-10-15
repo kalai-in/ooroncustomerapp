@@ -1,5 +1,6 @@
 import 'package:customer/core/api/api_exception.dart';
 import 'package:customer/features/cart/models/cart_model.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 import 'package:customer/features/cart/repositories/cart_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:customer/core/localization/services/localization_service.dart';
@@ -34,6 +35,8 @@ class GuestCartFetchCubit extends Cubit<GuestCartState> {
     required List<String> variantIds,
     required List<String> quantities,
     bool silent = false,
+    // Passed through untouched; omit to keep existing delivery-only behavior.
+    DeliveryType? deliveryType,
   }) async {
     try {
       if (variantIds.isEmpty) {
@@ -44,6 +47,7 @@ class GuestCartFetchCubit extends Cubit<GuestCartState> {
       final result = await _repository.getGuestCart(
         variantIds: variantIds,
         quantities: quantities,
+        deliveryType: deliveryType,
       );
       emit(GuestCartLoaded(result));
     } on ApiException catch (e) {

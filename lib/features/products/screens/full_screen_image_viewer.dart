@@ -107,10 +107,14 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
               child: ListView.builder(
                 controller: _thumbnailController,
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingM),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: ThemeConstants.paddingM,
+                ),
                 itemCount: widget.images.length,
                 itemBuilder: (_, i) => Padding(
-                  padding: const EdgeInsetsDirectional.only(end: ThemeConstants.paddingS),
+                  padding: const EdgeInsetsDirectional.only(
+                    end: ThemeConstants.paddingS,
+                  ),
                   child: GestureDetector(
                     onTap: () {
                       _pageController.animateToPage(

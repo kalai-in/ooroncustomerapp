@@ -103,7 +103,12 @@ class _WalletTransactionsScreenState extends State<WalletTransactionsScreen> {
       isScrollControlled: false,
       title: context.translate(LanguageLabelKeys.filterByType),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingM, ThemeConstants.paddingXL, ThemeConstants.paddingXXL),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingXXL,
+      ),
       builder: (_) => StatefulBuilder(
         builder: (ctx, setSheet) {
           WalletTxnType? sel = _selectedType;
@@ -288,13 +293,23 @@ class _WalletTransactionsScreenState extends State<WalletTransactionsScreen> {
         ListView.builder(
           controller: _pager.controller,
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingM,
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+          ),
           itemCount: filtered.length + (state.isFetchingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == filtered.length) {
               return PaginatedListFooter(
                 isLoadingMore: state.isFetchingMore,
                 hasMore: state.hasMore,
+                skeletonBuilder: (_) => const TransactionListSkeletonLoader(
+                  itemCount: 1,
+                  outlined: true,
+                  shrinkWrap: true,
+                ),
               );
             }
             return WalletTransactionItem(txn: filtered[index]);

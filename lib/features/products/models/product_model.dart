@@ -295,6 +295,7 @@ class Variants {
   int? stock;
   bool? inStock;
   int? quantity;
+  int? isNotifyRequested;
   List<CustomSections>? customSections;
 
   Variants({
@@ -309,8 +310,11 @@ class Variants {
     this.stock,
     this.inStock,
     this.quantity,
+    this.isNotifyRequested,
     this.customSections,
   });
+
+  bool get isNotified => isNotifyRequested == 1;
 
   bool get isAvailable {
     if (inStock != null) return inStock == true;
@@ -336,6 +340,7 @@ class Variants {
     stock = parseInt(json['stock']);
     inStock = parseBool(json['in_stock']);
     quantity = parseInt(json['quantity']) ?? 0;
+    isNotifyRequested = parseInt(json['is_notify_requested']) ?? 0;
     final rawCustomSections = json['custom_sections'];
     if (rawCustomSections is List) {
       customSections = rawCustomSections
@@ -361,6 +366,7 @@ class Variants {
     data['stock'] = stock;
     data['in_stock'] = inStock;
     data['quantity'] = quantity;
+    data['is_notify_requested'] = isNotifyRequested;
     if (customSections != null) {
       data['custom_sections'] = customSections!.map((v) => v.toJson()).toList();
     }

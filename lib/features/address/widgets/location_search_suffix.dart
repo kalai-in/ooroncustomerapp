@@ -31,7 +31,10 @@ class LocationSearchSuffix extends StatelessWidget {
 
   Widget _clearBtn(BuildContext context) {
     return IconButton(
-      icon: const AppSvgIcon(AssetsConstants.closeIcon, size: ThemeConstants.iconS),
+      icon: const AppSvgIcon(
+        AssetsConstants.closeIcon,
+        size: ThemeConstants.iconS,
+      ),
       color: context.cs.onSurfaceVariant,
       onPressed: onClear,
     );

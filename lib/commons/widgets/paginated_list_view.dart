@@ -15,6 +15,7 @@ class PaginatedListView<T> extends StatelessWidget {
   final ScrollPhysics? physics;
   final Color? refreshBackgroundColor;
   final double refreshStrokeWidth;
+  final WidgetBuilder? loadingMoreSkeletonBuilder;
 
   const PaginatedListView({
     super.key,
@@ -28,6 +29,7 @@ class PaginatedListView<T> extends StatelessWidget {
     this.physics,
     this.refreshBackgroundColor,
     this.refreshStrokeWidth = 2.0,
+    this.loadingMoreSkeletonBuilder,
   });
 
   @override
@@ -39,7 +41,7 @@ class PaginatedListView<T> extends StatelessWidget {
       onRefresh: onRefresh,
       child: ListView.builder(
         controller: scrollController,
-        physics: physics,
+        physics: physics ?? const AlwaysScrollableScrollPhysics(),
         padding: padding,
         itemCount: items.length + (isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
@@ -47,6 +49,7 @@ class PaginatedListView<T> extends StatelessWidget {
             return PaginatedListFooter(
               isLoadingMore: isLoadingMore,
               hasMore: hasMore,
+              skeletonBuilder: loadingMoreSkeletonBuilder,
             );
           }
           return itemBuilder(context, items[index], index);

@@ -9,7 +9,12 @@ class AppPngIcon extends StatelessWidget {
 
   final BoxFit fit;
 
-  const AppPngIcon(this.path, {super.key, this.size, this.fit = BoxFit.contain});
+  const AppPngIcon(
+    this.path, {
+    super.key,
+    this.size,
+    this.fit = BoxFit.contain,
+  });
 
   @override
   Widget build(BuildContext context) {

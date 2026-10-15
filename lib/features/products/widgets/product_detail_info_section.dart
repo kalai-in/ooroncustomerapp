@@ -174,7 +174,9 @@ class ProductDetailPoliciesSection extends StatelessWidget {
     final dividerColor = context.cs.outlineVariant;
 
     return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingL),
+      padding: const EdgeInsetsDirectional.symmetric(
+        vertical: ThemeConstants.paddingL,
+      ),
       child: IntrinsicHeight(
         child: Row(
           children: [
@@ -292,7 +294,12 @@ class KeyFeaturesSection extends StatelessWidget {
     if (features.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingM),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingM,
+      ),
       child: Column(
         crossAxisAlignment: .start,
         children: [
@@ -307,7 +314,9 @@ class KeyFeaturesSection extends StatelessWidget {
           ...List.generate(features.length, (i) {
             final f = features[i];
             return Padding(
-              padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
+              padding: const EdgeInsetsDirectional.only(
+                bottom: ThemeConstants.paddingS,
+              ),
               child: Row(
                 crossAxisAlignment: .start,
                 children: [

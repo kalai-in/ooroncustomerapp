@@ -100,7 +100,9 @@ class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
     _timer?.cancel();
     if (_hints.isEmpty) return;
     _timer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (mounted) setState(() => _hintIndex = (_hintIndex + 1) % _hints.length);
+      if (mounted) {
+        setState(() => _hintIndex = (_hintIndex + 1) % _hints.length);
+      }
     });
   }
 
@@ -116,8 +118,14 @@ class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
   Widget build(BuildContext context) {
     final borders = AppDecorations.inputBorderSet(context.cs);
     final hints = _hints;
-    final showAnimatedHint = hints.isNotEmpty && widget.searchController.text.isEmpty;
-    return SizedBox(height: 40, width: double.infinity,
+    final showAnimatedHint =
+        hints.isNotEmpty && widget.searchController.text.isEmpty;
+    final hintStyle = context.tt.bodyMedium?.copyWith(
+      color: context.cs.onSurfaceVariant,
+    );
+    return SizedBox(
+      height: 40,
+      width: double.infinity,
       child: Row(
         children: [
           Expanded(
@@ -149,12 +157,19 @@ class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
                           size: ThemeConstants.iconM,
                           color: context.cs.onSurfaceVariant,
                           fit: widget.prefixIconAsset != null
-                              ? BoxFit.contain :BoxFit.scaleDown,
+                              ? BoxFit.contain
+                              : BoxFit.scaleDown,
                         ),
                       ),
                     ),
-                    prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-                    suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 0,
+                      minHeight: 0,
+                    ),
+                    suffixIconConstraints: const BoxConstraints(
+                      minWidth: 0,
+                      minHeight: 0,
+                    ),
                     suffixIcon: widget.searchController.text.isNotEmpty
                         ? IconButton(
                             icon: AppSvgIcon(
@@ -163,10 +178,15 @@ class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
                               color: context.cs.onSurfaceVariant,
                             ),
                             padding: EdgeInsetsDirectional.zero,
-                            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                            constraints: const BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
                             onPressed: () {
                               widget.searchController.clear();
-                              widget.onSubmitted != null ? widget.onSubmitted!('') : widget.onSearchChanged('');
+                              widget.onSubmitted != null
+                                  ? widget.onSubmitted!('')
+                                  : widget.onSearchChanged('');
                             },
                           )
                         : widget.onMicTap != null
@@ -190,7 +210,10 @@ class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
                                       : context.cs.onSurfaceVariant,
                                 ),
                                 padding: EdgeInsetsDirectional.zero,
-                                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                constraints: const BoxConstraints(
+                                  minWidth: 32,
+                                  minHeight: 32,
+                                ),
                                 onPressed: widget.onMicTap,
                               ),
                             ],
@@ -198,7 +221,8 @@ class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
                         : null,
                     filled: true,
                     fillColor: context.cs.surface,
-                    isDense: true,visualDensity: VisualDensity(vertical: -4, horizontal: -4),
+                    isDense: true,
+                    visualDensity: VisualDensity(vertical: -4, horizontal: -4),
                     contentPadding: const EdgeInsetsDirectional.symmetric(
                       horizontal: ThemeConstants.paddingM,
                       vertical: ThemeConstants.paddingXS,
@@ -217,49 +241,80 @@ class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
                           // Extra 4dp past the icon gives the blinking caret
                           // room before the hint text starts, so they never
                           // visually overlap while still animating on focus.
-                          start: ThemeConstants.paddingM + ThemeConstants.iconM + ThemeConstants.paddingS + 4,
+                          start:
+                              ThemeConstants.paddingM +
+                              ThemeConstants.iconM +
+                              ThemeConstants.paddingS +
+                              4,
                           // Reserve the suffix icon's zone so long hint text
                           // ellipsizes before reaching it instead of running
                           // underneath the mic button.
                           end: widget.onMicTap != null
-                              ? ThemeConstants.paddingM + ThemeConstants.iconM + ThemeConstants.paddingM
+                              ? ThemeConstants.paddingM +
+                                    ThemeConstants.iconM +
+                                    ThemeConstants.paddingM
                               : ThemeConstants.paddingM,
                         ),
                         child: Align(
                           alignment: AlignmentDirectional.centerStart,
-                          child: ClipRect(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 500),
-                              transitionBuilder: (child, animation) {
-                                return FadeTransition(
-                                  opacity: CurvedAnimation(
-                                    parent: animation,
-                                    curve: Curves.easeInOut,
-                                  ),
-                                  child: SlideTransition(
-                                    position: Tween<Offset>(
-                                      begin: const Offset(0, 0.5),
-                                      end: Offset.zero,
-                                    ).animate(
-                                      CurvedAnimation(
-                                        parent: animation,
-                                        curve: Curves.easeInOut,
+                          // Static "Search" prefix — only the quoted
+                          // suggestion animates.
+                          child: Row(
+                            children: [
+                              AppText(
+                                '${context.translate(LanguageLabelKeys.search)} ',
+                                style: hintStyle,
+                                maxLines: 1,
+                              ),
+                              Expanded(
+                                child: ClipRect(
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 500),
+                                    transitionBuilder: (child, animation) {
+                                      // Incoming slides up from below, outgoing
+                                      // slides out upward — same as the home
+                                      // search bar.
+                                      final isEntering =
+                                          (child.key as ValueKey<int>).value ==
+                                          _hintIndex;
+                                      return FadeTransition(
+                                        opacity: CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.easeInOut,
+                                        ),
+                                        child: SlideTransition(
+                                          position:
+                                              Tween<Offset>(
+                                                begin: Offset(
+                                                  0,
+                                                  isEntering ? 0.5 : -0.5,
+                                                ),
+                                                end: Offset.zero,
+                                              ).animate(
+                                                CurvedAnimation(
+                                                  parent: animation,
+                                                  curve: Curves.easeInOut,
+                                                ),
+                                              ),
+                                          child: child,
+                                        ),
+                                      );
+                                    },
+                                    child: Align(
+                                      key: ValueKey<int>(_hintIndex),
+                                      alignment:
+                                          AlignmentDirectional.centerStart,
+                                      child: AppText(
+                                        '"${hints[_hintIndex % hints.length]}"',
+                                        style: hintStyle,
+                                        maxLines: 1,
+                                        overflow: .ellipsis,
                                       ),
                                     ),
-                                    child: child,
                                   ),
-                                );
-                              },
-                              child: AppText(
-                                '${context.translate(LanguageLabelKeys.search)} "${hints[_hintIndex % hints.length]}"',
-                                key: ValueKey<int>(_hintIndex),
-                                style: context.tt.bodyMedium?.copyWith(
-                                  color: context.cs.onSurfaceVariant,
                                 ),
-                                maxLines: 1,
-                                overflow: .ellipsis,
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),

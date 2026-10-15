@@ -1,5 +1,7 @@
+import 'package:flutter/rendering.dart';
 import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/commons/widgets/app_svg_icon.dart';
+import 'package:customer/commons/widgets/star_rating_row.dart';
 import 'package:customer/core/constants/app_constants.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/local_storage/settings_hive_box.dart';
@@ -55,6 +57,10 @@ class ProductDetailView extends StatefulWidget {
   /// cart" handler can scroll straight to it via [Scrollable.ensureVisible].
   final GlobalKey? upsellSectionKey;
 
+  /// Fallback scroll targets when the Upsell section is empty/absent.
+  final GlobalKey? similarSectionKey;
+  final GlobalKey? recentlyVisitedSectionKey;
+
   const ProductDetailView({
     super.key,
     required this.product,
@@ -71,6 +77,8 @@ class ProductDetailView extends StatefulWidget {
     required this.onToggleExpand,
     required this.onImagePageChanged,
     this.upsellSectionKey,
+    this.similarSectionKey,
+    this.recentlyVisitedSectionKey,
   });
 
   @override
@@ -178,6 +186,12 @@ class _ProductDetailViewState extends State<ProductDetailView>
 
     return CustomScrollView(
       controller: widget.scrollController,
+      // Widen (not unbound — this page can carry many review images/similar
+      // products, so an infinite cache risks building the whole page
+      // eagerly) the cache window so the upsell section stays mounted at
+      // typical scroll depths; otherwise its GlobalKey.currentContext goes
+      // null and silently breaks Scrollable.ensureVisible.
+      scrollCacheExtent: const ScrollCacheExtent.pixels(6000),
       slivers: [
         // ── App bar + image ────────────────────────────────────────────────
         SliverAppBar(
@@ -267,7 +281,9 @@ class _ProductDetailViewState extends State<ProductDetailView>
                           decoration: AppDecorations.box(
                             color: context.cs.scrim.withValues(alpha: 0.75),
                           ),
-                          padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
+                          padding: const EdgeInsetsDirectional.all(
+                            ThemeConstants.paddingM,
+                          ),
                           child: Column(
                             crossAxisAlignment: .start,
                             mainAxisAlignment: .end,
@@ -391,8 +407,7 @@ class _ProductDetailViewState extends State<ProductDetailView>
                           alignment: Alignment.center,
                           child: Transform.flip(
                             flipX:
-                                Directionality.of(context) ==
-                                TextDirection.rtl,
+                                Directionality.of(context) == TextDirection.rtl,
                             child: AppSvgIcon(
                               _showKeyFeatures
                                   ? AssetsConstants.arrowLeftIcon
@@ -445,45 +460,15 @@ class _ProductDetailViewState extends State<ProductDetailView>
               children: [
                 // ── Name + meta ──────────────────────────────────────────────
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingM),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    ThemeConstants.paddingL,
+                    ThemeConstants.paddingL,
+                    ThemeConstants.paddingL,
+                    ThemeConstants.paddingM,
+                  ),
                   child: Column(
                     crossAxisAlignment: .start,
                     children: [
-                      Row(
-                        crossAxisAlignment: .start,
-                        spacing: widget.product.productType != 0 ? ThemeConstants.spaceS : 0,
-                        children: [
-                          widget.product.productType != 0
-                              ? ProductTypeIcon(
-                                  productType: widget.product.productType,
-                                  size: ThemeConstants.iconS,
-                                )
-                              : const SizedBox.shrink(),
-                          Expanded(
-                            child: AppText(
-                              displayName,
-                              style: context.tt.titleLarge?.copyWith(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: context.cs.onSurface,
-                                height: 1.3,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (displayShortDesc.isNotEmpty) ...[
-                        AppSpacing.h6,
-                        AppText(
-                          displayShortDesc,
-                          style: context.tt.bodySmall?.copyWith(
-                            color: context.cs.onSurfaceVariant,
-                          ),
-                          maxLines: 2,
-                          overflow: .ellipsis,
-                        ),
-                      ],
-                      AppSpacing.h8,
                       BlocBuilder<
                         RatingsListCubit,
                         PaginationState<ProductRatingList>
@@ -524,47 +509,23 @@ class _ProductDetailViewState extends State<ProductDetailView>
                             crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               if (total > 0) ...[
-                                Container(
-                                  padding:
-                                      const EdgeInsetsDirectional.symmetric(
-                                        horizontal: ThemeConstants.paddingS,
-                                        vertical: ThemeConstants.paddingXS,
-                                      ),
-                                  decoration: AppDecorations.box(
-                                    color: context.cs.onSecondaryContainer,
-                                    borderRadius: AppRadius.r4,
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: .min,
-                                    spacing: ThemeConstants.spaceXS,
-                                    children: [
-                                      AppText(
-                                        avg.toStringAsFixed(1),
-                                        style: context.tt.bodySmall?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: context.cs.onInverseSurface,
-                                        ),
-                                      ),
-                                      AppSvgIcon(
-                                        AssetsConstants.rateIcon,
-                                        size: ThemeConstants.iconXXS,
-                                        color: context.cs.onInverseSurface,
-                                      ),
-                                    ],
-                                  ),
+                                StarRatingRow(
+                                  rating: avg,
+                                  size: ThemeConstants.iconXXS,
                                 ),
                                 AppText(
-                                  '$total ${context.translate(LanguageLabelKeys.ratings)}',
+                                  '($total)',
                                   style: context.tt.bodySmall?.copyWith(
                                     color: context.cs.onSurfaceVariant,
                                   ),
                                 ),
-                                if (widget.product.timeToDeliver?.isNotEmpty == true)
+                                if (widget.product.timeToDeliver?.isNotEmpty ==
+                                    true)
                                   Container(
-                                  width: 1,
-                                  height: 12,
-                                  color: context.cs.outlineVariant,
-                                ),
+                                    width: 1,
+                                    height: 12,
+                                    color: context.cs.outlineVariant,
+                                  ),
                               ],
                               if (widget.product.timeToDeliver?.isNotEmpty ==
                                   true)
@@ -574,14 +535,15 @@ class _ProductDetailViewState extends State<ProductDetailView>
                                   children: [
                                     AppSvgIcon(
                                       AssetsConstants.timeIcon,
-                                      size: ThemeConstants.iconXS,
-                                      color: context.cs.primary,
+                                      size: ThemeConstants.iconXXS,
+                                      color: context.cs.onSurfaceVariant,
                                     ),
                                     AppText(
                                       widget.product.timeToDeliver!,
                                       style: context.tt.bodySmall?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: context.cs.primary,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: context.cs.onSurfaceVariant,
                                       ),
                                     ),
                                   ],
@@ -590,6 +552,43 @@ class _ProductDetailViewState extends State<ProductDetailView>
                           );
                         },
                       ),
+                      AppSpacing.h8,
+                      Row(
+                        crossAxisAlignment: .start,
+                        spacing: widget.product.productType != 0
+                            ? ThemeConstants.spaceS
+                            : 0,
+                        children: [
+                          widget.product.productType != 0
+                              ? ProductTypeIcon(
+                                  productType: widget.product.productType,
+                                  size: ThemeConstants.iconS,
+                                )
+                              : const SizedBox.shrink(),
+                          Expanded(
+                            child: AppText(
+                              displayName,
+                              style: context.tt.titleLarge?.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: context.cs.onSurface,
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (displayShortDesc.isNotEmpty) ...[
+                        AppSpacing.h6,
+                        AppText(
+                          displayShortDesc,
+                          style: context.tt.bodySmall?.copyWith(
+                            color: context.cs.onSurfaceVariant,
+                          ),
+                          maxLines: 2,
+                          overflow: .ellipsis,
+                        ),
+                      ],
                       if (widget.product.productType == 5 &&
                           (widget.product.prescriptionNote?.isNotEmpty ==
                               true)) ...[
@@ -704,19 +703,32 @@ class _ProductDetailViewState extends State<ProductDetailView>
                 ],
 
                 // ── Policies ──────────────────────────────────────────────────
-                _ThinDivider(),
-                Padding(
-                  padding: const EdgeInsetsDirectional.symmetric(
+                Container(
+                  margin: const EdgeInsetsDirectional.symmetric(
                     horizontal: ThemeConstants.paddingL,
-                    vertical: ThemeConstants.paddingXS,
+                    vertical: ThemeConstants.paddingS,
+                  ),
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: ThemeConstants.paddingM,
+                    vertical: ThemeConstants.paddingS,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  decoration: AppDecorations.box(
+                    color: context.cs.surface,
+                    borderRadius: AppRadius.r12,
+                    boxShadow: [
+                      BoxShadow(
+                        color: context.cs.shadow.withValues(alpha: 0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: ProductDetailPoliciesSection(product: widget.product),
                 ),
-                _ThinDivider(),
 
                 // ── Delivery by ──────────────────────────────────────────────
-                if (SettingsHiveBox.instance.channel !=
-                        AppConstants.quick &&
+                if (SettingsHiveBox.instance.channel != AppConstants.quick &&
                     (widget.product.estimatedDeliveryDate?.isNotEmpty ==
                         true)) ...[
                   Padding(
@@ -726,7 +738,8 @@ class _ProductDetailViewState extends State<ProductDetailView>
                       ThemeConstants.paddingL,
                       ThemeConstants.paddingM,
                     ),
-                    child: Container(width: double.infinity,
+                    child: Container(
+                      width: double.infinity,
                       padding: const EdgeInsetsDirectional.symmetric(
                         horizontal: ThemeConstants.paddingM,
                         vertical: ThemeConstants.paddingM,
@@ -774,130 +787,131 @@ class _ProductDetailViewState extends State<ProductDetailView>
                   _ThinDivider(),
                 ],
 
-                // ── Product Details / long description ──────────────────────────────────
-                if (displayDesc.isNotEmpty && displayDesc != 'null') ...[
-                  _ExpandableSection(
-                    title: context.translate(LanguageLabelKeys.productInfo),
-                    child: HtmlWidget(
-                      displayDesc,
-                      textStyle: context.tt.bodyMedium?.copyWith(
-                        color: context.cs.onSurfaceVariant,
-                        height: 1.7,
-                      ),
-                    ),
-                  ),
-                ],
+                // ── Product Details / long description + custom sections ───────
+                // All shown as one card, sections separated by a thin divider.
+                Builder(
+                  builder: (context) {
+                    final List<Widget> entries = [];
 
-                // ── Custom sections ───────────────────────────────────────────
-                if ((activeVariant?.customSections ?? []).isNotEmpty)
-                  ...((activeVariant!.customSections!)
-                      .where((s) => s.fields?.isNotEmpty == true)
-                      .map((section) {
-                        final textFields = (section.fields ?? [])
-                            .where(
-                              (f) =>
-                                  f.fieldType != 'image' &&
-                                  f.value?.isNotEmpty == true &&
-                                  f.value != 'null',
-                            )
-                            .toList();
-                        final imageFields = (section.fields ?? [])
-                            .where(
-                              (f) =>
-                                  f.fieldType == 'image' &&
-                                  f.value?.isNotEmpty == true &&
-                                  f.value != 'null',
-                            )
-                            .toList();
-                        if (textFields.isEmpty && imageFields.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
+                    if (displayDesc.isNotEmpty && displayDesc != 'null') {
+                      entries.add(
+                        _ExpandableSection(
+                          title: context.translate(
+                            LanguageLabelKeys.productInfo,
+                          ),
+                          child: HtmlWidget(
+                            displayDesc,
+                            textStyle: context.tt.bodyMedium?.copyWith(
+                              color: context.cs.onSurfaceVariant,
+                              height: 1.7,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
 
-                        return Column(
-                          children: [
-                            if (textFields.isNotEmpty)
-                              _ExpandableSection(
-                                title: section.sectionName ?? '',
-                                child: Column(
-                                  children: List.generate(textFields.length, (
-                                    i,
-                                  ) {
-                                    final field = textFields[i];
-                                    final isEven = i.isEven;
-                                    return Container(
-                                      decoration: AppDecorations.box(
-                                        color: isEven
-                                            ? context.cs.surfaceContainerLow
-                                            : context.cs.surfaceContainerLow
-                                                  .withValues(alpha: 0.3),
-                                        border: Border.all(
-                                          color: context.cs.surfaceContainerLow,
+                    for (final section
+                        in (activeVariant?.customSections ?? [])) {
+                      if (section.fields?.isNotEmpty != true) continue;
+                      final textFields = (section.fields ?? [])
+                          .where(
+                            (f) =>
+                                f.fieldType != 'image' &&
+                                f.value?.isNotEmpty == true &&
+                                f.value != 'null',
+                          )
+                          .toList();
+                      final imageFields = (section.fields ?? [])
+                          .where(
+                            (f) =>
+                                f.fieldType == 'image' &&
+                                f.value?.isNotEmpty == true &&
+                                f.value != 'null',
+                          )
+                          .toList();
+                      if (textFields.isEmpty && imageFields.isEmpty) continue;
+
+                      if (textFields.isNotEmpty) {
+                        entries.add(
+                          _ExpandableSection(
+                            title: section.sectionName ?? '',
+                            child: Column(
+                              children: List.generate(textFields.length, (i) {
+                                final field = textFields[i];
+                                final isEven = i.isEven;
+                                return Container(
+                                  decoration: AppDecorations.box(
+                                    color: isEven
+                                        ? context.cs.surfaceContainerLow
+                                        : context.cs.surfaceContainerLow
+                                              .withValues(alpha: 0.3),
+                                    border: Border.all(
+                                      color: context.cs.surfaceContainerLow,
+                                    ),
+                                  ),
+                                  padding:
+                                      const EdgeInsetsDirectional.symmetric(
+                                        horizontal: ThemeConstants.paddingS,
+                                        vertical: ThemeConstants.paddingS,
+                                      ),
+                                  child: Row(
+                                    crossAxisAlignment: .start,
+                                    children: [
+                                      SizedBox(
+                                        width: 140,
+                                        child: AppText(
+                                          field.fieldLabel ?? '',
+                                          style: context.tt.bodySmall?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: context.cs.onSurface,
+                                            height: 1.5,
+                                          ),
                                         ),
                                       ),
-                                      padding:
-                                          const EdgeInsetsDirectional.symmetric(
-                                            horizontal: ThemeConstants.paddingS,
-                                            vertical: ThemeConstants.paddingS,
+                                      Expanded(
+                                        child: AppText(
+                                          field.value!,
+                                          style: context.tt.bodySmall?.copyWith(
+                                            color: context.cs.onSurfaceVariant,
+                                            height: 1.5,
                                           ),
-                                      child: Row(
-                                        crossAxisAlignment: .start,
-                                        children: [
-                                          SizedBox(
-                                            width: 140,
-                                            child: AppText(
-                                              field.fieldLabel ?? '',
-                                              style: context.tt.bodySmall
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                    color: context.cs.onSurface,
-                                                    height: 1.5,
-                                                  ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: AppText(
-                                              field.value!,
-                                              style: context.tt.bodySmall
-                                                  ?.copyWith(
-                                                    color: context
-                                                        .cs
-                                                        .onSurfaceVariant,
-                                                    height: 1.5,
-                                                  ),
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                    );
-                                  }),
-                                ),
-                              ),
-                            if (imageFields.isNotEmpty) ...[
-                              _ThinDivider(),
+                                    ],
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (imageFields.isNotEmpty) {
+                        entries.add(
+                          Column(
+                            crossAxisAlignment: .start,
+                            children: [
                               Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
-                                  ThemeConstants.paddingL,
                                   ThemeConstants.paddingM,
-                                  ThemeConstants.paddingL,
+                                  ThemeConstants.paddingM,
+                                  ThemeConstants.paddingM,
                                   ThemeConstants.paddingXS,
                                 ),
-                                child: Align(
-                                  alignment: AlignmentDirectional.centerStart,
-                                  child: AppText(
-                                    section.sectionName ?? '',
-                                    style: context.tt.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: context.cs.onSurface,
-                                    ),
+                                child: AppText(
+                                  section.sectionName ?? '',
+                                  style: context.tt.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: context.cs.onSurface,
                                   ),
                                 ),
                               ),
                               ...imageFields.map(
                                 (field) => Padding(
                                   padding: const EdgeInsetsDirectional.fromSTEB(
-                                    ThemeConstants.paddingL,
                                     ThemeConstants.paddingM,
-                                    ThemeConstants.paddingL,
+                                    ThemeConstants.paddingM,
+                                    ThemeConstants.paddingM,
                                     ThemeConstants.paddingM,
                                   ),
                                   child: Column(
@@ -928,9 +942,46 @@ class _ProductDetailViewState extends State<ProductDetailView>
                                 ),
                               ),
                             ],
-                          ],
+                          ),
                         );
-                      })),
+                      }
+                    }
+
+                    if (entries.isEmpty) return const SizedBox.shrink();
+
+                    return Container(
+                      margin: const EdgeInsetsDirectional.symmetric(
+                        horizontal: ThemeConstants.paddingL,
+                        vertical: ThemeConstants.paddingS,
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      decoration: AppDecorations.box(
+                        color: context.cs.surface,
+                        borderRadius: AppRadius.r12,
+                        boxShadow: [
+                          BoxShadow(
+                            color: context.cs.shadow.withValues(alpha: 0.06),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.symmetric(
+                          vertical: ThemeConstants.paddingXS,
+                        ),
+                        child: Column(
+                          children: [
+                            for (var i = 0; i < entries.length; i++) ...[
+                              entries[i],
+                              if (i != entries.length - 1) _ThinDivider(),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
 
                 // ── Ratings ───────────────────────────────────────────────────
                 ProductDetailRatingSection(
@@ -938,17 +989,16 @@ class _ProductDetailViewState extends State<ProductDetailView>
                 ),
 
                 // ── Upsell, similar & recently visited ──────────────────────────
-                _ThinDivider(),
                 ProductDetailUpsellSection(
                   sectionKey: widget.upsellSectionKey,
                   heroSuffix: '${widget.subSectionHeroSuffix}_upsell',
                 ),
-                _ThinDivider(),
                 SimilarProductsSection(
+                  sectionKey: widget.similarSectionKey,
                   heroSuffix: '${widget.subSectionHeroSuffix}_sp',
                 ),
-                _ThinDivider(),
                 RecentlyVisitedSection(
+                  sectionKey: widget.recentlyVisitedSectionKey,
                   heroSuffix: '${widget.subSectionHeroSuffix}_rv',
                 ),
                 // ProductDetailBottomBar floats over content (AppScaffold's
@@ -1000,74 +1050,57 @@ class _ExpandableSectionState extends State<_ExpandableSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingS),
-      clipBehavior: Clip.antiAlias,
-      decoration: AppDecorations.box(
-        color: context.cs.surfaceContainerLow
-                                                  .withValues(alpha: 0.3),//context.cs.surfaceContainerLowest,
-        borderRadius: AppRadius.r12,
-        border: Border.all(
-          color: context.cs.outlineVariant.withValues(alpha: 0.4),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: .start,
-        children: [
-          InkWell(
-            onTap: () => setState(() => _expanded = !_expanded),
-            child: Padding(
-              padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: ThemeConstants.paddingM,
-                vertical: ThemeConstants.paddingM,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: AppText(
-                      widget.title,
-                      style: context.tt.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: context.cs.onSurface,
-                      ),
-                    ),
-                  ),
-                  AnimatedRotation(
-                    turns: _expanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: AppSvgIcon(
-                      AssetsConstants.arrowDownIcon,
-                      size: ThemeConstants.iconM,
-                      color: context.cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+    return Column(
+      crossAxisAlignment: .start,
+      children: [
+        InkWell(
+          onTap: () => setState(() => _expanded = !_expanded),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: ThemeConstants.paddingM,
+              vertical: ThemeConstants.paddingM,
             ),
-          ),
-          AnimatedCrossFade(
-            firstChild: const SizedBox.shrink(),
-            secondChild: Column(
-              crossAxisAlignment: .start,
+            child: Row(
               children: [
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: context.cs.outlineVariant.withValues(alpha: 0.4),
+                Expanded(
+                  child: AppText(
+                    widget.title,
+                    style: context.tt.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: context.cs.onSurface,
+                    ),
+                  ),
                 ),
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, ThemeConstants.paddingS, ThemeConstants.paddingM, ThemeConstants.paddingM),
-                  child: widget.child,
+                AnimatedRotation(
+                  turns: _expanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: AppSvgIcon(
+                    AssetsConstants.arrowDownIcon,
+                    size: ThemeConstants.iconM,
+                    color: context.cs.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
-            crossFadeState: _expanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 220),
           ),
-        ],
-      ),
+        ),
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              ThemeConstants.paddingM,
+              0,
+              ThemeConstants.paddingM,
+              ThemeConstants.paddingM,
+            ),
+            child: widget.child,
+          ),
+          crossFadeState: _expanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 220),
+        ),
+      ],
     );
   }
 }

@@ -6,6 +6,7 @@ enum BlockType {
   gridBanner,
   titleImage,
   textSection,
+  productTabs,
   unknown;
 
   static BlockType fromRaw(String? raw) {
@@ -24,6 +25,8 @@ enum BlockType {
         return BlockType.titleImage;
       case 'text_section':
         return BlockType.textSection;
+      case 'product_tabs':
+        return BlockType.productTabs;
       default:
         return BlockType.unknown;
     }

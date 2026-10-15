@@ -14,6 +14,12 @@ class AppScaffold extends StatefulWidget {
   /// overlay up, leaving a gap between it and the nav bar.
   final bool applyBottomInset;
 
+  /// Lets the body draw behind a transparent/translucent app bar (e.g. a
+  /// bar that fades out on scroll) instead of stopping below it. The body
+  /// is responsible for reserving its own top inset when content shouldn't
+  /// start under the status bar/app bar.
+  final bool extendBodyBehindAppBar;
+
   const AppScaffold({
     super.key,
     required this.body,
@@ -21,6 +27,7 @@ class AppScaffold extends StatefulWidget {
     this.appBar,
     this.backgroundColor,
     this.applyBottomInset = true,
+    this.extendBodyBehindAppBar = false,
   });
 
   @override
@@ -99,6 +106,7 @@ class _AppScaffoldState extends State<AppScaffold> {
           ),
       child: Scaffold(
         extendBody: true,
+        extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
         resizeToAvoidBottomInset: true,
         appBar: widget.appBar,
         backgroundColor: scaffoldColor,

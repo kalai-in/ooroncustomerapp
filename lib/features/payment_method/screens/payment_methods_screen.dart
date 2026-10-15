@@ -214,6 +214,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen>
               extra: state.extra,
               merchantOrderId: state.merchantOrderId,
               phonePeToken: state.phonePeToken,
+              deliveryType: widget.args.deliveryType,
             ),
           ),
         ),
@@ -260,6 +261,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen>
           arguments: OrderSuccessArgs(
             orderId: state.orderId,
             orderItemId: state.orderItemId,
+            deliveryType: widget.args.deliveryType,
           ),
         );
       }

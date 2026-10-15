@@ -26,7 +26,9 @@ class MaintenanceScreen extends StatelessWidget {
       child: AppScaffold(
         body: Center(
           child: Padding(
-            padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.spaceXXXL),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: ThemeConstants.spaceXXXL,
+            ),
             child: Column(
               mainAxisAlignment: .center,
               crossAxisAlignment: .center,

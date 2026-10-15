@@ -5,6 +5,7 @@ import 'package:customer/core/api/api_parameters.dart';
 import 'package:customer/core/local_storage/settings_hive_box.dart';
 import 'package:customer/features/cart/models/cart_model.dart';
 import 'package:customer/features/cart/models/cart_recommendations_model.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 
 class CartRepository {
   final ApiClient _apiClient;
@@ -16,6 +17,8 @@ class CartRepository {
     String? latitude,
     String? longitude,
     String? addressId,
+    // Omit to keep server's default ('delivery').
+    DeliveryType? deliveryType,
   }) async {
     try {
       final lat = latitude ?? SettingsHiveBox.instance.userLatitude;
@@ -28,6 +31,8 @@ class CartRepository {
             cleanAddressId.isNotEmpty &&
             cleanAddressId != 'null')
           ApiParameters.addressId: cleanAddressId,
+        if (deliveryType != null)
+          ApiParameters.deliveryType: deliveryType.apiValue,
       };
       final response = await _apiClient.get(
         ApiEndpoints.cart,
@@ -46,6 +51,8 @@ class CartRepository {
   Future<Cart> getGuestCart({
     required List<String> variantIds,
     required List<String> quantities,
+    // Omit to keep server's default ('delivery').
+    DeliveryType? deliveryType,
   }) async {
     try {
       final lat = SettingsHiveBox.instance.userLatitude;
@@ -55,6 +62,8 @@ class CartRepository {
         ApiParameters.longitude: lng,
         ApiParameters.variantIds: variantIds.join(','),
         ApiParameters.quantities: quantities.join(','),
+        if (deliveryType != null)
+          ApiParameters.deliveryType: deliveryType.apiValue,
       };
       final response = await _apiClient.get(
         ApiEndpoints.guestCart,

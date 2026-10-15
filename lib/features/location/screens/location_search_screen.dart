@@ -109,7 +109,12 @@ class _LocationSearchViewState extends State<_LocationSearchView> {
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingS),
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                ThemeConstants.paddingL,
+                ThemeConstants.paddingM,
+                ThemeConstants.paddingL,
+                ThemeConstants.paddingS,
+              ),
               child: AppTextField(
                 controller: _controller,
                 focusNode: _focusNode,

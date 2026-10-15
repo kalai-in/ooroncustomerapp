@@ -5,6 +5,7 @@ import 'package:customer/commons/widgets/custom_app_bar.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/routes/order_detail_args.dart';
 import 'package:customer/core/routes/route_names.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 import 'package:customer/features/payment_method/cubit/payment_cubit.dart';
 import 'package:customer/features/payment_method/models/payment_method_item.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
@@ -25,6 +26,7 @@ class WebViewPaymentArgs {
     this.extra,
     this.merchantOrderId,
     this.phonePeToken,
+    this.deliveryType = DeliveryType.delivery,
   });
 
   final String url;
@@ -36,6 +38,9 @@ class WebViewPaymentArgs {
   final Map<String, dynamic>? extra;
   final String? merchantOrderId;
   final String? phonePeToken;
+
+  /// Carried through to order success — see [PaymentArgs.deliveryType].
+  final DeliveryType deliveryType;
 }
 
 class WebViewPaymentScreen extends StatefulWidget {
@@ -288,6 +293,7 @@ class _WebViewPaymentScreenState extends State<WebViewPaymentScreen> {
               arguments: OrderSuccessArgs(
                 orderId: state.orderId,
                 orderItemId: state.orderItemId,
+                deliveryType: widget.args.deliveryType,
               ),
             );
           }

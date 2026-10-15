@@ -35,7 +35,12 @@ class DashedUnderlineTooltip extends StatelessWidget {
       context,
       isScrollControlled: false,
       title: sheetTitle ?? text,
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.spaceXXXL),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingL,
+        ThemeConstants.spaceXXXL,
+      ),
       builder: (sheetContext) => SlideAnimationList(
         children: [
           if (contentBuilder != null)

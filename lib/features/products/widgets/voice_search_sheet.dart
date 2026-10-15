@@ -144,9 +144,7 @@ class _VoiceSearchSheetState extends State<_VoiceSearchSheet>
             ),
             AppSpacing.h8,
             AppText(
-              context.translate(
-                LanguageLabelKeys.voiceSearchNotHeardSubtitle,
-              ),
+              context.translate(LanguageLabelKeys.voiceSearchNotHeardSubtitle),
               textAlign: TextAlign.center,
               style: context.tt.bodyMedium?.copyWith(
                 color: context.cs.onSurfaceVariant,

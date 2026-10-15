@@ -10,7 +10,7 @@ import 'package:customer/utils/extensions/context_extensions.dart';
 enum CategoryTileShape { roundedSquare, circle }
 
 // Shared tile for category grid (CategoryScreen / SubCategoryChildrenPanel)
-// and home category blocks (HomeCategoryBlock). imageSize == null -> Expanded
+// and home category blocks (CategoryBlock). imageSize == null -> Expanded
 // flex mode that fills the parent grid cell (tablet-aware 5:3 / 6:2 split).
 // imageSize != null -> fixed pixel mode used where the caller pre-scales
 // sizes itself (home horizontal list / circular grid).

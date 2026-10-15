@@ -13,6 +13,7 @@ import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_spacing.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 import 'package:customer/features/chat/models/chat_message.dart';
 import 'package:customer/features/chat/services/chat_conversation_resolver.dart';
 import 'package:customer/features/orders/cubit/order_detail_cubit.dart';
@@ -409,6 +410,23 @@ class _OtpActionButton extends StatelessWidget {
   }
 }
 
+/// Pickup-store card shown as its own section — kept separate from
+/// [OrderDetailCustomerInfoCard] so the customer's own address never gets
+/// mixed up with the store's address.
+class OrderDetailPickupStoreCard extends StatelessWidget {
+  final OrderData order;
+  const OrderDetailPickupStoreCard({super.key, required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPickup =
+        DeliveryType.fromApiValue(order.deliveryType) == DeliveryType.pickup;
+    final pickupStore = order.pickupStore;
+    if (!isPickup || pickupStore == null) return const SizedBox.shrink();
+    return OrderPickupStoreCard(store: pickupStore);
+  }
+}
+
 class OrderDetailCustomerInfoCard extends StatelessWidget {
   final OrderData order;
   final Widget? footer;
@@ -426,6 +444,8 @@ class OrderDetailCustomerInfoCard extends StatelessWidget {
       if (order.userName.hasValue) order.userName!,
       if (order.mobile.hasValue) order.mobile!,
     ].join(' · ');
+    final isPickup =
+        DeliveryType.fromApiValue(order.deliveryType) == DeliveryType.pickup;
 
     final rows = <Widget>[
       OrderDetailLabelValueRow(
@@ -459,7 +479,7 @@ class OrderDetailCustomerInfoCard extends StatelessWidget {
           label: context.translate(LanguageLabelKeys.customerInfo),
           value: customerLine,
         ),
-      if (fullAddress.isNotEmpty)
+      if (!isPickup && fullAddress.isNotEmpty)
         OrderDetailLabelValueRow(
           label: context.translate(LanguageLabelKeys.deliverTo),
           value: fullAddress,
@@ -622,11 +642,24 @@ class OrderDetailItemRow extends StatelessWidget {
           crossAxisAlignment: .start,
           children: [
             hasImage
-                ? AppNetworkImage(
-                    url: item.imageUrl!,
-                    width: imgSize,
-                    height: imgSize,
-                    borderRadius: AppRadius.r8,
+                ? ClipRRect(
+                    borderRadius: AppRadius.r10,
+                    child: Container(
+                      decoration: AppDecorations.box(
+                        color: context.cs.surfaceContainer,
+                        border: Border.all(
+                          color: context.cs.outline.withValues(alpha: 0.12),
+                        ),
+                        borderRadius: AppRadius.r10,
+                      ),
+                      child: AppNetworkImage(
+                        url: item.imageUrl!,
+                        width: imgSize,
+                        height: imgSize,
+                        fit: BoxFit.contain,
+                        borderRadius: AppRadius.r10,
+                      ),
+                    ),
                   )
                 : ProductImagePlaceholder(size: imgSize),
             AppSpacing.w12,
@@ -1105,7 +1138,8 @@ class OrderDetailPriceSummaryCard extends StatelessWidget {
               ? taxBreakdownMessage(
                   context,
                   order.taxBreakdown!,
-                  (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                  (amount) =>
+                      '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
                 )
               : null,
           suffixSheetTitle: hasTax
@@ -1115,7 +1149,8 @@ class OrderDetailPriceSummaryCard extends StatelessWidget {
               ? (sheetContext) => taxBreakdownSheet(
                   sheetContext,
                   order.taxBreakdown!,
-                  (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                  (amount) =>
+                      '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
                 )
               : null,
         ),
@@ -1132,7 +1167,8 @@ class OrderDetailPriceSummaryCard extends StatelessWidget {
                 )
                 ? (sheetContext) => additionalChargeDetailSheet(
                     sheetContext,
-                    (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                    (amount) =>
+                        '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
                     label: context.translate(LanguageLabelKeys.deliveryCharge),
                     totalAmount: order.deliveryCharge?.amount ?? 0,
                     taxName: order.deliveryCharge?.taxName,
@@ -1171,7 +1207,8 @@ class OrderDetailPriceSummaryCard extends StatelessWidget {
               detailContentBuilder: hasTaxDetail
                   ? (sheetContext) => additionalChargeDetailSheet(
                       sheetContext,
-                      (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                      (amount) =>
+                          '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
                       label: label,
                       totalAmount: charge.amount ?? 0,
                       isRefundable: charge.isRefundable,
@@ -1199,7 +1236,8 @@ class OrderDetailPriceSummaryCard extends StatelessWidget {
               detailContentBuilder: hasTaxDetail
                   ? (sheetContext) => additionalChargeDetailSheet(
                       sheetContext,
-                      (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                      (amount) =>
+                          '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
                       label: label,
                       totalAmount: surge.charge ?? 0,
                       isRefundable: surge.isRefundable,
@@ -1235,7 +1273,7 @@ class OrderDetailDeliveryBoyCard extends StatelessWidget {
           arguments: ChatScreenArgs(
             chatType: ChatType.deliveryBoyChat,
             recipientName: order.deliveryBoyName ?? '',
-            recipientId: order.id ?? 0,
+            recipientId: order.deliveryBoyId ?? 0,
             orderId: orderId,
             conversationId: conversationId,
           ),

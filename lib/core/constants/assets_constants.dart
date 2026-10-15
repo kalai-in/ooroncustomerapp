@@ -71,6 +71,7 @@ class AssetsConstants {
   static const String dangerIcon = '$path/danger_icon.svg';
   static const String phoneIcon = '$path/phone_icon.svg';
   static const String storePinIcon = '$path/store_pin_icon.svg';
+  static const String storeIcon = '$path/store_icon.svg';
   static const String uploadIcon = '$path/upload_icon.svg';
   static const String warningIcon = '$path/warning_icon.svg';
   static const String openInNewRoundedIcon =
@@ -109,7 +110,8 @@ class AssetsConstants {
   static const String expectedDeliveryIcon = '$path/expected_delivery.svg';
 
   //Tracking icon
-  static const String deliveryBoyTrackingIcon = '$pathPng/delivery_boy_tracking_icon.png'; 
+  static const String deliveryBoyTrackingIcon =
+      '$pathPng/delivery_boy_tracking_icon.png';
 
   //bottom navigationbar icon
   static const String bottomNavIconPath = '$path/bottom_nav_icon';
@@ -128,7 +130,8 @@ class AssetsConstants {
   static const String profileInActiveIcon =
       '$bottomNavIconPath/profile_inactive.svg';
   static const String orderActiveIcon = '$bottomNavIconPath/order_active.svg';
-  static const String orderInActiveIcon = '$bottomNavIconPath/order_inactive.svg';
+  static const String orderInActiveIcon =
+      '$bottomNavIconPath/order_inactive.svg';
 
   // for payment getaway
   static const String paymentGatewayIconPath = '$path/payment_getaway';
@@ -197,4 +200,9 @@ class AssetsConstants {
   static const String successCircleCheck =
       '$lottiePath/success_circle_check.json';
   static const String storeClosed = '$lottiePath/store_closed.json';
+  static const String spinningWheel = '$lottiePath/spinning_wheel.json';
+
+  // sounds
+  static const String soundsPath = 'assets/sounds';
+  static const String spinSound = '$soundsPath/spin_sound.mp3';
 }

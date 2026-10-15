@@ -143,7 +143,9 @@ class AddressPickerSheet extends StatelessWidget {
                                   builder: (_, animationController) =>
                                       ListView.separated(
                                         padding:
-                                            const EdgeInsetsDirectional.all(ThemeConstants.paddingL),
+                                            const EdgeInsetsDirectional.all(
+                                              ThemeConstants.paddingL,
+                                            ),
                                         itemCount: state.data.length,
                                         separatorBuilder: (_, _) =>
                                             AppSpacing.h8,

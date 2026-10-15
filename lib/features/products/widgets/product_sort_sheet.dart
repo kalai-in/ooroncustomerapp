@@ -19,7 +19,13 @@ void showProductSortSheet(
   showAppBottomSheet(
     context,
     title: context.translate(LanguageLabelKeys.sortBy),
-    padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingXXL),enableDrag: true,
+    padding: const EdgeInsetsDirectional.fromSTEB(
+      ThemeConstants.paddingL,
+      ThemeConstants.paddingM,
+      ThemeConstants.paddingL,
+      ThemeConstants.paddingXXL,
+    ),
+    enableDrag: true,
     builder: (sheetContext) => _ProductSortSheet(
       currentSort: currentSort,
       onSelect: (sort) {
@@ -52,7 +58,9 @@ class _ProductSortSheet extends StatelessWidget {
               title: context.translate(sort.labelKey()),
               selected: sort == currentSort,
               showContainerDecoration: false,
-              padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingM),
+              padding: const EdgeInsetsDirectional.symmetric(
+                vertical: ThemeConstants.paddingM,
+              ),
               onTap: () => onSelect(sort),
             ),
         ],

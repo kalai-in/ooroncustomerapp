@@ -196,7 +196,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         .loadOrderDetail(widget.orderId),
                     child: ListView(
                       controller: _scrollController,
-                      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingL),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsetsDirectional.all(
+                        ThemeConstants.paddingL,
+                      ),
                       children: [
                         OrderTimelineStatusCard(
                           statusLabel:
@@ -222,6 +225,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             order.otp != 0) ...[
                           AppSpacing.h12,
                           OrderDetailOtpCard(otp: order.otp!.toString()),
+                        ],
+                        if (order.pickupStore != null) ...[
+                          AppSpacing.h12,
+                          OrderDetailPickupStoreCard(order: order),
                         ],
                         AppSpacing.h12,
                         OrderDetailItemsCard(

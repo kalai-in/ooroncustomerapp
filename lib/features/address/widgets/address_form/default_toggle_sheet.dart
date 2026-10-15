@@ -24,7 +24,7 @@ class DefaultToggleSheet extends StatelessWidget {
         Expanded(
           child: Column(
             crossAxisAlignment: .start,
-            spacing: ThemeConstants. spaceXXS,
+            spacing: ThemeConstants.spaceXXS,
             children: [
               AppText(
                 context.translate(LanguageLabelKeys.setAsDefaultAddress),

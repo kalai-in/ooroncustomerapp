@@ -10,8 +10,13 @@ import 'package:flutter/material.dart';
 /// meta row) so the blog list doesn't jump layout once real cards swap in.
 class BlogListSkeletonLoader extends StatelessWidget {
   final int itemCount;
+  final bool shrinkWrap;
 
-  const BlogListSkeletonLoader({super.key, this.itemCount = 4});
+  const BlogListSkeletonLoader({
+    super.key,
+    this.itemCount = 4,
+    this.shrinkWrap = false,
+  });
 
   Widget _card(BuildContext context, Color color) {
     return Container(
@@ -74,8 +79,14 @@ class BlogListSkeletonLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerBuilder(
       builder: (context, color) => ListView.separated(
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+        ),
         physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: shrinkWrap,
         itemCount: itemCount,
         separatorBuilder: (_, _) => AppSpacing.h12,
         itemBuilder: (_, _) => _card(context, color),

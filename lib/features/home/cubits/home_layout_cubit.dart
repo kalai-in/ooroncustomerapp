@@ -19,7 +19,11 @@ final class HomeLayoutLoaded extends HomeLayoutState {
   // loader appended at the bottom instead of a full-screen reload.
   final bool isLoadingMore;
   final bool hasMore;
-  HomeLayoutLoaded(this.homeLayout, {this.isLoadingMore = false, this.hasMore = true});
+  HomeLayoutLoaded(
+    this.homeLayout, {
+    this.isLoadingMore = false,
+    this.hasMore = true,
+  });
 
   HomeLayoutLoaded copyWith({
     HomeBuilderModel? homeLayout,
@@ -115,12 +119,15 @@ class HomeLayoutCubit extends Cubit<HomeLayoutState> {
       ];
       current.homeLayout.data?.layout?.sections = mergedSections;
       _offset += newSections.length;
-      final total = result.data?.totalSections ?? current.homeLayout.data?.totalSections;
+      final total =
+          result.data?.totalSections ?? current.homeLayout.data?.totalSections;
       emit(
         current.copyWith(
           homeLayout: current.homeLayout,
           isLoadingMore: false,
-          hasMore: total != null ? _offset < total : newSections.length >= _limit,
+          hasMore: total != null
+              ? _offset < total
+              : newSections.length >= _limit,
         ),
       );
     } on ApiException catch (_) {

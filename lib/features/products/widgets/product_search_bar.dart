@@ -31,7 +31,12 @@ class ProductSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).cardColor,
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingM),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingS,
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingM,
+      ),
       child: Row(
         spacing: ThemeConstants.spaceS,
         children: [

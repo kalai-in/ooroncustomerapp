@@ -98,8 +98,18 @@ class AppConfirmDialog extends StatelessWidget {
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
-      contentPadding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXXL, ThemeConstants.paddingXL, ThemeConstants.paddingXXL, ThemeConstants.paddingS),
-      actionsPadding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingM, ThemeConstants.paddingXL, ThemeConstants.paddingL),
+      contentPadding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingXXL,
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingXXL,
+        ThemeConstants.paddingS,
+      ),
+      actionsPadding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingL,
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -130,11 +140,7 @@ class AppConfirmDialog extends StatelessWidget {
         ],
       ),
       actionsAlignment: MainAxisAlignment.center,
-      actions: [
-        Row(
-          children: _buildButtons(context, isLoading, showCancel),
-        ),
-      ],
+      actions: [Row(children: _buildButtons(context, isLoading, showCancel))],
     );
   }
 
@@ -147,7 +153,9 @@ class AppConfirmDialog extends StatelessWidget {
       child: AppButton(
         label: cancelLabel,
         variant: swapButtonEmphasis
-            ? (isDestructive ? AppButtonVariant.danger : AppButtonVariant.primary)
+            ? (isDestructive
+                  ? AppButtonVariant.danger
+                  : AppButtonVariant.primary)
             : AppButtonVariant.outline,
         color: swapButtonEmphasis ? null : context.cs.onSurfaceVariant,
         height: 38,
@@ -160,7 +168,9 @@ class AppConfirmDialog extends StatelessWidget {
         label: confirmLabel,
         variant: swapButtonEmphasis
             ? AppButtonVariant.outline
-            : (isDestructive ? AppButtonVariant.danger : AppButtonVariant.primary),
+            : (isDestructive
+                  ? AppButtonVariant.danger
+                  : AppButtonVariant.primary),
         color: swapButtonEmphasis ? context.cs.onSurfaceVariant : null,
         height: 38,
         fontSize: 12,

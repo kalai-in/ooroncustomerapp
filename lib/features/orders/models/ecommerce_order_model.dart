@@ -4,7 +4,7 @@ import 'package:customer/commons/models/surge_charges_model.dart';
 import 'package:customer/commons/models/tax_charges_model.dart';
 import 'package:customer/features/orders/models/order_address_model.dart';
 import 'package:customer/features/orders/models/order_model.dart'
-    show ItemRating, VariantAttributes;
+    show ItemRating, OrderPickupStore, VariantAttributes;
 import 'package:customer/utils/json_parsers.dart';
 
 class EcommerceOrderModel {
@@ -107,6 +107,11 @@ class EcommerceOrderDataModel {
   String? orderItemStatus;
   String? prescriptionUrl;
 
+  /// 'delivery' | 'pickup'. `pickupStore` is null for delivery orders.
+  String? deliveryType;
+  OrderPickupStore? pickupStore;
+  String? estimatedDeliveryDate;
+
   EcommerceOrderDataModel({
     this.id,
     this.userId,
@@ -172,6 +177,9 @@ class EcommerceOrderDataModel {
     this.trackingUrl,
     this.orderItemStatus,
     this.prescriptionUrl,
+    this.deliveryType,
+    this.pickupStore,
+    this.estimatedDeliveryDate,
   });
 
   EcommerceOrderDataModel.fromJson(Map<String, dynamic> json) {
@@ -202,7 +210,9 @@ class EcommerceOrderDataModel {
     taxPercentage = parseDouble(json['tax_percentage']);
     subTotal = parseDouble(json['sub_total']);
     deliveryCharge = json['delivery_charges'] is Map<String, dynamic>
-        ? DeliveryCharges.fromJson(json['delivery_charges'] as Map<String, dynamic>)
+        ? DeliveryCharges.fromJson(
+            json['delivery_charges'] as Map<String, dynamic>,
+          )
         : null;
     final rawAdditionalCharges = json['additional_charges'];
     if (rawAdditionalCharges is List) {
@@ -284,6 +294,13 @@ class EcommerceOrderDataModel {
     trackingUrl = parseString(json['tracking_url']) ?? "";
     orderItemStatus = parseString(json['order_item_status']) ?? "";
     prescriptionUrl = parseString(json['prescription_url']) ?? "";
+    deliveryType = parseString(json['delivery_type']);
+    pickupStore = json['pickup_store'] is Map<String, dynamic>
+        ? OrderPickupStore.fromJson(
+            json['pickup_store'] as Map<String, dynamic>,
+          )
+        : null;
+    estimatedDeliveryDate = parseString(json['estimated_delivery_date']);
   }
 
   Map<String, dynamic> toJson() {
@@ -372,6 +389,9 @@ class EcommerceOrderDataModel {
     data['tracking_url'] = trackingUrl;
     data['order_item_status'] = orderItemStatus;
     data['prescription_url'] = prescriptionUrl;
+    data['delivery_type'] = deliveryType;
+    data['pickup_store'] = pickupStore?.toJson();
+    data['estimated_delivery_date'] = estimatedDeliveryDate;
     return data;
   }
 }

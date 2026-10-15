@@ -36,10 +36,6 @@ class LanguageRepository {
         ApiEndpoints.systemLanguages,
         queryParameters: {ApiParameters.systemType: '1', ApiParameters.id: id},
       );
-      /* final json = response as Map<String, dynamic>;
-      final list = json['data'] as List<dynamic>? ?? [];
-      if (list.isEmpty) throw ApiException(message: 'Language not found');
-      return Data.fromJson(list.first as Map<String, dynamic>); */
       final json = response as Map<String, dynamic>;
 
       final data = json['data'];

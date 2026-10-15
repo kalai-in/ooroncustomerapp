@@ -58,7 +58,9 @@ class _CheckoutPaymentPickerScreenState
           }
           if (state is PaymentMethodsError) {
             return Padding(
-              padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXL),
+              padding: const EdgeInsetsDirectional.all(
+                ThemeConstants.paddingXL,
+              ),
               child: Row(
                 children: [
                   AppSvgIcon(
@@ -82,11 +84,18 @@ class _CheckoutPaymentPickerScreenState
           }
           if (state is PaymentMethodsLoaded) {
             final methods = state.methods
-                .where((m) => m.type != PaymentGatewayType.cod || widget.codAllowed)
+                .where(
+                  (m) => m.type != PaymentGatewayType.cod || widget.codAllowed,
+                )
                 .toList();
             return ListView.separated(
               controller: _scrollController,
-              padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingL, ThemeConstants.paddingXL, ThemeConstants.paddingXL),
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                ThemeConstants.paddingXL,
+                ThemeConstants.paddingL,
+                ThemeConstants.paddingXL,
+                ThemeConstants.paddingXL,
+              ),
               itemCount: methods.length,
               separatorBuilder: (_, _) => AppSpacing.h8,
               itemBuilder: (_, i) {

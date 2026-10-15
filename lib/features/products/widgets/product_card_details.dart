@@ -55,7 +55,8 @@ class ProductCardDetails extends StatelessWidget {
   static double strikeFontSize(bool isCompact) => isCompact ? 10.0 : 12.0;
   static double discountFontSize(bool isCompact) => isCompact ? 11.0 : 13.0;
   static double nameFontSize(bool isCompact) => isCompact ? 11.5 : 13.5;
-  static double starSize(bool isCompact) => isCompact ? ThemeConstants.iconXXS : ThemeConstants.iconXS;
+  static double starSize(bool isCompact) =>
+      isCompact ? ThemeConstants.iconXXS : ThemeConstants.iconXS;
   static double ratingFontSize(bool isCompact) => isCompact ? 9.5 : 11.5;
   static double timeFontSize(bool isCompact) => isCompact ? 9.5 : 11.0;
   static double timeIconSize(bool isCompact) => isCompact ? 10.0 : 12.0;
@@ -130,9 +131,7 @@ class ProductCardDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final textColor = context.cs.onSurface;
     final subColor = context.cs.onSurfaceVariant;
-    final mutedColor = isDark
-        ? context.cs.onSurfaceVariant
-        : context.cs.onSurfaceVariant;
+    final mutedColor = context.cs.onSurfaceVariant;
     final decimalPoint = product.decimalPoint ?? 2;
 
     final priceFontSize = ProductCardDetails.priceFontSize(isCompact);
@@ -145,7 +144,9 @@ class ProductCardDetails extends StatelessWidget {
     final timeIconSize = ProductCardDetails.timeIconSize(isCompact);
 
     return Padding(
-      padding: EdgeInsetsDirectional.only(top: isCompact ? ThemeConstants.paddingXS : ThemeConstants.paddingXS),
+      padding: EdgeInsetsDirectional.only(
+        top: isCompact ? ThemeConstants.paddingXS : ThemeConstants.paddingXS,
+      ),
       child: Column(
         mainAxisSize: .min,
         crossAxisAlignment: .start,
@@ -238,7 +239,11 @@ class ProductCardDetails extends StatelessWidget {
           if (product.isMinAlert == true ||
               product.timeToDeliver?.isNotEmpty == true)
             Padding(
-              padding: EdgeInsetsDirectional.only(top: isCompact ? ThemeConstants.paddingXS : ThemeConstants.paddingXS),
+              padding: EdgeInsetsDirectional.only(
+                top: isCompact
+                    ? ThemeConstants.paddingXS
+                    : ThemeConstants.paddingXS,
+              ),
               child: Row(
                 children: [
                   if (product.timeToDeliver?.isNotEmpty == true) ...[

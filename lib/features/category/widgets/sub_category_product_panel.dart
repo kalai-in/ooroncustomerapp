@@ -1,11 +1,11 @@
 import 'package:customer/commons/cubit/base_pagination_cubit.dart';
 import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/commons/widgets/empty_state_widget.dart';
-import 'package:customer/commons/widgets/loading_widget.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/features/products/models/product_model.dart';
 import 'package:customer/features/products/widgets/product_card.dart';
 import 'package:customer/features/products/widgets/product_card_grid.dart';
+import 'package:customer/features/products/widgets/product_card_skeleton.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/core/constants/theme_constants.dart';
@@ -47,7 +47,12 @@ class SubCategoryProductPanel extends StatelessWidget {
           child: ProductCardGrid(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingS, ThemeConstants.paddingXS, ThemeConstants.paddingS, ThemeConstants.paddingS),
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              ThemeConstants.paddingS,
+              ThemeConstants.paddingXS,
+              ThemeConstants.paddingS,
+              ThemeConstants.paddingS,
+            ),
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 8 * (isTablet ? 1.75 : 1.0),
             mainAxisSpacing: 12 * (isTablet ? 1.75 : 1.0),
@@ -63,9 +68,21 @@ class SubCategoryProductPanel extends StatelessWidget {
         ),
         if (state.isFetchingMore)
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXL),
-              child: LoadingWidget(),
+            child: ProductCardGrid(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                ThemeConstants.paddingS,
+                0,
+                ThemeConstants.paddingS,
+                ThemeConstants.paddingS,
+              ),
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 8 * (isTablet ? 1.75 : 1.0),
+              mainAxisSpacing: 12 * (isTablet ? 1.75 : 1.0),
+              itemCount: crossAxisCount,
+              itemBuilder: (context, index, cardWidth) =>
+                  const ProductCardSkeleton(),
             ),
           )
         else

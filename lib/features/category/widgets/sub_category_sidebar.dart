@@ -98,20 +98,28 @@ class SidebarItem extends StatelessWidget {
                       color: isSelected
                           ? context.cs.primary.withValues(alpha: 0.08)
                           : unselectedAvatarBg,
-                      border: isSelected
-                          ? Border.all(
-                              color: context.cs.primary.withValues(alpha: 0.4),
-                              width: 1.5,
-                            )
-                          : null,
                     ),
                     child: Center(
-                      child: AnimatedContainer(
+                      // Animates via scale, not the box's own width/height.
+                      // AppNetworkImage gets explicit width/height (below) so
+                      // it skips its own LayoutBuilder-derived sizing — that
+                      // ambient-constraint path would otherwise pick up
+                      // whatever this Container's actual available space is
+                      // at the moment (56, or 53 once the selected border's
+                      // implicit inset eats into it), recomputing
+                      // memCacheWidth/Height on every selection change and
+                      // flashing the placeholder each time the decode cache
+                      // key shifts. A fixed size passed directly is immune to
+                      // that regardless of what the ancestor box does.
+                      child: AnimatedScale(
                         duration: const Duration(milliseconds: 350),
                         curve: isSelected ? Curves.elasticOut : Curves.easeOut,
-                        width: isSelected ? 58 : 28,
-                        height: isSelected ? 58 : 28,
-                        child: AppNetworkImage(url: category.imageUrl ?? ''),
+                        scale: isSelected ? 1.0 : 28 / 58,
+                        child: AppNetworkImage(
+                          url: category.imageUrl ?? '',
+                          width: 50,
+                          height: 50,
+                        ),
                       ),
                     ),
                   ),

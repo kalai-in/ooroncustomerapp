@@ -149,21 +149,33 @@ class _AddressScreenState extends State<AddressScreen> {
         ListView.builder(
           controller: _pager.controller,
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingM,
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+          ),
           itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == state.data.length) {
               return PaginatedListFooter(
                 isLoadingMore: state.isFetchingMore,
                 hasMore: state.hasMore,
+                skeletonBuilder: (_) => const AddressListSkeletonLoader(
+                  itemCount: 1,
+                  shrinkWrap: true,
+                ),
               );
             }
             return Padding(
-              padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
+              padding: const EdgeInsetsDirectional.only(
+                bottom: ThemeConstants.paddingS,
+              ),
               child: AddressCard(
                 address: state.data[index],
                 onEdit: () => _goToEdit(state.data[index]),
-                onDelete: () => confirmDeleteAddress(context, state.data[index]),
+                onDelete: () =>
+                    confirmDeleteAddress(context, state.data[index]),
               ),
             );
           },

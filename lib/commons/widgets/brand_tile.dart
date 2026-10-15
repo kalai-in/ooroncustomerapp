@@ -8,7 +8,7 @@ import 'package:customer/utils/extensions/context_extensions.dart';
 
 enum BrandTileShape { roundedSquare, circle }
 
-// Shared tile for HomeBrandBlock's horizontal/grid (roundedSquare) and
+// Shared tile for BrandBlock's horizontal/grid (roundedSquare) and
 // circular layouts. `size` means box width/height for roundedSquare, and
 // CircleAvatar radius for circle — same meaning as the caller's existing
 // tileSize / circleRadius values, so no conversion needed at call sites.

@@ -10,8 +10,13 @@ import 'package:flutter/material.dart';
 /// FAQ list doesn't jump layout once real tiles swap in.
 class FaqListSkeletonLoader extends StatelessWidget {
   final int itemCount;
+  final bool shrinkWrap;
 
-  const FaqListSkeletonLoader({super.key, this.itemCount = 8});
+  const FaqListSkeletonLoader({
+    super.key,
+    this.itemCount = 8,
+    this.shrinkWrap = false,
+  });
 
   Widget _tile(BuildContext context, Color color, double width) {
     return Container(
@@ -36,8 +41,14 @@ class FaqListSkeletonLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerBuilder(
       builder: (context, color) => ListView.builder(
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+        ),
         physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: shrinkWrap,
         itemCount: itemCount,
         itemBuilder: (_, index) =>
             _tile(context, color, index.isEven ? double.infinity : 200),

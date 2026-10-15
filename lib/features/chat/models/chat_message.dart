@@ -120,8 +120,15 @@ class ChatMessage {
   /// Parses the REST shape: `attachment` (storage path), `attachment_url` (full url),
   /// `created_at` (timestamp). Falls back to the socket shape (`timestamp`, nested
   /// `attachment` object) when those fields are absent.
+  /// This app always represents a customer — sender ids aren't unique across
+  /// roles (e.g. admin id 1 and customer id 1 are different people that
+  /// collide numerically), so `isMe` must also require the sender role to be
+  /// `customer`, not just a matching id.
+  static const String ownSenderType = 'customer';
+
   factory ChatMessage.fromJson(Map<String, dynamic> json, int myId) {
     final senderId = int.tryParse(json['sender_id']?.toString() ?? '') ?? 0;
+    final senderType = json['sender_type']?.toString() ?? '';
     ChatAttachment? attachment;
     final attachmentUrl = json['attachment_url']?.toString();
     if (attachmentUrl != null && attachmentUrl.isNotEmpty) {
@@ -140,12 +147,12 @@ class ChatMessage {
           json['id']?.toString() ??
           DateTime.now().millisecondsSinceEpoch.toString(),
       senderId: senderId,
-      senderType: json['sender_type']?.toString() ?? '',
+      senderType: senderType,
       message: json['message']?.toString() ?? '',
       timestamp: dateRaw != null
           ? _parseServerTimestamp(dateRaw.toString()) ?? DateTime.now()
           : DateTime.now(),
-      isMe: senderId == myId,
+      isMe: senderId == myId && senderType == ownSenderType,
       attachment: attachment,
     );
   }

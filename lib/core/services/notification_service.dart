@@ -84,7 +84,8 @@ class NotificationService {
   /// `type: "url"` + `id` fields.
   String? _extractUrl(String? title, String? body) {
     final match =
-        _urlPattern.firstMatch(title ?? '') ?? _urlPattern.firstMatch(body ?? '');
+        _urlPattern.firstMatch(title ?? '') ??
+        _urlPattern.firstMatch(body ?? '');
     return match?.group(0);
   }
 
@@ -218,7 +219,8 @@ class NotificationService {
       return false;
     }
     final conversationId =
-        message.data['conversation_id'] as String? ?? message.data['id'] as String?;
+        message.data['conversation_id'] as String? ??
+        message.data['id'] as String?;
     final active = ChatCubit.active;
     if (active == null ||
         conversationId == null ||

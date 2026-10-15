@@ -1,5 +1,6 @@
 import 'package:customer/core/api/api_exception.dart';
 import 'package:customer/features/cart/models/cart_model.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 import 'package:customer/features/cart/repositories/cart_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:customer/core/localization/services/localization_service.dart';
@@ -36,6 +37,8 @@ class CartFetchCubit extends Cubit<CartFetchState> {
     String? latitude,
     String? longitude,
     String? addressId,
+    // Passed through untouched; omit to keep existing delivery-only behavior.
+    DeliveryType? deliveryType,
   }) async {
     try {
       emit(CartFetchLoading());
@@ -43,6 +46,7 @@ class CartFetchCubit extends Cubit<CartFetchState> {
         latitude: latitude,
         longitude: longitude,
         addressId: addressId,
+        deliveryType: deliveryType,
       );
       emit(CartFetchLoaded(result));
     } on ApiException catch (e) {

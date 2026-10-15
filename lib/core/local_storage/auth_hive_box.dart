@@ -18,7 +18,7 @@ class AuthHiveBox {
     await _box.putAll({
       kToken: token,
       kIsLoggedIn: true,
-      kUserId: data?.id ?? '',
+      kUserId: data?.id ?? 0,
       kUserName: data?.name ?? '',
       kUserMobile: data?.mobile ?? '',
       kUserEmail: data?.email ?? '',
@@ -104,7 +104,7 @@ class AuthHiveBox {
 
     await _box.putAll({
       kIsLoggedIn: true,
-      kUserId: mergedData.id ?? existingData?.id ?? '',
+      kUserId: mergedData.id ?? existingData?.id ?? 0,
       kUserName: mergedData.name ?? '',
       kUserMobile: mergedData.mobile ?? '',
       kUserEmail: mergedData.email ?? '',

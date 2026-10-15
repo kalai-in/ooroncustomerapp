@@ -1,5 +1,6 @@
 enum PromoDiscountType {
   flat,
+  percentage,
   freeDelivery,
   unknown;
 
@@ -7,6 +8,8 @@ enum PromoDiscountType {
     switch (raw) {
       case 'flat':
         return PromoDiscountType.flat;
+      case 'percentage':
+        return PromoDiscountType.percentage;
       case 'free_delivery':
         return PromoDiscountType.freeDelivery;
       default:

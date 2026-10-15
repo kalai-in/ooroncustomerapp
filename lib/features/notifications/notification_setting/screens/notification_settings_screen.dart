@@ -203,7 +203,12 @@ class _NotifTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingXS, ThemeConstants.paddingL, ThemeConstants.paddingM),
+      margin: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingXS,
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingM,
+      ),
       padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
       height: 44,
       decoration: AppDecorations.box(
@@ -295,7 +300,12 @@ class _ChannelListState extends State<_ChannelList> {
       child: ListView.builder(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+        ),
         itemCount: statuses.length,
         itemBuilder: (context, index) {
           final category = statuses[index];
@@ -313,7 +323,10 @@ class _ChannelListState extends State<_ChannelList> {
             children: [
               if (category.category != null)
                 Padding(
-                  padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingS, bottom: ThemeConstants.paddingS),
+                  padding: const EdgeInsetsDirectional.only(
+                    top: ThemeConstants.paddingS,
+                    bottom: ThemeConstants.paddingS,
+                  ),
                   child: AppText(
                     category.category!,
                     style: context.tt.bodyMedium?.copyWith(

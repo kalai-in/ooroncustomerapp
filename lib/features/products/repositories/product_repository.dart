@@ -307,6 +307,46 @@ class ProductRepository {
     }
   }
 
+  Future<String> notifyMe({required String productVariantId}) async {
+    try {
+      final lat = SettingsHiveBox.instance.userLatitude;
+      final lng = SettingsHiveBox.instance.userLongitude;
+      final params = <String, dynamic>{
+        ApiParameters.productVariantId: productVariantId,
+        ApiParameters.latitude: lat,
+        ApiParameters.longitude: lng,
+      };
+      final response = await _apiClient.post(
+        ApiEndpoints.notifyMe,
+        queryParameters: params,
+      );
+      final map = response as Map<String, dynamic>;
+      return map['message']?.toString() ?? '';
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  Future<String> removeNotifyMe({required String productVariantId}) async {
+    try {
+      final formData = FormData.fromMap({
+        ApiParameters.productVariantId: productVariantId,
+      });
+      final response = await _apiClient.post(
+        ApiEndpoints.removeNotifyMe,
+        data: formData,
+      );
+      final map = response as Map<String, dynamic>;
+      return map['message']?.toString() ?? '';
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
   Future<RatingImages> getRatingImages({
     required int offset,
     required int limit,

@@ -38,7 +38,12 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       ),
       body: ListView(
         controller: _scrollController,
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingXXL+ThemeConstants.paddingXS),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingXXL + ThemeConstants.paddingXS,
+        ),
         children: [
           MenuCard(
             title: context.translate(LanguageLabelKeys.general),

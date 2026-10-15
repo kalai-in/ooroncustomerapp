@@ -16,10 +16,13 @@ class TransactionListSkeletonLoader extends StatelessWidget {
   /// uses a shadowed one — matches whichever real tile is being mirrored.
   final bool outlined;
 
+  final bool shrinkWrap;
+
   const TransactionListSkeletonLoader({
     super.key,
     this.itemCount = 6,
     this.outlined = false,
+    this.shrinkWrap = false,
   });
 
   Widget _tile(BuildContext context, Color color) {
@@ -75,8 +78,14 @@ class TransactionListSkeletonLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerBuilder(
       builder: (context, color) => ListView.builder(
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+        ),
         physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: shrinkWrap,
         itemCount: itemCount,
         itemBuilder: (_, _) => _tile(context, color),
       ),

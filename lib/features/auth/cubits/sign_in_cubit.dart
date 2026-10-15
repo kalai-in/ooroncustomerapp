@@ -191,11 +191,7 @@ class SignInCubit extends Cubit<SignInState> {
       _onLoginSuccess(user, AppConstants.loginMethodEmailPassword);
       emit(SignInLoaded(user));
     } on ApiException catch (e) {
-      /* if (_isUserNotFound(e)) {
-        emit(SignInUserNotFound(email: id));
-      } else { */
       emit(SignInError(e.message));
-      /* } */
     } catch (error, stack) {
       CrashlyticsService.instance.recordError(
         error,

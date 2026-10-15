@@ -5,6 +5,7 @@ import 'package:customer/utils/extensions/num_extensions.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/features/cart/cubit/cart_cubit.dart';
 import 'package:customer/commons/widgets/cart_button.dart';
+import 'package:customer/commons/widgets/notify_me_button.dart';
 import 'package:customer/features/products/models/product_detail_model.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
@@ -12,7 +13,6 @@ import 'package:customer/utils/extensions/size_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:customer/commons/widgets/app_text.dart';
-import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/core/constants/theme_constants.dart';
@@ -64,11 +64,15 @@ class ProductDetailBottomBar extends StatelessWidget {
     final outOfStock = !isUnlimited && stock <= 0;
     final isStoreClosedQuick = SettingsHiveBox.instance.isStoreClosedQuick;
 
-    final bottomSafe =
-        context.bottomSafePadding * bottomInsetFraction;
+    final bottomSafe = context.bottomSafePadding * bottomInsetFraction;
 
     return Container(
-      padding: EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, bottomSafe + ThemeConstants.paddingM),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingL,
+        bottomSafe + ThemeConstants.paddingM,
+      ),
       decoration: AppDecorations.box(
         color: context.cs.surface,
         border: Border(
@@ -121,21 +125,13 @@ class ProductDetailBottomBar extends StatelessWidget {
           ),
           AppSpacing.w16,
           if (outOfStock)
-            Container(
+            NotifyMeButton(
+              key: ValueKey('notify_detail_btn_${product.id}_${activeV?.id}'),
+              productVariantId: activeV?.id?.toString() ?? '',
               width: 100,
               height: 44,
-              decoration: AppDecorations.box(
-                color: context.cs.inverseSurface,
-                borderRadius: AppRadius.r10,
-              ),
-              alignment: Alignment.center,
-              child: AppText(
-                context.translate(LanguageLabelKeys.soldOut),
-                style: context.tt.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: context.cs.onInverseSurface,
-                ),
-              ),
+              fontSize: 14,
+              initiallyNotified: activeV?.isNotified ?? false,
             )
           else
             BlocBuilder<CartCubit, CartState>(

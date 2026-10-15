@@ -50,7 +50,12 @@ class ChatSkeletonLoader extends StatelessWidget {
 
     return ShimmerBuilder(
       builder: (context, color) => ListView.builder(
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, ThemeConstants.paddingM, ThemeConstants.paddingM, ThemeConstants.paddingS),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingS,
+        ),
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
         itemBuilder: (_, index) =>

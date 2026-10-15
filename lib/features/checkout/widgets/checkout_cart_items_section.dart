@@ -4,8 +4,6 @@ import 'package:customer/utils/extensions/num_extensions.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:customer/commons/widgets/app_text.dart';
-import 'package:customer/commons/widgets/app_confirm_dialog.dart';
-
 import 'package:customer/features/cart/cubit/cart_cubit.dart';
 import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/core/local_storage/auth_hive_box.dart';
@@ -16,6 +14,7 @@ import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/features/cart/cubit/cart_action_cubit.dart';
 import 'package:customer/features/cart/models/cart_model.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 import 'package:customer/features/checkout/widgets/checkout_delivery_eta_section.dart';
 import 'package:customer/features/checkout/widgets/checkout_prescription_tile.dart';
 import 'package:customer/features/checkout/widgets/checkout_shared_widgets.dart';
@@ -40,6 +39,7 @@ class CheckoutCartItemsSection extends StatelessWidget {
     this.onPrescriptionPicked,
     this.onPrescriptionRemoved,
     this.prescriptionKeyOf,
+    this.onAddMoreItems,
   });
 
   final CartData cartData;
@@ -52,73 +52,29 @@ class CheckoutCartItemsSection extends StatelessWidget {
   final void Function(String variantId)? onPrescriptionRemoved;
   final GlobalKey Function(String variantId)? prescriptionKeyOf;
 
+  // "Forgot something? Add More Items" tap — destination to be wired once
+  // decided (e.g. back to the product listing / cart).
+  final VoidCallback? onAddMoreItems;
+
   @override
   Widget build(BuildContext context) {
     final items = cartData.cart ?? [];
+    // Cart response's own delivery_type reflects the mode it was actually
+    // priced in (server may have fallen back from what was requested), so
+    // this reads straight off cartData rather than a separately-tracked flag.
+    final isPickup =
+        DeliveryType.fromApiValue(cartData.deliveryType) == DeliveryType.pickup;
     return CheckoutCard(
       child: Column(
         crossAxisAlignment: .start,
         children: [
-          Row(
-            crossAxisAlignment: .start,
-            children: [
-              Expanded(
-                child: CheckoutDeliveryEtaSection(
-                  distance: cartData.distance,
-                  timeToDeliver: cartData.timeToDeliver,
-                  estimatedDeliveryDate: cartData.estimatedDeliveryDate,
-                  itemCount: items.length,
-                ),
-              ),
-              InkWell(
-                borderRadius: AppRadius.r8,
-                onTap: () async {
-                  final cartActionCubit = context.read<CartActionCubit>();
-                  final cartCubit = context.read<CartCubit>();
-                  final confirmed = await AppConfirmDialog.show(
-                    context: context,
-                    icon: AppConfirmDialogIcon.danger,
-                    isDestructive: true,
-                    title: context.translate(LanguageLabelKeys.clearCart),
-                    message: context.translate(
-                      LanguageLabelKeys.clearCartConfirm,
-                    ),
-                    cancelLabel: context.translate(LanguageLabelKeys.cancel),
-                    confirmLabel: context.translate(LanguageLabelKeys.clear),
-                  );
-                  if (confirmed == true) {
-                    if (AuthHiveBox.instance.isLoggedIn) {
-                      cartActionCubit.clearCart();
-                    }
-                    cartCubit.clear();
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: ThemeConstants.paddingXS,
-                    vertical: ThemeConstants.paddingXS,
-                  ),
-                  child: Row(
-                    mainAxisSize: .min,
-                    spacing: ThemeConstants.spaceXS,
-                    children: [
-                      AppSvgIcon(
-                        AssetsConstants.deleteIcon,
-                        size: ThemeConstants.iconXS,
-                        color: context.cs.error,
-                      ),
-                      AppText(
-                        context.translate(LanguageLabelKeys.clearCart),
-                        style: context.tt.labelMedium?.copyWith(
-                          color: context.cs.error,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          CheckoutDeliveryEtaSection(
+            distance: cartData.distance,
+            timeToDeliver: cartData.timeToDeliver,
+            estimatedDeliveryDate: cartData.estimatedDeliveryDate,
+            itemCount: items.length,
+            isPickup: isPickup,
+            pickupPreparationTime: cartData.pickup?.preparationTime,
           ),
           Divider(height: 0.5),
           AppSpacing.h12,
@@ -148,13 +104,40 @@ class CheckoutCartItemsSection extends StatelessWidget {
                       Divider(
                         height: 20,
                         thickness: 1,
-                        color: context.cs.outline.withValues(alpha: 0.1),
+                        color: context.cs.outlineVariant,
                       ),
                   ],
                 );
               },
             );
           }),
+          AppSpacing.h12,
+          Divider(height: 0.5),
+          AppSpacing.h12,
+          InkWell(
+            borderRadius: AppRadius.r8,
+            onTap: onAddMoreItems,
+            child: Row(
+              mainAxisAlignment: .center,
+              mainAxisSize: .max,
+              children: [
+                AppText(
+                  context.translate(LanguageLabelKeys.forgotSomething),
+                  style: context.tt.bodyMedium?.copyWith(
+                    color: context.cs.onSurface,
+                  ),
+                ),
+                AppSpacing.w4,
+                AppText(
+                  context.translate(LanguageLabelKeys.addMoreItems),
+                  style: context.tt.bodyMedium?.copyWith(
+                    color: context.cs.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -230,6 +213,7 @@ class CheckoutCartItemTile extends StatelessWidget {
                         borderRadius: AppRadius.r10,
                         child: Container(
                           decoration: AppDecorations.box(
+                            color: context.cs.surfaceContainer,
                             border: Border.all(
                               color: context.cs.outline.withValues(alpha: 0.12),
                             ),
@@ -242,6 +226,7 @@ class CheckoutCartItemTile extends StatelessWidget {
                                 '',
                             width: imgSize,
                             height: imgSize,
+                            fit: BoxFit.contain,
                             memCacheWidth: 144,
                             memCacheHeight: 144,
                             borderRadius: AppRadius.r10,
@@ -278,14 +263,15 @@ class CheckoutCartItemTile extends StatelessWidget {
                     ],
                   ),
                   Expanded(
-                    child: Column(
+                    child: Row(
                       crossAxisAlignment: .start,
                       children: [
-                        Row(
-                          crossAxisAlignment: .start,
-                          children: [
-                            Expanded(
-                              child: AppText(
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: .start,
+                            mainAxisSize: .min,
+                            children: [
+                              AppText(
                                 item.name ?? '',
                                 style: context.tt.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
@@ -294,88 +280,52 @@ class CheckoutCartItemTile extends StatelessWidget {
                                 maxLines: 2,
                                 overflow: .ellipsis,
                               ),
-                            ),
-                            InkWell(
-                              borderRadius: AppRadius.r8,
-                              onTap: () => _removeItem(context, item),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.only(
-                                  start: ThemeConstants.paddingS,
-                                ),
-                                child: AppSvgIcon(
-                                  AssetsConstants.closeIcon,
-                                  size: ThemeConstants.iconXS,
-                                  color: context.cs.onSurface,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (variant.isNotEmpty) ...[
-                          AppSpacing.h4,
-                          Container(
-                            padding: const EdgeInsetsDirectional.symmetric(
-                              horizontal: ThemeConstants.paddingS,
-                              vertical: ThemeConstants.paddingXS,
-                            ),
-                            decoration: AppDecorations.box(
-                              color: context.cs.surfaceContainerHighest
-                                  .withValues(alpha: 0.5),
-                              borderRadius: AppRadius.r6,
-                            ),
-                            child: AppText(
-                              variant,
-                              style: context.tt.labelSmall?.copyWith(
-                                color: context.cs.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              maxLines: 1,
-                              overflow: .ellipsis,
-                            ),
-                          ),
-                        ],
-                        if (slabMessage.isNotEmpty) ...[
-                          AppSpacing.h6,
-                          Row(
-                            mainAxisSize: .min,
-                            spacing: ThemeConstants.spaceXS,
-                            children: [
-                              AppSvgIcon(
-                                AssetsConstants.offerIcon,
-                                color: context.cs.onSecondaryContainer,
-                                size: ThemeConstants.iconXS,
-                              ),
-                              Flexible(
-                                child: AppText(
-                                  slabMessage,
-                                  style: context.tt.labelSmall?.copyWith(
-                                    color: context.cs.onSecondaryContainer,
-                                    fontWeight: FontWeight.w700,
+                              if (variant.isNotEmpty) ...[
+                                AppSpacing.h4,
+                                AppText(
+                                  variant,
+                                  style: context.tt.bodySmall?.copyWith(
+                                    color: context.cs.onSurfaceVariant,
                                   ),
                                   maxLines: 1,
                                   overflow: .ellipsis,
                                 ),
-                              ),
+                              ],
                             ],
                           ),
-                        ],
-                        AppSpacing.h10,
-                        Row(
+                        ),
+                        AppSpacing.w8,
+                        Column(
+                          crossAxisAlignment: .end,
+                          mainAxisSize: .min,
                           children: [
+                            if (isOutOfStock)
+                              InkWell(
+                                borderRadius: AppRadius.r8,
+                                onTap: () => _removeItem(context, item),
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                    start: ThemeConstants.paddingS,
+                                  ),
+                                  child: AppSvgIcon(
+                                    AssetsConstants.closeIcon,
+                                    size: ThemeConstants.iconXS,
+                                    color: context.cs.onSurface,
+                                  ),
+                                ),
+                              )
+                            else
+                              CheckoutQtyControl(item: item),
+                            AppSpacing.h2,
                             BlocSelector<CartCubit, CartState, int>(
-                              selector: (state) =>
-                                  state.countFor(resolveCheckoutVariantId(item)),
+                              selector: (state) => state.countFor(
+                                resolveCheckoutVariantId(item),
+                              ),
                               builder: (context, qty) => Row(
                                 crossAxisAlignment: .center,
-                                spacing: ThemeConstants.spaceS,
+                                spacing: ThemeConstants.spaceXS,
                                 children: [
-                                  AppText(
-                                    '${item.currency}${(displayPrice * qty).formatPrice(dp)}',
-                                    style: context.tt.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  if (hasDiscount) ...[
+                                  if (hasDiscount)
                                     AppText(
                                       '${item.currency}${(price * qty).formatPrice(dp)}',
                                       style: context.tt.bodySmall?.copyWith(
@@ -385,12 +335,15 @@ class CheckoutCartItemTile extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                  ],
+                                  AppText(
+                                    '${item.currency}${(displayPrice * qty).formatPrice(dp)}',
+                                    style: context.tt.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                            const Spacer(),
-                            if (!isOutOfStock) CheckoutQtyControl(item: item),
                           ],
                         ),
                       ],
@@ -401,13 +354,55 @@ class CheckoutCartItemTile extends StatelessWidget {
             ),
           ],
         ),
+        if (slabMessage.isNotEmpty)
+          Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: imgSize + ThemeConstants.spaceM,
+            ),
+            child: InkWell(
+              borderRadius: AppRadius.r8,
+              onTap: () {},
+              child: Row(
+                mainAxisSize: .min,
+                spacing: ThemeConstants.spaceXS,
+                children: [
+                  AppSvgIcon(
+                    AssetsConstants.lockIcon,
+                    color: context.cs.onSecondaryContainer,
+                    size: ThemeConstants.iconXS,
+                  ),
+                  Flexible(
+                    child: AppText(
+                      slabMessage,
+                      style: context.tt.labelSmall?.copyWith(
+                        color: context.cs.onSecondaryContainer,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: .ellipsis,
+                    ),
+                  ),
+                  AppSvgIcon(
+                    AssetsConstants.arrowRightIcon,
+                    color: context.cs.onSecondaryContainer,
+                    size: ThemeConstants.iconXS,
+                  ),
+                ],
+              ),
+            ),
+          ),
         if (showPrescription)
-          CheckoutPrescriptionTile(
-            key: prescriptionKey,
-            item: item,
-            file: prescriptionFile,
-            onPicked: onPrescriptionPicked!,
-            onRemove: onPrescriptionRemoved ?? () {},
+          Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: imgSize + ThemeConstants.spaceM,
+            ),
+            child: CheckoutPrescriptionTile(
+              key: prescriptionKey,
+              item: item,
+              file: prescriptionFile,
+              onPicked: onPrescriptionPicked!,
+              onRemove: onPrescriptionRemoved ?? () {},
+            ),
           ),
       ],
     );
@@ -565,24 +560,21 @@ class _CheckoutQtyControlState extends State<CheckoutQtyControl>
     return ScaleTransition(
       scale: _scaleAnim,
       child: Container(
-        height: 32,
-        // Same surface as CartButton's stepper, with a softer lift — this
-        // control is shorter (32px) and sits inside a list row.
-        decoration: AppDecorations.cartControl(
-          cs: context.cs,
-          filled: true,
-          softShadow: true,
+        height: 28,
+        decoration: AppDecorations.box(
+          border: Border.all(color: context.cs.primary),
+          borderRadius: AppRadius.r8,
         ),
         child: Row(
           mainAxisSize: .min,
           children: [
             CheckoutQtyBtn(
               icon: AssetsConstants.removeIcon,
-              color: context.cs.onPrimary,
+              color: context.cs.primary,
               onTap: () => _onRemove(context),
             ),
             SizedBox(
-              width: 24,
+              width: 18,
               child: Center(
                 child: BlocSelector<CartCubit, CartState, int>(
                   selector: (state) => state.countFor(_variantId),
@@ -590,7 +582,7 @@ class _CheckoutQtyControlState extends State<CheckoutQtyControl>
                     '$qty',
                     style: context.tt.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: context.cs.onPrimary,
+                      color: context.cs.primary,
                     ),
                   ),
                 ),
@@ -599,8 +591,8 @@ class _CheckoutQtyControlState extends State<CheckoutQtyControl>
             CheckoutQtyBtn(
               icon: AssetsConstants.addIcon,
               color: item.isOutOfStock
-                  ? context.cs.onPrimary.withValues(alpha: 0.35)
-                  : context.cs.onPrimary,
+                  ? context.cs.primary.withValues(alpha: 0.35)
+                  : context.cs.primary,
               onTap: () => _onAdd(context),
             ),
           ],
@@ -628,8 +620,8 @@ class CheckoutQtyBtn extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: ThemeConstants.paddingS,
-          vertical: ThemeConstants.paddingS,
+          horizontal: ThemeConstants.paddingXS,
+          vertical: ThemeConstants.paddingXS,
         ),
         child: AppSvgIcon(icon, size: ThemeConstants.iconXS, color: color),
       ),

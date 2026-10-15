@@ -59,6 +59,16 @@ class CartData {
   String? currency;
   int? decimalPoint;
 
+  // Self-pickup fields (added alongside delivery, both optional — absent /
+  // null on responses from before self-pickup existed).
+  /// Mode this cart was actually priced in ('delivery' | 'pickup'); server
+  /// falls back to whichever mode the store offers if the requested one
+  /// isn't available, so always read this rather than assuming the request.
+  String? deliveryType;
+  int? deliveryAvailable;
+  int? pickupAvailable;
+  CartPickupInfo? pickup;
+
   CartData({
     this.codAllowed,
     this.productVariantId,
@@ -83,6 +93,10 @@ class CartData {
     this.taxBreakdown,
     this.currency,
     this.decimalPoint,
+    this.deliveryType,
+    this.deliveryAvailable,
+    this.pickupAvailable,
+    this.pickup,
   });
 
   CartData.fromJson(Map<String, dynamic> json) {
@@ -97,7 +111,9 @@ class CartData {
     unlockPromoCodeId = parseInt(json['unlock_promo_code_id']);
     isDeliverableAddress = parseInt(json['is_deliverable_address']);
     deliveryCharges = json['delivery_charges'] is Map<String, dynamic>
-        ? DeliveryCharges.fromJson(json['delivery_charges'] as Map<String, dynamic>)
+        ? DeliveryCharges.fromJson(
+            json['delivery_charges'] as Map<String, dynamic>,
+          )
         : null;
     surgeCharges = json['surge_charges'] is List
         ? (json['surge_charges'] as List)
@@ -135,6 +151,13 @@ class CartData {
 
     currency = parseString(json['currency']);
     decimalPoint = parseInt(json['decimal_point']);
+
+    deliveryType = parseString(json['delivery_type']);
+    deliveryAvailable = parseInt(json['delivery_available']);
+    pickupAvailable = parseInt(json['pickup_available']);
+    pickup = json['pickup'] is Map<String, dynamic>
+        ? CartPickupInfo.fromJson(json['pickup'] as Map<String, dynamic>)
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -169,6 +192,80 @@ class CartData {
     }
     data['currency'] = currency;
     data['decimal_point'] = decimalPoint;
+    data['delivery_type'] = deliveryType;
+    data['delivery_available'] = deliveryAvailable;
+    data['pickup_available'] = pickupAvailable;
+    data['pickup'] = pickup?.toJson();
     return data;
+  }
+}
+
+/// Pickup store snapshot returned on the cart response — same store info as
+/// the `zone` API's `store` object, plus per-cart availability/distance.
+class CartPickupInfo {
+  int? available;
+  String? unavailableReason;
+  int? storeId;
+  String? storeName;
+  String? address;
+  double? latitude;
+  double? longitude;
+  String? contactNumber;
+  int? preparationMinutes;
+  String? preparationTime;
+  bool? isOpenNow;
+  double? distance;
+  String? distanceUnit;
+
+  CartPickupInfo({
+    this.available,
+    this.unavailableReason,
+    this.storeId,
+    this.storeName,
+    this.address,
+    this.latitude,
+    this.longitude,
+    this.contactNumber,
+    this.preparationMinutes,
+    this.preparationTime,
+    this.isOpenNow,
+    this.distance,
+    this.distanceUnit,
+  });
+
+  CartPickupInfo.fromJson(Map<String, dynamic> json) {
+    available = parseInt(json['available']);
+    unavailableReason = parseString(json['unavailable_reason']);
+    storeId = parseInt(json['store_id']);
+    storeName = parseString(json['store_name']);
+    address = parseString(json['address']);
+    latitude = parseDoubleOrNull(json['latitude']);
+    longitude = parseDoubleOrNull(json['longitude']);
+    contactNumber = parseString(json['contact_number']);
+    preparationMinutes = parseInt(json['preparation_minutes']);
+    preparationTime = parseString(json['preparation_time']);
+    isOpenNow = json['is_open_now'] is bool
+        ? json['is_open_now'] as bool
+        : null;
+    distance = parseDoubleOrNull(json['distance']);
+    distanceUnit = parseString(json['distance_unit']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'available': available,
+      'unavailable_reason': unavailableReason,
+      'store_id': storeId,
+      'store_name': storeName,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+      'contact_number': contactNumber,
+      'preparation_minutes': preparationMinutes,
+      'preparation_time': preparationTime,
+      'is_open_now': isOpenNow,
+      'distance': distance,
+      'distance_unit': distanceUnit,
+    };
   }
 }

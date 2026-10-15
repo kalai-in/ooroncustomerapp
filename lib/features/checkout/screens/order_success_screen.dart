@@ -14,6 +14,7 @@ import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/features/cart/cubit/cart_action_cubit.dart';
 import 'package:customer/features/cart/cubit/cart_cubit.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 import 'package:customer/utils/extensions/context_extensions.dart';
 import 'package:customer/utils/extensions/localization_extensions.dart';
 import 'package:customer/utils/extensions/size_extensions.dart';
@@ -28,6 +29,7 @@ class OrderSuccessScreen extends StatefulWidget {
     super.key,
     required this.orderId,
     this.orderItemId = '',
+    this.deliveryType = DeliveryType.delivery,
   });
 
   final String orderId;
@@ -35,6 +37,10 @@ class OrderSuccessScreen extends StatefulWidget {
   /// Ecommerce channel's item-level id — used to route "Track My Order"
   /// to the ecommerce order-detail screen instead of orderId.
   final String orderItemId;
+
+  /// Quick-channel "Track My Order" routes to order-tracking for delivery,
+  /// order-detail for pickup (no live rider to track).
+  final DeliveryType deliveryType;
 
   @override
   State<OrderSuccessScreen> createState() => _OrderSuccessScreenState();
@@ -125,6 +131,18 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
                             isOngoing: true,
                           ),
                         );
+                      } else if (widget.deliveryType == DeliveryType.pickup) {
+                        // No live rider for a pickup order — land on the
+                        // order-detail screen (pickup store, status) instead
+                        // of the delivery-tracking map.
+                        AppNavigator.pushReplacementNamed(
+                          context,
+                          RouteNames.orderDetail,
+                          arguments: OrderDetailArgs(
+                            orderId: widget.orderId,
+                            isOngoing: true,
+                          ),
+                        );
                       } else {
                         AppNavigator.pushReplacementNamed(
                           context,
@@ -148,7 +166,9 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
           ),
         ),
         body: Padding(
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingL),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: ThemeConstants.paddingL,
+          ),
           child: Column(
             mainAxisAlignment: .center,
             children: [

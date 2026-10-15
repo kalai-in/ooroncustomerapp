@@ -28,7 +28,6 @@ class CheckoutWalletSection extends StatelessWidget {
   final bool isWalletSelected;
   final ValueChanged<bool> onWalletToggle;
 
-
   @override
   Widget build(BuildContext context) {
     if (walletBalance <= 0) return const SizedBox.shrink();
@@ -61,7 +60,7 @@ class CheckoutWalletSection extends StatelessWidget {
             spacing: ThemeConstants.spaceS,
             children: [
               Row(
-                crossAxisAlignment: .center,
+                crossAxisAlignment: .start,
                 children: [
                   _WalletCheckbox(
                     selected: isWalletSelected,
@@ -71,11 +70,13 @@ class CheckoutWalletSection extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: .start,
-                      spacing: ThemeConstants. spaceXXS,
+                      spacing: ThemeConstants.spaceXXS,
                       children: [
                         AppText(
                           '${AppConfig.appName} ${context.translate(LanguageLabelKeys.wallet)}',
-                          style: context.tt.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                          style: context.tt.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         Row(
                           children: [
@@ -146,11 +147,11 @@ class _WalletCheckbox extends StatelessWidget {
       onTap: () => onChanged(!selected),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        width: 22,
-        height: 22,
+        width: 18,
+        height: 18,
         decoration: AppDecorations.box(
           color: selected ? context.cs.primary : Colors.transparent,
-          borderRadius: AppRadius.r6,
+          borderRadius: AppRadius.r4,
           border: Border.all(
             color: selected ? context.cs.primary : context.cs.onSurfaceVariant,
             width: 2,

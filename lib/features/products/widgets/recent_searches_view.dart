@@ -30,13 +30,19 @@ class RecentSearchesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsetsDirectional.only(start: ThemeConstants.paddingL, end: ThemeConstants.paddingL),
+      padding: const EdgeInsetsDirectional.only(
+        start: ThemeConstants.paddingL,
+        end: ThemeConstants.paddingL,
+      ),
       child: Column(
         crossAxisAlignment: .start,
         spacing: ThemeConstants.paddingXS,
         children: [
           Padding(
-            padding: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingL, bottom: ThemeConstants.paddingM),
+            padding: const EdgeInsetsDirectional.only(
+              top: ThemeConstants.paddingL,
+              bottom: ThemeConstants.paddingM,
+            ),
             child: Row(
               mainAxisAlignment: .spaceBetween,
               children: [

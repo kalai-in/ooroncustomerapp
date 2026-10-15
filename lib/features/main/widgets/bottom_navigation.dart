@@ -26,11 +26,6 @@ class BottomNavBar extends StatefulWidget {
 
 class BottomNavBarState extends State<BottomNavBar> {
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: AppDecorations.bottomSheetFooter(
@@ -53,7 +48,7 @@ class BottomNavBarState extends State<BottomNavBar> {
                       behavior: HitTestBehavior.opaque,
                       child: Column(
                         mainAxisAlignment: .center,
-                        spacing: ThemeConstants. spaceXXS,
+                        spacing: ThemeConstants.spaceXXS,
                         children: [
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 200),

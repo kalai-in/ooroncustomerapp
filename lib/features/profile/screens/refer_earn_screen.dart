@@ -115,12 +115,21 @@ class _ReferEarnViewState extends State<_ReferEarnView>
 
           return SingleChildScrollView(
             controller: _scrollController,
-            padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingXL, ThemeConstants.paddingL, ThemeConstants.paddingL,),
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              ThemeConstants.paddingL,
+              ThemeConstants.paddingXL,
+              ThemeConstants.paddingL,
+              ThemeConstants.paddingL,
+            ),
             child: Column(
               crossAxisAlignment: .start,
               spacing: ThemeConstants.spaceXXL,
               children: [
-                _staggered(0, total, _HeroCard(bonus: bonus, currency: currency)),
+                _staggered(
+                  0,
+                  total,
+                  _HeroCard(bonus: bonus, currency: currency),
+                ),
                 _staggered(
                   1,
                   total,
@@ -200,9 +209,10 @@ class _HeroCardState extends State<_HeroCard>
     vsync: this,
     duration: const Duration(milliseconds: 1400),
   )..repeat(reverse: true);
-  late final Animation<double> _pulse = Tween(begin: 0.94, end: 1.08).animate(
-    CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-  );
+  late final Animation<double> _pulse = Tween(
+    begin: 0.94,
+    end: 1.08,
+  ).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
 
   @override
   void dispose() {
@@ -240,9 +250,7 @@ class _HeroCardState extends State<_HeroCard>
                 color: onPrimary.withValues(alpha: 0.2),
                 shape: .circle,
               ),
-              padding: const EdgeInsetsDirectional.all(
-                ThemeConstants.paddingM,
-              ),
+              padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
               child: AppSvgIcon(
                 AssetsConstants.giftIcon,
                 size: ThemeConstants.iconL,
@@ -331,7 +339,9 @@ class _RewardsBreakdownCard extends StatelessWidget {
               final isLast = i == tiles.length - 1;
               return Expanded(
                 child: Padding(
-                  padding: EdgeInsetsDirectional.only(end: isLast ? 0 : ThemeConstants.paddingS),
+                  padding: EdgeInsetsDirectional.only(
+                    end: isLast ? 0 : ThemeConstants.paddingS,
+                  ),
                   child: _StatTile(label: label, value: value),
                 ),
               );
@@ -451,7 +461,9 @@ class _ReferralCodeCard extends StatelessWidget {
                 _BouncyTap(
                   onTap: onCopy,
                   child: Container(
-                    padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
+                    padding: const EdgeInsetsDirectional.all(
+                      ThemeConstants.paddingS,
+                    ),
                     decoration: AppDecorations.box(
                       color: primary.withValues(alpha: 0.12),
                       borderRadius: AppRadius.r8,
@@ -597,7 +609,7 @@ class _HowItWorksCard extends StatelessWidget {
                       ),
                       child: Column(
                         crossAxisAlignment: .start,
-                        spacing: ThemeConstants. spaceXXS,
+                        spacing: ThemeConstants.spaceXXS,
                         children: [
                           AppText(
                             title,

@@ -13,7 +13,10 @@ class SheetDragHandle extends StatelessWidget {
       child: Container(
         width: 40,
         height: 4,
-        margin: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingM, bottom: ThemeConstants.paddingXS),
+        margin: const EdgeInsetsDirectional.only(
+          top: ThemeConstants.paddingM,
+          bottom: ThemeConstants.paddingXS,
+        ),
         decoration: AppDecorations.dragHandle(color: context.cs.outlineVariant),
       ),
     );

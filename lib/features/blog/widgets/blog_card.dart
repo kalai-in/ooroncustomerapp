@@ -40,7 +40,8 @@ class BlogCard extends StatelessWidget {
               AppNetworkImage(
                 url: blog.imageUrl!,
                 width: double.infinity,
-                borderRadius: AppRadius.top10,fit: BoxFit.contain,
+                borderRadius: AppRadius.top10,
+                fit: BoxFit.contain,
                 placeholder: Container(
                   height: 180,
                   color: context.cs.surfaceContainerHighest,
@@ -48,8 +49,11 @@ class BlogCard extends StatelessWidget {
                   child: FractionallySizedBox(
                     widthFactor: 0.3,
                     heightFactor: 0.3,
-                    child: AppSvgIcon(AssetsConstants.placeholder, fit: BoxFit.contain),
-                  )
+                    child: AppSvgIcon(
+                      AssetsConstants.placeholder,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
                 errorWidget: Container(
                   height: 180,
@@ -73,7 +77,9 @@ class BlogCard extends StatelessWidget {
                   if ((categoryName != null && categoryName.isNotEmpty) ||
                       (blog.createdAt ?? '').isNotEmpty)
                     Padding(
-                      padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingXS),
+                      padding: const EdgeInsetsDirectional.only(
+                        bottom: ThemeConstants.paddingXS,
+                      ),
                       child: Row(
                         mainAxisAlignment: .spaceBetween,
                         children: [

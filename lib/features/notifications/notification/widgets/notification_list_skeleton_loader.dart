@@ -10,8 +10,13 @@ import 'package:flutter/material.dart';
 /// so the notifications list doesn't jump layout once real cards swap in.
 class NotificationListSkeletonLoader extends StatelessWidget {
   final int itemCount;
+  final bool shrinkWrap;
 
-  const NotificationListSkeletonLoader({super.key, this.itemCount = 6});
+  const NotificationListSkeletonLoader({
+    super.key,
+    this.itemCount = 6,
+    this.shrinkWrap = false,
+  });
 
   Widget _card(BuildContext context, Color color) {
     return Container(
@@ -56,6 +61,7 @@ class NotificationListSkeletonLoader extends StatelessWidget {
           vertical: ThemeConstants.paddingM,
         ),
         physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: shrinkWrap,
         itemCount: itemCount,
         separatorBuilder: (_, _) => AppSpacing.h8,
         itemBuilder: (_, _) => _card(context, color),

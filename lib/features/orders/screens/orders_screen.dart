@@ -112,13 +112,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
   // Provided app-wide in main.dart (not owned/closed here) — the
   // notification service refetches these directly on "order" pushes even
   // when this screen isn't open, so they must outlive it.
-  late final OngoingOrderCubit _ongoingCubit = context.read<OngoingOrderCubit>();
-  late final CompletedOrderCubit _completedCubit =
-      context.read<CompletedOrderCubit>();
-  late final OngoingEcommerceOrderCubit _ongoingEcommerceCubit =
-      context.read<OngoingEcommerceOrderCubit>();
-  late final CompletedEcommerceOrderCubit _completedEcommerceCubit =
-      context.read<CompletedEcommerceOrderCubit>();
+  late final OngoingOrderCubit _ongoingCubit = context
+      .read<OngoingOrderCubit>();
+  late final CompletedOrderCubit _completedCubit = context
+      .read<CompletedOrderCubit>();
+  late final OngoingEcommerceOrderCubit _ongoingEcommerceCubit = context
+      .read<OngoingEcommerceOrderCubit>();
+  late final CompletedEcommerceOrderCubit _completedEcommerceCubit = context
+      .read<CompletedEcommerceOrderCubit>();
   String _channel = SettingsHiveBox.instance.channel;
   DateTimeRange? _dateRange;
   final _appBarShadow = ValueNotifier<bool>(false);
@@ -304,7 +305,12 @@ class _OrderChannelFilter extends StatelessWidget {
     return showAppBottomSheet<void>(
       context,
       title: context.translate(LanguageLabelKeys.filterOrders),
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingM, ThemeConstants.paddingXL, ThemeConstants.paddingXXL),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingXXL,
+      ),
       builder: (_) => _OrderChannelFilterSheet(
         selected: selected,
         dateRange: dateRange,
@@ -447,7 +453,12 @@ class _PillTabBar extends StatelessWidget implements PreferredSizeWidget {
     final primary = context.cs.primary;
 
     return Container(
-      margin: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingM),
+      margin: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingS,
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingM,
+      ),
       padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
       decoration: AppDecorations.box(
         color: containerBg,
@@ -510,8 +521,7 @@ class _PaginatedOrderList<T> extends StatefulWidget {
   });
 
   @override
-  State<_PaginatedOrderList<T>> createState() =>
-      _PaginatedOrderListState<T>();
+  State<_PaginatedOrderList<T>> createState() => _PaginatedOrderListState<T>();
 }
 
 class _PaginatedOrderListState<T> extends State<_PaginatedOrderList<T>> {
@@ -579,13 +589,22 @@ class _PaginatedOrderListState<T> extends State<_PaginatedOrderList<T>> {
               ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 controller: _pager.controller,
-                padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingL),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  ThemeConstants.paddingL,
+                  ThemeConstants.paddingS,
+                  ThemeConstants.paddingL,
+                  ThemeConstants.paddingL,
+                ),
                 itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index == state.data.length) {
                     return PaginatedListFooter(
                       isLoadingMore: state.isFetchingMore,
                       hasMore: state.hasMore,
+                      skeletonBuilder: (_) => const OrderListSkeletonLoader(
+                        itemCount: 1,
+                        shrinkWrap: true,
+                      ),
                     );
                   }
                   return widget.itemBuilder(context, state.data[index]);

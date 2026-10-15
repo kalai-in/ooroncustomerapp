@@ -240,7 +240,9 @@ class _PromoCodeTileWidgetState extends State<PromoCodeTileWidget> {
     );
 
     return Padding(
-      padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingM),
+      padding: const EdgeInsetsDirectional.only(
+        bottom: ThemeConstants.paddingM,
+      ),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -291,7 +293,9 @@ class _BulletLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingXS),
+      padding: const EdgeInsetsDirectional.only(
+        bottom: ThemeConstants.paddingXS,
+      ),
       child: Row(
         crossAxisAlignment: .center,
         spacing: ThemeConstants.spaceXS,

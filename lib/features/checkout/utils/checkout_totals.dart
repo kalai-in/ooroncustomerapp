@@ -1,13 +1,14 @@
 import 'package:customer/features/cart/models/cart_model.dart';
-import 'package:customer/features/promo_code/models/enums/promo_discount_type.dart';
+import 'package:customer/features/promo_code/models/enums/promo_apply_type.dart';
 import 'package:customer/features/promo_code/models/promo_code_model.dart';
 
-/// Post-promo payable total. A flat promo is credited as wallet cashback
-/// after delivery rather than subtracted here, a percentage promo is —
-/// mirrors `CheckoutBillDetailsSection`'s `_PromoTotals`. Every screen/widget
-/// computing what's actually charged (place-order payload, payment-method
-/// gating, the sticky bar's displayed total) must derive it from here so the
-/// displayed total and the amount actually sent to the gateway can't drift.
+/// Post-promo payable total. A wallet promo (`discount_apply_type: wallet`)
+/// is credited as wallet cashback after delivery rather than subtracted
+/// here, an instant promo is — mirrors `CheckoutBillDetailsSection`'s
+/// `_PromoTotals`. Every screen/widget computing what's actually charged
+/// (place-order payload, payment-method gating, the sticky bar's displayed
+/// total) must derive it from here so the displayed total and the amount
+/// actually sent to the gateway can't drift.
 double resolveCheckoutPostPromoTotal({
   required CartData cartData,
   PromoCodeData? appliedPromo,
@@ -15,8 +16,23 @@ double resolveCheckoutPostPromoTotal({
   final orderAmount = cartData.totalAmount ?? 0.0;
   final promo = appliedPromo;
   if (promo == null) return orderAmount;
-  if (promo.discountTypeEnum == PromoDiscountType.flat) return orderAmount;
+  if (promo.discountApplyTypeEnum == PromoApplyType.wallet) return orderAmount;
   return orderAmount - promo.discount;
+}
+
+/// Total amount saved on this order — cart-level savings plus an instant
+/// promo's discount (a wallet promo isn't counted here since it's
+/// credited as wallet cashback instead). Mirrors
+/// `CheckoutBillDetailsSection`'s `_PromoTotals.saved`.
+num resolveCheckoutSavedAmount({
+  required CartData cartData,
+  PromoCodeData? appliedPromo,
+}) {
+  final promo = appliedPromo;
+  final isWalletPromo =
+      promo != null && promo.discountApplyTypeEnum == PromoApplyType.wallet;
+  return (cartData.savedAmount ?? 0) +
+      (promo != null && !isWalletPromo ? promo.discount : 0);
 }
 
 /// True when the wallet balance alone covers [postPromoTotal] and the user

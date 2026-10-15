@@ -11,7 +11,7 @@ extension InputValidators on String? {
           ? context.translate(LanguageLabelKeys.pleaseEnterEmail)
           : null;
     }
-    if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)) {
+    if (!RegExp(r'^[\w.+-]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)) {
       return context.translate(LanguageLabelKeys.pleaseEnterValidEmail);
     }
     return null;
@@ -47,8 +47,7 @@ extension InputValidators on String? {
 
   String? validateRequiredField(BuildContext context, {String? message}) {
     if (this == null || this!.trim().isEmpty) {
-      return message ??
-          context.translate(LanguageLabelKeys.pleaseEnterPassword);
+      return message ?? context.translate(LanguageLabelKeys.required);
     }
     return null;
   }

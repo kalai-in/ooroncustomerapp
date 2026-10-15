@@ -56,7 +56,8 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   Timer? _debounce;
   // context is unsafe to read() from inside dispose() (widget may already be
   // deactivated) — grab the cubit while the tree is still stable instead.
-  late final SearchProductCubit _searchCubit = context.read<SearchProductCubit>();
+  late final SearchProductCubit _searchCubit = context
+      .read<SearchProductCubit>();
 
   // Bumped to remount (and thus replay) the title's WaveText — once on
   // first open, then again whenever the list is scrolled down and back up.
@@ -157,7 +158,12 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         showBackButton: false,
         scrollController: _pager.controller,
         titleWidget: Padding(
-          padding: const EdgeInsetsDirectional.only(start: ThemeConstants.paddingS, end: ThemeConstants.paddingS, top: ThemeConstants.paddingXS, bottom: ThemeConstants.paddingXS),
+          padding: const EdgeInsetsDirectional.only(
+            start: ThemeConstants.paddingS,
+            end: ThemeConstants.paddingS,
+            top: ThemeConstants.paddingXS,
+            bottom: ThemeConstants.paddingXS,
+          ),
           child: AppSearchFilterBar(
             searchController: _searchController,
             onSearchChanged: _onQueryChanged,
@@ -248,9 +254,8 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
             isFetchingMore: state.isFetchingMore,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            onProductTap: (_) => cubit.saveImplicitSearch(
-              _searchController.text,
-            ),
+            onProductTap: (_) =>
+                cubit.saveImplicitSearch(_searchController.text),
           );
           return _pager.attach(
             SingleChildScrollView(
@@ -271,17 +276,13 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                       padding: EdgeInsetsDirectional.only(
                         start: ThemeConstants.paddingL,
                         end: ThemeConstants.paddingL,
-                        top: showRecent
-                            ? ThemeConstants.paddingXL
-                            : ThemeConstants.paddingXL,
+                        top: ThemeConstants.paddingXL,
                       ),
                       child: Align(
                         alignment: AlignmentDirectional.centerStart,
                         child: WaveText(
                           key: ValueKey(_titleWaveTrigger),
-                          context.translate(
-                            LanguageLabelKeys.whatsOnYourMind,
-                          ),
+                          context.translate(LanguageLabelKeys.whatsOnYourMind),
                           style: context.tt.bodyLarge?.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,

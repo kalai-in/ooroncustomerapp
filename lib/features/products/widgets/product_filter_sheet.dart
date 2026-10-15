@@ -245,7 +245,9 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
           SizedBox(
             width: double.infinity,
             child: Padding(
-              padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingL),
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: ThemeConstants.paddingL,
+              ),
               child: AppText(
                 context.translate(LanguageLabelKeys.filters),
                 style: context.tt.titleMedium?.copyWith(
@@ -297,8 +299,8 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
                                     Container(
                                       decoration: AppDecorations.box(
                                         gradient: LinearGradient(
-                                          begin: AlignmentDirectional
-                                              .centerStart,
+                                          begin:
+                                              AlignmentDirectional.centerStart,
                                           end: AlignmentDirectional.centerEnd,
                                           colors: [
                                             context.cs.primary.withValues(
@@ -363,13 +365,13 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
                                                                 .values ??
                                                             [])
                                                         .where(
-                                                          (v) =>
-                                                              _selectedAttributeValueIds
-                                                                  .contains(
-                                                                    v.id
-                                                                            ?.toString() ??
-                                                                        '',
-                                                                  ),
+                                                          (
+                                                            v,
+                                                          ) => _selectedAttributeValueIds
+                                                              .contains(
+                                                                v.id?.toString() ??
+                                                                    '',
+                                                              ),
                                                         )
                                                         .length
                                                   : 0);
@@ -392,9 +394,8 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
                                               child: Padding(
                                                 padding:
                                                     const EdgeInsetsDirectional.symmetric(
-                                                      horizontal:
-                                                          ThemeConstants
-                                                              .paddingM,
+                                                      horizontal: ThemeConstants
+                                                          .paddingM,
                                                     ),
                                                 child: Row(
                                                   spacing:
@@ -438,8 +439,7 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
                                                                   .cs
                                                                   .primary,
                                                               borderRadius:
-                                                                  AppRadius
-                                                                      .r20,
+                                                                  AppRadius.r20,
                                                             ),
                                                         child: AppText(
                                                           '$count',
@@ -508,7 +508,9 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
 
   Widget _buildBrandContent(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXS),
+      padding: const EdgeInsetsDirectional.symmetric(
+        vertical: ThemeConstants.paddingXS,
+      ),
       itemCount: _brands.length,
       itemBuilder: (context, i) {
         final brand = _brands[i];
@@ -554,7 +556,9 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet>
   Widget _buildAttributeContent(BuildContext context, Attributes attribute) {
     final values = attribute.values ?? [];
     return ListView.builder(
-      padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXS),
+      padding: const EdgeInsetsDirectional.symmetric(
+        vertical: ThemeConstants.paddingXS,
+      ),
       itemCount: values.length,
       itemBuilder: (context, i) {
         final value = values[i];

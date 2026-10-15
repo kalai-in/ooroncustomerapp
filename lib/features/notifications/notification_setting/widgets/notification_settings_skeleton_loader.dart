@@ -42,7 +42,12 @@ class NotificationSettingsSkeletonLoader extends StatelessWidget {
     return ShimmerBuilder(
       builder: (context, color) => ListView.builder(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+        ),
         itemCount: itemCount,
         itemBuilder: (_, _) => _tile(context, color),
       ),

@@ -33,28 +33,35 @@ class OrderStatus {
 class OrderStatusLabels {
   static String name(BuildContext context, int? code) {
     return switch (code) {
-      OrderStatus.paymentPending =>
-        context.translate(LanguageLabelKeys.statusPaymentPending),
-      OrderStatus.orderReceived =>
-        context.translate(LanguageLabelKeys.statusOrderReceived),
-      OrderStatus.processing =>
-        context.translate(LanguageLabelKeys.statusProcessing),
-      OrderStatus.shipped =>
-        context.translate(LanguageLabelKeys.statusShipped),
-      OrderStatus.outForDelivery =>
-        context.translate(LanguageLabelKeys.statusOutForDelivery),
-      OrderStatus.delivered =>
-        context.translate(LanguageLabelKeys.statusDelivered),
-      OrderStatus.cancelled =>
-        context.translate(LanguageLabelKeys.statusCancelled),
-      OrderStatus.returned =>
-        context.translate(LanguageLabelKeys.statusReturned),
-      OrderStatus.preparing =>
-        context.translate(LanguageLabelKeys.statusPreparing),
-      OrderStatus.readyForPickup =>
-        context.translate(LanguageLabelKeys.statusReadyForPickup),
-      OrderStatus.pickup =>
-        context.translate(LanguageLabelKeys.statusPickup),
+      OrderStatus.paymentPending => context.translate(
+        LanguageLabelKeys.statusPaymentPending,
+      ),
+      OrderStatus.orderReceived => context.translate(
+        LanguageLabelKeys.statusOrderReceived,
+      ),
+      OrderStatus.processing => context.translate(
+        LanguageLabelKeys.statusProcessing,
+      ),
+      OrderStatus.shipped => context.translate(LanguageLabelKeys.statusShipped),
+      OrderStatus.outForDelivery => context.translate(
+        LanguageLabelKeys.statusOutForDelivery,
+      ),
+      OrderStatus.delivered => context.translate(
+        LanguageLabelKeys.statusDelivered,
+      ),
+      OrderStatus.cancelled => context.translate(
+        LanguageLabelKeys.statusCancelled,
+      ),
+      OrderStatus.returned => context.translate(
+        LanguageLabelKeys.statusReturned,
+      ),
+      OrderStatus.preparing => context.translate(
+        LanguageLabelKeys.statusPreparing,
+      ),
+      OrderStatus.readyForPickup => context.translate(
+        LanguageLabelKeys.statusReadyForPickup,
+      ),
+      OrderStatus.pickup => context.translate(LanguageLabelKeys.statusPickup),
       _ => context.translate(LanguageLabelKeys.statusUnknown),
     };
   }

@@ -5,7 +5,9 @@ import 'package:customer/features/address/models/address_model.dart';
 import 'package:customer/features/cart/cubit/cart_action_cubit.dart';
 import 'package:customer/features/cart/cubit/cart_cubit.dart';
 import 'package:customer/features/cart/cubit/cart_fetch_cubit.dart';
+import 'package:customer/features/cart/cubit/guest_cart_fetch_cubit.dart';
 import 'package:customer/features/cart/models/cart_model.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 import 'package:customer/features/checkout/cubit/place_order_cubit.dart';
 import 'package:customer/features/promo_code/cubit/promo_code_validate_cubit.dart';
 import 'package:customer/features/promo_code/models/promo_code_model.dart';
@@ -19,6 +21,7 @@ class CheckoutBlocListeners extends StatelessWidget {
     super.key,
     required this.isLoggedIn,
     required this.selectedAddress,
+    this.deliveryType = DeliveryType.delivery,
     required this.onAddressResolved,
     required this.onAddressCleared,
     required this.onPromoValidated,
@@ -29,6 +32,11 @@ class CheckoutBlocListeners extends StatelessWidget {
 
   final bool isLoggedIn;
   final AddressData? selectedAddress;
+
+  /// Current toggle selection — carried into the add/remove-triggered
+  /// refetches below so an in-flight pickup selection isn't silently reset
+  /// to 'delivery' by a fetchCart call that forgot the param.
+  final DeliveryType deliveryType;
   final ValueChanged<AddressData> onAddressResolved;
   final VoidCallback onAddressCleared;
   final ValueChanged<PromoCodeData> onPromoValidated;
@@ -53,6 +61,7 @@ class CheckoutBlocListeners extends StatelessWidget {
               } else {
                 ctx.read<CartFetchCubit>().fetchCart(
                   addressId: selectedAddress?.id,
+                  deliveryType: deliveryType,
                 );
               }
             } else if (state is CartActionError) {
@@ -101,6 +110,10 @@ class CheckoutBlocListeners extends StatelessWidget {
                               additionalCharges: prevData.additionalCharges,
                               currency: prevData.currency,
                               decimalPoint: prevData.decimalPoint,
+                              deliveryType: prevData.deliveryType,
+                              deliveryAvailable: prevData.deliveryAvailable,
+                              pickupAvailable: prevData.pickupAvailable,
+                              pickup: prevData.pickup,
                             ),
                     ),
                   );
@@ -109,6 +122,7 @@ class CheckoutBlocListeners extends StatelessWidget {
               }
               ctx.read<CartFetchCubit>().fetchCart(
                 addressId: selectedAddress?.id,
+                deliveryType: deliveryType,
               );
               AppSnackBar.show(
                 context: ctx,
@@ -129,6 +143,19 @@ class CheckoutBlocListeners extends StatelessWidget {
         BlocListener<CartCubit, CartState>(
           listener: (ctx, state) {
             if (!isLoggedIn) onGuestCartChanged(state);
+          },
+        ),
+        // Guest checkout resolves its cart (pricing, stock, zone
+        // availability) via GuestCartFetchCubit, entirely separate from
+        // CartCubit — without this, an item the guest cart response drops
+        // or reprices never reaches CartCubit, leaving the floating cart
+        // bar's count stuck on the stale local value forever.
+        BlocListener<GuestCartFetchCubit, GuestCartState>(
+          listener: (ctx, state) {
+            if (!isLoggedIn && state is GuestCartLoaded) {
+              final items = state.cart.data?.cart ?? [];
+              ctx.read<CartCubit>().seedFromApi(items);
+            }
           },
         ),
         BlocListener<PromoCodeValidateCubit, PromoCodeValidateState>(
@@ -162,6 +189,11 @@ class CheckoutBlocListeners extends StatelessWidget {
             }
 
             if (current == null) {
+              // Pickup's address is optional (choose saved or type manually)
+              // — don't force the default on the customer, let the bottom
+              // bar's choice buttons show instead. Delivery still needs one
+              // auto-picked so checkout isn't stuck with nothing selected.
+              if (deliveryType == DeliveryType.pickup) return;
               final def = state.data.firstWhere(
                 (a) => a.isDefault == '1',
                 orElse: () => state.data.first,

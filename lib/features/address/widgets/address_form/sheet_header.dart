@@ -15,7 +15,12 @@ class SheetHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingS, ThemeConstants.paddingXL, ThemeConstants.paddingM),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingS,
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingM,
+      ),
       child: AppText(
         isEdit
             ? context.translate(LanguageLabelKeys.editAddress)

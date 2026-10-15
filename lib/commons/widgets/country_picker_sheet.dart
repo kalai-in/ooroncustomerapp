@@ -62,9 +62,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: context.screenHeight * 0.75,
-      ),
+      constraints: BoxConstraints(maxHeight: context.screenHeight * 0.75),
       child: Column(
         mainAxisSize: .min,
         children: [
@@ -73,7 +71,10 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
             hintText: context.translate(LanguageLabelKeys.search),
             onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
             prefixIcon: Padding(
-              padding: const EdgeInsetsDirectional.only(start: ThemeConstants.paddingL, end: ThemeConstants.paddingS),
+              padding: const EdgeInsetsDirectional.only(
+                start: ThemeConstants.paddingL,
+                end: ThemeConstants.paddingS,
+              ),
               child: AppSvgIcon(
                 AssetsConstants.searchIcon,
                 size: ThemeConstants.iconS,
@@ -87,7 +88,9 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
             ),
             // No `border` override — the default outline set is what makes the
             // field visible against the sheet's surface-coloured background.
-            contentPadding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingS),
+            contentPadding: const EdgeInsetsDirectional.symmetric(
+              vertical: ThemeConstants.paddingS,
+            ),
           ),
           AppSpacing.h12,
           Flexible(
@@ -95,7 +98,9 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
               builder: (context, state) {
                 if (state is CountriesLoading || state is CountriesInitial) {
                   return const Padding(
-                    padding: EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXXL),
+                    padding: EdgeInsetsDirectional.symmetric(
+                      vertical: ThemeConstants.paddingXXL,
+                    ),
                     child: LoadingWidget(),
                   );
                 }

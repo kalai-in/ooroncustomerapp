@@ -4,12 +4,19 @@ import 'package:google_fonts/google_fonts.dart';
 /// Central configuration file for buyers to customise.
 ///
 /// ─── HOW TO CONFIGURE ───────────────────────────────────────────────────────
-///   1. Pick the active environment by editing [environment] below.
+///   1. Pick the active environment — either edit [environment] below,
+///      or just pass it as an argument in step 3 (no manual edit needed).
 ///      Available environments live as JSON files in `env/`:
-///        env/demo.json
+///        env/demo.json, env/dev.json, env/stage.json
 ///   2. Edit the URLs/host in the matching `env/<name>.json` file.
-///   3. Run:  dart run tool/apply_config.dart
+///   3. Run:  dart run tool/apply_config.dart `<environment>`
+///      e.g.: dart run tool/apply_config.dart stage
+///            dart run tool/apply_config.dart dev
+///            dart run tool/apply_config.dart demo
+///      (or just `dart run tool/apply_config.dart` to re-sync the
+///      environment already set in [environment] below)
 ///      The script reads the selected env JSON and:
+///        • sets [environment] below (when passed as an argument)
 ///        • rewrites the URL constants below
 ///        • patches AndroidManifest.xml, Info.plist
 ///   4. Build / run:  flutter clean && flutter run

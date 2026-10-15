@@ -65,7 +65,12 @@ void showAddressOptionsSheet(
     context,
     title: context.translate(LanguageLabelKeys.selectOption),
     backgroundColor: context.cs.surfaceContainer,
-    padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingXL, ThemeConstants.paddingL, ThemeConstants.paddingL),
+    padding: const EdgeInsetsDirectional.fromSTEB(
+      ThemeConstants.paddingL,
+      ThemeConstants.paddingXL,
+      ThemeConstants.paddingL,
+      ThemeConstants.paddingL,
+    ),
     builder: (sheetContext) => Container(
       decoration: AppDecorations.box(
         color: sheetContext.cs.surface,
@@ -120,7 +125,11 @@ class _AddressOptionTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            AppSvgIcon(icon, size: ThemeConstants.iconS, color: context.cs.onSurfaceVariant),
+            AppSvgIcon(
+              icon,
+              size: ThemeConstants.iconS,
+              color: context.cs.onSurfaceVariant,
+            ),
             AppSpacing.w12,
             Expanded(
               child: AppText(

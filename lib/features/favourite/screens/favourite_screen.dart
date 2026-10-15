@@ -1,11 +1,12 @@
 import 'package:customer/core/constants/assets_constants.dart';
+import 'package:customer/core/constants/navigation_service.dart';
+import 'package:customer/core/routes/route_names.dart';
 import 'package:customer/commons/utils/pagination_scroll_controller.dart';
 import 'package:customer/core/local_storage/auth_hive_box.dart';
 import 'package:customer/commons/cubit/location_cubit.dart';
 import 'package:customer/commons/widgets/custom_app_bar.dart';
 import 'package:customer/commons/widgets/empty_state_widget.dart';
 import 'package:customer/core/localization/language_label_key.dart';
-import 'package:customer/commons/widgets/loading_widget.dart';
 import 'package:customer/features/cart/cubit/cart_cubit.dart';
 import 'package:customer/features/favourite/cubit/favorite_cubit.dart';
 import 'package:customer/features/main/widgets/floating_cart_bar.dart';
@@ -103,61 +104,73 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
             AppSpacing.w8,
           ],
         ),
-        body: RefreshIndicator(
-          onRefresh: () async {
-            if (!AuthHiveBox.instance.isLoggedIn) return;
-            final cubit = context.read<FavoriteCubit>();
-            cubit.loadFavorites();
-            await cubit.stream.firstWhere((s) => !s.listLoading);
-          },
-          child: BlocBuilder<FavoriteCubit, FavoriteState>(
-            builder: (context, state) {
-              if (state.listLoading) {
-                return _buildSkeleton(context);
-              }
-              if (state.listError != null && state.products.isEmpty) {
-                return EmptyStateWidget(
-                  imagePath: AssetsConstants.noWishlistFound,
-                  title: state.listError!,
-                  subtitle: context.translate(LanguageLabelKeys.pullToRefresh),
-                  onRetry: () => context.read<FavoriteCubit>().loadFavorites(),
-                );
-              }
-              if (state.products.isEmpty) {
-                return EmptyStateWidget(
-                  imagePath: AssetsConstants.noWishlistFound,
-                  title: context.translate(LanguageLabelKeys.noFavourites),
-                  subtitle: context.translate(
-                    LanguageLabelKeys.noFavouritesSubtitle,
-                  ),
-                );
-              }
-              final cartHasItems = context.select(
-                (CartCubit c) => c.state.totalItems > 0,
-              );
-              return _pager.attach(
-                ProductListingView(
-                  products: state.products,
-                  isGrid: _isGrid,
-                  controller: _pager.controller,
-                  isFetchingMore: state.isLoadingMore,
-                  padding: EdgeInsetsDirectional.fromSTEB(
-                    ThemeConstants.paddingM,
-                    ThemeConstants.paddingM,
-                    ThemeConstants.paddingM,
-                    ThemeConstants.paddingM +
-                        (cartHasItems ? FloatingCartBar.barHeight : 0),
-                  ),
-                  onFavoriteTap: (product) =>
-                      context.read<FavoriteCubit>().toggle(product),
-                  listLoadingMoreBuilder: (context) => const Padding(
-                    padding: EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXXL),
-                    child: LoadingWidget(),
-                  ),
-                ),
-              );
-            },
-          ),
+        body: Stack(
+          children: [
+            RefreshIndicator(
+              onRefresh: () async {
+                if (!AuthHiveBox.instance.isLoggedIn) return;
+                final cubit = context.read<FavoriteCubit>();
+                cubit.loadFavorites();
+                await cubit.stream.firstWhere((s) => !s.listLoading);
+              },
+              child: BlocBuilder<FavoriteCubit, FavoriteState>(
+                builder: (context, state) {
+                  if (state.listLoading) {
+                    return _buildSkeleton(context);
+                  }
+                  if (state.listError != null && state.products.isEmpty) {
+                    return EmptyStateWidget(
+                      imagePath: AssetsConstants.noWishlistFound,
+                      title: state.listError!,
+                      subtitle: context.translate(
+                        LanguageLabelKeys.pullToRefresh,
+                      ),
+                      onRetry: () =>
+                          context.read<FavoriteCubit>().loadFavorites(),
+                    );
+                  }
+                  if (state.products.isEmpty) {
+                    return EmptyStateWidget(
+                      imagePath: AssetsConstants.noWishlistFound,
+                      title: context.translate(LanguageLabelKeys.noFavourites),
+                      subtitle: context.translate(
+                        LanguageLabelKeys.noFavouritesSubtitle,
+                      ),
+                    );
+                  }
+                  final cartHasItems = context.select(
+                    (CartCubit c) => c.state.totalItems > 0,
+                  );
+                  return _pager.attach(
+                    ProductListingView(
+                      products: state.products,
+                      isGrid: _isGrid,
+                      controller: _pager.controller,
+                      isFetchingMore: state.isLoadingMore,
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                        ThemeConstants.paddingM,
+                        ThemeConstants.paddingM,
+                        ThemeConstants.paddingM,
+                        ThemeConstants.paddingM +
+                            (cartHasItems ? FloatingCartBar.barHeight : 0),
+                      ),
+                      onFavoriteTap: (product) =>
+                          context.read<FavoriteCubit>().toggle(product),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: FloatingCartBar(
+                onViewCart: () =>
+                    AppNavigator.pushNamed(context, RouteNames.checkout),
+              ),
+            ),
+          ],
         ),
       ),
     );

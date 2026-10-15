@@ -16,6 +16,7 @@ abstract final class RouteNames {
   static const String orderTracking = '/order-tracking';
   static const String notifications = '/notifications';
   static const String faq = '/faq';
+  static const String spinWheelRewards = '/spin-wheel-rewards';
   static const String blog = '/blog';
   static const String blogDetail = '/blog-detail';
   static const String transactions = '/transactions';
@@ -29,6 +30,7 @@ abstract final class RouteNames {
   static const String locationRequired = '/location-required';
   static const String notificationList = '/notification-list';
   static const String productDetail = '/product-detail';
+  static const String productAllReviews = '/product-all-reviews';
   static const String paymentMethods = '/payment-methods';
   static const String webviewPayment = '/webview-payment';
   static const String chat = '/chat';

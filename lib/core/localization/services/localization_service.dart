@@ -56,5 +56,9 @@ class LocalizationService extends ChangeNotifier {
 /// on [LocalizationService] the same way `Directionality.of(context)` does
 /// for text direction — see `main.dart`.
 class LocalizationScope extends InheritedNotifier<LocalizationService> {
-  const LocalizationScope({super.key, required super.notifier, required super.child});
+  const LocalizationScope({
+    super.key,
+    required super.notifier,
+    required super.child,
+  });
 }

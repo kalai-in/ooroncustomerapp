@@ -94,10 +94,14 @@ class LocationTile extends StatelessWidget {
                 onTap: () async {
                   final phone = contactPhone!;
                   final uri = Uri.parse('tel:$phone');
-                  if (await canLaunchUrl(uri)) launchUrl(uri);
+                  try {
+                    if (await canLaunchUrl(uri)) launchUrl(uri);
+                  } catch (_) {}
                 },
                 child: Container(
-                  padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
+                  padding: const EdgeInsetsDirectional.all(
+                    ThemeConstants.paddingS,
+                  ),
                   decoration: AppDecorations.box(
                     color: context.cs.primaryContainer,
                     borderRadius: AppRadius.r8,

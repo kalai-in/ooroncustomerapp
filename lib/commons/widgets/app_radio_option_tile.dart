@@ -61,7 +61,7 @@ class AppRadioOptionTile<T> extends StatelessWidget {
               ? AppText(title, style: titleStyle)
               : Column(
                   crossAxisAlignment: .start,
-                  spacing: ThemeConstants. spaceXXS,
+                  spacing: ThemeConstants.spaceXXS,
                   children: [
                     AppText(title, style: titleStyle),
                     AppText(
@@ -93,11 +93,7 @@ class AppRadioOptionTile<T> extends StatelessWidget {
               margin:
                   margin ?? const EdgeInsetsDirectional.symmetric(vertical: 1),
               padding: padding,
-              decoration: AppDecorations.selectableOption(
-                primaryColor: context.cs.primary,
-                outlineColor: context.cs.outline,
-                selected: selected,
-              ),
+              decoration: AppDecorations.selectableOption(),
               child: content,
             )
           : Padding(padding: padding, child: content),

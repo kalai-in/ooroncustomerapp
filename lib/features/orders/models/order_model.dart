@@ -36,6 +36,61 @@ class LiveLocation {
       (latitude != 0 || longitude != 0);
 }
 
+/// Pickup order's fulfillment store — same shape as the cart response's
+/// `pickup` object minus the per-cart `available`/`unavailable_reason`/
+/// `distance` fields (an already-placed order's store doesn't need those).
+class OrderPickupStore {
+  int? storeId;
+  String? storeName;
+  String? address;
+  double? latitude;
+  double? longitude;
+  String? contactNumber;
+  int? preparationMinutes;
+  String? preparationTime;
+  bool? isOpenNow;
+
+  OrderPickupStore({
+    this.storeId,
+    this.storeName,
+    this.address,
+    this.latitude,
+    this.longitude,
+    this.contactNumber,
+    this.preparationMinutes,
+    this.preparationTime,
+    this.isOpenNow,
+  });
+
+  OrderPickupStore.fromJson(Map<String, dynamic> json) {
+    storeId = parseInt(json['store_id']);
+    storeName = parseString(json['store_name']);
+    address = parseString(json['address']);
+    latitude = parseDoubleOrNull(json['latitude']);
+    longitude = parseDoubleOrNull(json['longitude']);
+    contactNumber = parseString(json['contact_number']);
+    preparationMinutes = parseInt(json['preparation_minutes']);
+    preparationTime = parseString(json['preparation_time']);
+    isOpenNow = json['is_open_now'] is bool
+        ? json['is_open_now'] as bool
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'store_id': storeId,
+      'store_name': storeName,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+      'contact_number': contactNumber,
+      'preparation_minutes': preparationMinutes,
+      'preparation_time': preparationTime,
+      'is_open_now': isOpenNow,
+    };
+  }
+}
+
 class OrderModel {
   int? status;
   String? message;
@@ -125,6 +180,10 @@ class OrderData {
   String? preparationTime;
   String? timeToDeliver;
 
+  /// 'delivery' | 'pickup'. `pickupStore` is null for delivery orders.
+  String? deliveryType;
+  OrderPickupStore? pickupStore;
+
   OrderData({
     this.id,
     this.userId,
@@ -181,6 +240,8 @@ class OrderData {
     this.totalDeliverTime,
     this.preparationTime,
     this.timeToDeliver,
+    this.deliveryType,
+    this.pickupStore,
   });
 
   OrderData.fromJson(Map<String, dynamic> json) {
@@ -200,7 +261,9 @@ class OrderData {
     orderNote = parseString(json['order_note']);
     total = parseDouble(json['total']);
     deliveryCharge = json['delivery_charges'] is Map<String, dynamic>
-        ? DeliveryCharges.fromJson(json['delivery_charges'] as Map<String, dynamic>)
+        ? DeliveryCharges.fromJson(
+            json['delivery_charges'] as Map<String, dynamic>,
+          )
         : null;
     taxAmount = parseDouble(json['tax_amount']);
     taxPercentage = parseDouble(json['tax_percentage']);
@@ -279,6 +342,12 @@ class OrderData {
     totalDeliverTime = parseString(json['total_deliver_time']);
     preparationTime = parseString(json['preparation_time']);
     timeToDeliver = parseString(json['time_to_deliver']);
+    deliveryType = parseString(json['delivery_type']);
+    pickupStore = json['pickup_store'] is Map<String, dynamic>
+        ? OrderPickupStore.fromJson(
+            json['pickup_store'] as Map<String, dynamic>,
+          )
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -352,6 +421,8 @@ class OrderData {
     data['total_deliver_time'] = totalDeliverTime;
     data['preparation_time'] = preparationTime;
     data['time_to_deliver'] = timeToDeliver;
+    data['delivery_type'] = deliveryType;
+    data['pickup_store'] = pickupStore?.toJson();
     return data;
   }
 }

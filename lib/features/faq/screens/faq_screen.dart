@@ -110,13 +110,20 @@ class _FaqScreenState extends State<FaqScreen> {
       ListView.builder(
         controller: _pager.controller,
         physics: AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+        ),
         itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index == state.data.length) {
             return PaginatedListFooter(
               isLoadingMore: state.isFetchingMore,
               hasMore: state.hasMore,
+              skeletonBuilder: (_) =>
+                  const FaqListSkeletonLoader(itemCount: 2, shrinkWrap: true),
             );
           }
           return FaqTile(faq: state.data[index]);

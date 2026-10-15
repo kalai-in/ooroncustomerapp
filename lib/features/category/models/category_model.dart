@@ -41,6 +41,7 @@ class Category {
     this.name,
     this.imageUrl,
     this.hasChild,
+    this.hasActiveChild,
     this.lang,
     this.subtitle,
     this.metaTitle,
@@ -54,6 +55,7 @@ class Category {
     name = json['name']?.toString() ?? "";
     imageUrl = json['image_url']?.toString() ?? "";
     hasChild = parseBool(json['has_child']) ?? false;
+    hasActiveChild = parseBool(json['has_active_child']);
     lang = parseString(json['lang']);
     subtitle = parseString(json['subtitle']);
     metaTitle = parseString(json['meta_title']);
@@ -68,8 +70,8 @@ class Category {
     data['name'] = name;
     data['image_url'] = imageUrl;
     data['has_child'] = hasChild;
+    data['has_active_child'] = hasActiveChild;
     data['lang'] = lang;
-    data['name'] = name;
     data['subtitle'] = subtitle;
     data['meta_title'] = metaTitle;
     data['meta_keywords'] = metaKeywords;

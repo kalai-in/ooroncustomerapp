@@ -124,7 +124,12 @@ class _FloatingCartBarState extends State<FloatingCartBar>
             opacity: _barVisible ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 220),
             child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, 0, ThemeConstants.paddingM, ThemeConstants.paddingS),
+              padding: EdgeInsetsDirectional.fromSTEB(
+                ThemeConstants.paddingM,
+                0,
+                ThemeConstants.paddingM,
+                ThemeConstants.paddingS,
+              ),
               child: Center(
                 child: GestureDetector(
                   onTap: widget.onViewCart,
@@ -188,47 +193,52 @@ class _FloatingCartBarState extends State<FloatingCartBar>
                                       opacity: t,
                                       child: FittedBox(
                                         fit: BoxFit.scaleDown,
-                                        alignment: AlignmentDirectional.centerStart,
+                                        alignment:
+                                            AlignmentDirectional.centerStart,
                                         child: Column(
-                                        mainAxisAlignment: .center,
-                                        crossAxisAlignment: .start,
-                                        spacing: ThemeConstants.spaceXS,
-                                        children: [
-                                          AppText(
-                                            context.translate(
-                                              LanguageLabelKeys.viewCart,
-                                            ),
-                                            style: context.tt.titleSmall
-                                                ?.copyWith(
-                                                  color: context.cs.onPrimary,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w800,
-                                                  height: 1,
-                                                ),
-                                          ),
-                                          AnimatedSwitcher(
-                                            duration: const Duration(
-                                              milliseconds: 200,
-                                            ),
-                                            transitionBuilder: (child, anim) =>
-                                                FadeTransition(
-                                                  opacity: anim,
-                                                  child: child,
-                                                ),
-                                            child: AppText(
-                                              '${state.totalItems} ${context.translate(state.totalItems == 1 ? LanguageLabelKeys.item : LanguageLabelKeys.items)}',
-                                              key: ValueKey(state.totalItems),
-                                              style: context.tt.bodySmall
+                                          mainAxisAlignment: .center,
+                                          crossAxisAlignment: .start,
+                                          spacing: ThemeConstants.spaceXS,
+                                          children: [
+                                            AppText(
+                                              context.translate(
+                                                LanguageLabelKeys.viewCart,
+                                              ),
+                                              style: context.tt.titleSmall
                                                   ?.copyWith(
-                                                    color: context.cs.onPrimary
-                                                        .withValues(
-                                                          alpha: 0.75,
-                                                        ),
-                                                    fontWeight: FontWeight.w500,
+                                                    color: context.cs.onPrimary,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w800,
+                                                    height: 1,
                                                   ),
                                             ),
-                                          ),
-                                        ],
+                                            AnimatedSwitcher(
+                                              duration: const Duration(
+                                                milliseconds: 200,
+                                              ),
+                                              transitionBuilder:
+                                                  (child, anim) =>
+                                                      FadeTransition(
+                                                        opacity: anim,
+                                                        child: child,
+                                                      ),
+                                              child: AppText(
+                                                '${state.totalItems} ${context.translate(state.totalItems == 1 ? LanguageLabelKeys.item : LanguageLabelKeys.items)}',
+                                                key: ValueKey(state.totalItems),
+                                                style: context.tt.bodySmall
+                                                    ?.copyWith(
+                                                      color: context
+                                                          .cs
+                                                          .onPrimary
+                                                          .withValues(
+                                                            alpha: 0.75,
+                                                          ),
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),

@@ -51,7 +51,9 @@ class _AppNoInternetViewState extends State<AppNoInternetView> {
       width: double.infinity,
       height: double.infinity,
       color: Theme.of(context).scaffoldBackgroundColor,
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.spaceXXXL),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: ThemeConstants.spaceXXXL,
+      ),
       child: Column(
         mainAxisAlignment: .center,
         children: [

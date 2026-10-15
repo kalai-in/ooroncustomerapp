@@ -340,6 +340,7 @@ class Variants {
   int? isUnlimitedStock;
   bool? fewQuantityLeft;
   int? cartCount;
+  int? isNotifyRequested;
   List<Images>? images;
   List<Attributes>? attributes;
   List<CustomSections>? customSections;
@@ -357,10 +358,13 @@ class Variants {
     this.isUnlimitedStock,
     this.fewQuantityLeft,
     this.cartCount,
+    this.isNotifyRequested,
     this.images,
     this.attributes,
     this.customSections,
   });
+
+  bool get isNotified => isNotifyRequested == 1;
 
   Variants.fromJson(Map<String, dynamic> json) {
     id = parseInt(json['id']);
@@ -375,6 +379,7 @@ class Variants {
     isUnlimitedStock = parseInt(json['is_unlimited_stock']);
     fewQuantityLeft = parseBool(json['few_quantity_left']);
     cartCount = parseInt(json['cart_count']);
+    isNotifyRequested = parseInt(json['is_notify_requested']) ?? 0;
     final rawImages = json['images'];
     if (rawImages is List) {
       images = rawImages
@@ -409,6 +414,7 @@ class Variants {
     data['is_unlimited_stock'] = isUnlimitedStock;
     data['few_quantity_left'] = fewQuantityLeft;
     data['cart_count'] = cartCount;
+    data['is_notify_requested'] = isNotifyRequested;
     if (images != null) {
       data['images'] = images!.map((v) => v.toJson()).toList();
     }

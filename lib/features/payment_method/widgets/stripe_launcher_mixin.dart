@@ -64,6 +64,7 @@ mixin StripeLauncherMixin<T extends StatefulWidget> on State<T> {
       if (!mounted) return;
       context.read<PaymentCubit>().addTransaction(
         orderId: launcherArgs.orderId,
+        orderItemId: launcherArgs.orderItemId,
         paymentType: PaymentGatewayType.stripe.apiValue,
         txnId: paymentIntentId ?? '',
         success: true,
@@ -83,6 +84,7 @@ mixin StripeLauncherMixin<T extends StatefulWidget> on State<T> {
           context.translate(LanguageLabelKeys.stripePaymentFailed);
       context.read<PaymentCubit>().addTransaction(
         orderId: launcherArgs.orderId,
+        orderItemId: launcherArgs.orderItemId,
         paymentType: PaymentGatewayType.stripe.apiValue,
         txnId: paymentIntentId ?? '',
         success: false,

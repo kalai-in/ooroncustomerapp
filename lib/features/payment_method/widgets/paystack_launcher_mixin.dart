@@ -83,6 +83,7 @@ mixin PaystackLauncherMixin<T extends StatefulWidget> on State<T> {
       if (response.status) {
         context.read<PaymentCubit>().addTransaction(
           orderId: launcherArgs.orderId,
+          orderItemId: launcherArgs.orderItemId,
           paymentType: PaymentGatewayType.paystack.apiValue,
           txnId: response.reference ?? ref,
           success: true,

@@ -72,7 +72,12 @@ class LocationConfirmCard extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+          ),
           child: Column(
             mainAxisSize: .min,
             children: [
@@ -80,7 +85,9 @@ class LocationConfirmCard extends StatelessWidget {
                 child: Container(
                   width: 36,
                   height: 4,
-                  margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingM),
+                  margin: const EdgeInsetsDirectional.only(
+                    bottom: ThemeConstants.paddingM,
+                  ),
                   decoration: AppDecorations.dragHandle(
                     color: context.cs.outlineVariant,
                   ),
@@ -136,7 +143,9 @@ class LocationConfirmCard extends StatelessWidget {
                         borderRadius: AppRadius.r10,
                         onTap: isLocating ? null : onCurrentLocation,
                         child: Container(
-                          padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
+                          padding: const EdgeInsetsDirectional.all(
+                            ThemeConstants.paddingS,
+                          ),
                           decoration: AppDecorations.outlinedCard(
                             borderColor: context.cs.outlineVariant,
                           ),

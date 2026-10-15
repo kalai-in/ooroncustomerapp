@@ -4,9 +4,7 @@ import 'package:customer/commons/widgets/password_requirements_checklist.dart';
 import 'package:customer/utils/password_policy.dart';
 import 'package:customer/core/constants/navigation_service.dart';
 import 'package:customer/commons/widgets/app_snack_bar.dart';
-import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:customer/commons/widgets/app_text_field.dart';
-import 'package:customer/core/constants/assets_constants.dart';
 import 'package:customer/core/local_storage/auth_hive_box.dart';
 import 'package:customer/core/routes/route_names.dart';
 import 'package:customer/features/auth/cubits/change_password_cubit.dart';
@@ -27,7 +25,10 @@ import 'package:customer/core/localization/language_label_key.dart';
 import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
-void showChangePasswordSheet(BuildContext context, {AuthRepository? repository}) {
+void showChangePasswordSheet(
+  BuildContext context, {
+  AuthRepository? repository,
+}) {
   showAppBottomSheet(
     context,
     showDragHandle: false,
@@ -54,9 +55,6 @@ class _ChangePasswordSheetBodyState extends State<_ChangePasswordSheetBody> {
   final _oldPasswordController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
-  bool _obscureOld = true;
-  bool _obscurePassword = true;
-  bool _obscureConfirm = true;
 
   @override
   void dispose() {
@@ -95,18 +93,12 @@ class _ChangePasswordSheetBodyState extends State<_ChangePasswordSheetBody> {
               RouteNames.login,
             );
           }
-        } else if (state is ChangePasswordError) {
-          AppSnackBar.show(
-            context: widget.parentContext,
-            message: state.message,
-            type: SnackBarType.error,
-          );
         }
       },
       builder: (ctx, state) {
         final isLoading = state is ChangePasswordLoading;
         return SafeArea(
-          bottom: false,
+          bottom: true,
           child: Padding(
             padding: EdgeInsetsDirectional.fromSTEB(
               ThemeConstants.paddingL,
@@ -161,18 +153,7 @@ class _ChangePasswordSheetBodyState extends State<_ChangePasswordSheetBody> {
                       hintText: context.translate(
                         LanguageLabelKeys.enterCurrentPassword,
                       ),
-                      obscureText: _obscureOld,
-                      suffixIcon: IconButton(
-                        icon: AppSvgIcon(
-                          _obscureOld
-                              ? AssetsConstants.passwordVisibleIcon
-                              : AssetsConstants.passwordHideIcon,
-                          size: ThemeConstants.iconM,
-                          color: context.cs.onSurfaceVariant,
-                        ),
-                        onPressed: () =>
-                            setState(() => _obscureOld = !_obscureOld),
-                      ),
+                      isPassword: true,
                       validator: (v) => v.validateRequiredField(context),
                     ),
                     AppSpacing.h16,
@@ -189,19 +170,7 @@ class _ChangePasswordSheetBodyState extends State<_ChangePasswordSheetBody> {
                       hintText: context.translate(
                         LanguageLabelKeys.enterNewPassword,
                       ),
-                      obscureText: _obscurePassword,
-                      suffixIcon: IconButton(
-                        icon: AppSvgIcon(
-                          _obscurePassword
-                              ? AssetsConstants.passwordVisibleIcon
-                              : AssetsConstants.passwordHideIcon,
-                          size: ThemeConstants.iconM,
-                          color: context.cs.onSurfaceVariant,
-                        ),
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
-                      ),
+                      isPassword: true,
                       validator: (v) => v.validatePassword(context),
                     ),
                     AppSpacing.h8,
@@ -228,23 +197,21 @@ class _ChangePasswordSheetBodyState extends State<_ChangePasswordSheetBody> {
                       hintText: context.translate(
                         LanguageLabelKeys.reEnterPassword,
                       ),
-                      obscureText: _obscureConfirm,
-                      suffixIcon: IconButton(
-                        icon: AppSvgIcon(
-                          _obscureConfirm
-                              ? AssetsConstants.passwordVisibleIcon
-                              : AssetsConstants.passwordHideIcon,
-                          size: ThemeConstants.iconM,
-                          color: context.cs.onSurfaceVariant,
-                        ),
-                        onPressed: () =>
-                            setState(() => _obscureConfirm = !_obscureConfirm),
-                      ),
+                      isPassword: true,
                       validator: (v) => v.validateConfirmPassword(
                         context,
                         _passwordController.text.trim(),
                       ),
                     ),
+                    if (state is ChangePasswordError) ...[
+                      AppSpacing.h16,
+                      AppText(
+                        state.message,
+                        style: context.tt.bodySmall?.copyWith(
+                          color: context.cs.error,
+                        ),
+                      ),
+                    ],
                     AppSpacing.h24,
                     AppButton(
                       label: context.translate(
@@ -303,7 +270,10 @@ void showLogoutDialog(BuildContext context, {AuthRepository? repository}) {
   );
 }
 
-void showDeleteAccountDialog(BuildContext context, {AuthRepository? repository}) {
+void showDeleteAccountDialog(
+  BuildContext context, {
+  AuthRepository? repository,
+}) {
   showDialog(
     context: context,
     barrierDismissible: false,

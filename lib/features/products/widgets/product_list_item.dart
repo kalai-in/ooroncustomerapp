@@ -11,6 +11,7 @@ import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/core/constants/navigation_service.dart';
 import 'package:customer/features/cart/cubit/cart_cubit.dart';
 import 'package:customer/commons/widgets/cart_button.dart';
+import 'package:customer/commons/widgets/notify_me_button.dart';
 import 'package:customer/commons/widgets/favorite_button.dart';
 import 'package:customer/commons/widgets/product_type_icon.dart';
 import 'package:customer/commons/widgets/star_rating_row.dart';
@@ -91,6 +92,13 @@ class _ProductListItemState extends State<ProductListItem> {
     final isTablet = AppSizes.isTablet(context);
     final isCompact = !isTablet;
     final imageSize = context.widthFraction(0.33).clamp(130.0, 200.0);
+    // Match product_detail_view's hero memCache dims exactly — the Hero tag
+    // shared with this image only reuses the already-decoded bitmap (no
+    // placeholder flash mid-flight) when both sides resolve to the same
+    // ResizeImage cache key.
+    final heroDpr = MediaQuery.devicePixelRatioOf(context);
+    final heroMemCacheWidth = (context.screenWidth * heroDpr).round();
+    final heroMemCacheHeight = (context.screenHeight * 0.38 * heroDpr).round();
     final nameFontSize = ProductCardDetails.nameFontSize(isCompact);
     final priceFontSize = ProductCardDetails.priceFontSize(isCompact);
     final strikeFontSize = ProductCardDetails.strikeFontSize(isCompact);
@@ -108,6 +116,7 @@ class _ProductListItemState extends State<ProductListItem> {
         activeV?.isOutOfStock == true ||
         (activeV == null && product.isOutOfStock);
     final isStoreClosedQuick = SettingsHiveBox.instance.isStoreClosedQuick;
+    final dimOpacity = (isProductOutOfStock || isStoreClosedQuick) ? 0.45 : 1.0;
     final measurement = VariantAttributesFormatter.firstValue(
       activeV?.attributesText,
     );
@@ -160,17 +169,17 @@ class _ProductListItemState extends State<ProductListItem> {
           border: Border.all(color: context.cs.outlineVariant),
           borderRadius: AppRadius.r8,
         ),
-        child: Opacity(
-          // sold-out opacity logic untouched; store-closed greys the card the same way, independently.
-          opacity: (isProductOutOfStock || isStoreClosedQuick) ? 0.45 : 1,
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: .center,
-              children: [
-                // Left: details — font scale mirrors ProductCardDetails,
-                // keyed off screen width, so list rows and grid cards
-                // (phone or tablet) land on the same type scale.
-                Expanded(
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: .center,
+            children: [
+              // Left: details — font scale mirrors ProductCardDetails,
+              // keyed off screen width, so list rows and grid cards
+              // (phone or tablet) land on the same type scale.
+              Expanded(
+                child: Opacity(
+                  // sold-out opacity logic untouched; store-closed greys the card the same way, independently.
+                  opacity: dimOpacity,
                   child: Column(
                     mainAxisAlignment: .start,
                     crossAxisAlignment: .start,
@@ -268,9 +277,7 @@ class _ProductListItemState extends State<ProductListItem> {
                           style: context.tt.displayMedium?.copyWith(
                             fontSize: timeFontSize,
                             fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? context.cs.onSurfaceVariant
-                                : context.cs.onSurfaceVariant,
+                            color: context.cs.onSurfaceVariant,
                           ),
                           maxLines: 1,
                           overflow: .ellipsis,
@@ -283,9 +290,7 @@ class _ProductListItemState extends State<ProductListItem> {
                             AppSvgIcon(
                               AssetsConstants.timeIcon,
                               size: timeIconSize,
-                              color: isDark
-                                  ? context.cs.onSurfaceVariant
-                                  : context.cs.onSurfaceVariant,
+                              color: context.cs.onSurfaceVariant,
                             ),
                             AppSpacing.w3,
                             Flexible(
@@ -296,9 +301,7 @@ class _ProductListItemState extends State<ProductListItem> {
                                 style: context.tt.displayMedium?.copyWith(
                                   fontSize: timeFontSize,
                                   fontWeight: FontWeight.w700,
-                                  color: isDark
-                                      ? context.cs.onSurfaceVariant
-                                      : context.cs.onSurfaceVariant,
+                                  color: context.cs.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -308,15 +311,18 @@ class _ProductListItemState extends State<ProductListItem> {
                     ],
                   ),
                 ),
-                AppSpacing.w12,
-                // Right: image with overlays + floating cart button
-                BlocBuilder<CartCubit, CartState>(
-                  builder: (context, cartState) {
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        // Image with fav + dots overlay
-                        Hero(
+              ),
+              AppSpacing.w12,
+              // Right: image with overlays + floating cart button
+              BlocBuilder<CartCubit, CartState>(
+                builder: (context, cartState) {
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Image with fav + dots overlay
+                      Opacity(
+                        opacity: dimOpacity,
+                        child: Hero(
                           tag: 'product_hero_${product.id}${widget.heroSuffix}',
                           child: ClipRRect(
                             borderRadius: AppRadius.r8,
@@ -337,7 +343,9 @@ class _ProductListItemState extends State<ProductListItem> {
                                         color: imageBg,
                                         child: AppNetworkImage(
                                           url: url,
-                                          fit: BoxFit.contain,
+                                          fit: BoxFit.cover,
+                                          memCacheWidth: heroMemCacheWidth,
+                                          memCacheHeight: heroMemCacheHeight,
                                         ),
                                       );
                                     },
@@ -412,87 +420,99 @@ class _ProductListItemState extends State<ProductListItem> {
                               ),
                             ),
                           ),
-                        ), // Hero
-                        // Floating cart button (bottom-right, overflows)
-                        if (!isProductOutOfStock)
-                          PositionedDirectional(
-                            end: -5,
-                            bottom: -4,
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Builder(
-                                  builder: (context) {
-                                    // Multi-variant: the button shows the cart
-                                    // total across every variant, matching
-                                    // ProductCard — a variant added from the
-                                    // sheet must reflect here too.
-                                    final isMulti = variants.length > 1;
-                                    final multiTotal = isMulti
-                                        ? variants.fold<int>(
-                                            0,
-                                            (s, v) =>
-                                                s +
-                                                cartState.countFor(
-                                                  v.id?.toString() ?? '',
-                                                ),
-                                          )
-                                        : 0;
-                                    final cartButton = CartButton(
-                                      key: ValueKey(
-                                        'list_btn_${product.id}_${activeV?.id}',
-                                      ),
-                                      width: 76,
-                                      height: 36,
-                                      fontSize: 12,
-                                      optionsFontSize: 8,
-                                      optionCount: variants.length,
-                                      initialCount: isMulti
-                                          ? multiTotal
-                                          : cartState.countFor(variantId),
-                                      productId: product.id?.toString() ?? '',
-                                      variantId: variantId,
-                                      price: displayPrice,
-                                      imageUrl:
-                                          product.images?.isNotEmpty == true
-                                          ? (product.images!.first.imageUrl ??
-                                                '')
-                                          : '',
-                                      totalAllowedQuantity:
-                                          product.totalAllowedQuantity ?? 0,
-                                      // CartButton already applies the local
-                                      // cart add/remove itself; these hooks
-                                      // only handle the multi-variant sheet.
-                                      onFirstAdd: () {
-                                        if (isMulti) {
-                                          showProductVariantSheet(
-                                            context: context,
-                                            product: product,
-                                            variants: variants,
-                                            isDark: isDark,
-                                          );
-                                        }
-                                      },
-                                      onLastRemove: () {},
-                                    );
-                                    if (!isStoreClosedQuick) return cartButton;
-                                    return GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onTap: () =>
-                                          showStoreClosedDialog(context),
-                                      child: IgnorePointer(child: cartButton),
-                                    );
-                                  },
-                                ),
-                              ],
+                        ),
+                      ), // Hero
+                      // Floating cart / notify button (bottom-right, overflows)
+                      if (isProductOutOfStock)
+                        PositionedDirectional(
+                          end: -5,
+                          bottom: -4,
+                          child: NotifyMeButton(
+                            key: ValueKey(
+                              'notify_list_btn_${product.id}_${activeV?.id}',
                             ),
+                            productVariantId: variantId,
+                            width: 76,
+                            height: 36,
+                            fontSize: 12,
+                            initiallyNotified: activeV?.isNotified ?? false,
                           ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
+                        ),
+                      if (!isProductOutOfStock)
+                        PositionedDirectional(
+                          end: -5,
+                          bottom: -4,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Builder(
+                                builder: (context) {
+                                  // Multi-variant: the button shows the cart
+                                  // total across every variant, matching
+                                  // ProductCard — a variant added from the
+                                  // sheet must reflect here too.
+                                  final isMulti = variants.length > 1;
+                                  final multiTotal = isMulti
+                                      ? variants.fold<int>(
+                                          0,
+                                          (s, v) =>
+                                              s +
+                                              cartState.countFor(
+                                                v.id?.toString() ?? '',
+                                              ),
+                                        )
+                                      : 0;
+                                  final cartButton = CartButton(
+                                    key: ValueKey(
+                                      'list_btn_${product.id}_${activeV?.id}',
+                                    ),
+                                    width: 76,
+                                    height: 36,
+                                    fontSize: 12,
+                                    optionsFontSize: 8,
+                                    optionCount: variants.length,
+                                    initialCount: isMulti
+                                        ? multiTotal
+                                        : cartState.countFor(variantId),
+                                    productId: product.id?.toString() ?? '',
+                                    variantId: variantId,
+                                    price: displayPrice,
+                                    imageUrl: product.images?.isNotEmpty == true
+                                        ? (product.images!.first.imageUrl ?? '')
+                                        : '',
+                                    totalAllowedQuantity:
+                                        product.totalAllowedQuantity ?? 0,
+                                    // CartButton already applies the local
+                                    // cart add/remove itself; these hooks
+                                    // only handle the multi-variant sheet.
+                                    onFirstAdd: () {
+                                      if (isMulti) {
+                                        showProductVariantSheet(
+                                          context: context,
+                                          product: product,
+                                          variants: variants,
+                                          isDark: isDark,
+                                        );
+                                      }
+                                    },
+                                    onLastRemove: () {},
+                                  );
+                                  if (!isStoreClosedQuick) return cartButton;
+                                  return GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () => showStoreClosedDialog(context),
+                                    child: IgnorePointer(child: cartButton),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),

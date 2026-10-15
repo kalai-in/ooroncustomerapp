@@ -50,11 +50,24 @@ const String kMaintenanceDialogDismissedWindow =
 // ── Channel ───────────────────────────────────────────────────────────────
 const String kChannel = 'channel';
 
+// ── Spin wheel ────────────────────────────────────────────────────────────
+/// Date (yyyy-MM-dd) the home spin wheel was last shown — one spin per day.
+const String kSpinWheelLastShownDate = 'spin_wheel_last_shown_date';
+
+/// Pending `spin_wheel/spin` request_token (UUID v4) — set right before
+/// calling the spin API, cleared only on a successful response. Kept on
+/// error/timeout/app-kill so a retry reuses the SAME token, letting the
+/// backend recognize and dedupe a previously-interrupted spin.
+const String kSpinWheelPendingRequestToken = 'spin_wheel_pending_request_token';
+
 // ── Store closed ──────────────────────────────────────────────────────────
 const String kStoreClosed = 'store_closed';
 
 // ── Zone ──────────────────────────────────────────────────────────────────
 const String kZoneId = 'zone_id';
+
+// ── Country ───────────────────────────────────────────────────────────────
+const String kSelectedCountryId = 'selected_country_id';
 
 // ── Guest Cart ────────────────────────────────────────────────────────────
 const String guestCartBox = 'guest_cart';

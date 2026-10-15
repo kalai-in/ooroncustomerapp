@@ -11,15 +11,20 @@ import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/theme_constants.dart';
 
 class CheckoutCard extends StatelessWidget {
-  const CheckoutCard({super.key, required this.child});
+  const CheckoutCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
+  });
 
   final Widget child;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingM),
+      padding: padding,
       decoration: AppDecorations.box(
         color: context.cs.surface,
         borderRadius: AppRadius.r12,
@@ -52,15 +57,20 @@ class CheckoutSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: .start,
       spacing: ThemeConstants.spaceS,
       children: [
         icon.isNotEmpty
-            ? AppSvgIcon(icon, color: context.cs.onSurfaceVariant, size: ThemeConstants.iconL,)
+            ? AppSvgIcon(
+                icon,
+                color: context.cs.onSurfaceVariant,
+                size: ThemeConstants.iconM,
+              )
             : const SizedBox(),
         Expanded(
           child: Column(
             crossAxisAlignment: .start,
-            spacing: ThemeConstants. spaceXXS,
+            spacing: ThemeConstants.spaceXXS,
             children: [
               AppText(
                 title,

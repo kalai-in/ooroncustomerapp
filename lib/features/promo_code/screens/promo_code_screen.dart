@@ -100,7 +100,12 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
           spacing: ThemeConstants.spaceL,
           children: [
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, 0),
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                ThemeConstants.paddingL,
+                ThemeConstants.paddingL,
+                ThemeConstants.paddingL,
+                0,
+              ),
               child: PromoCodeInputRow(
                 controller: _controller,
                 onApply: _apply,

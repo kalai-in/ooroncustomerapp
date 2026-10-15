@@ -32,7 +32,12 @@ class WalletBalanceCard extends StatelessWidget {
             double.tryParse(AuthHiveBox.instance.userBalance) ?? 0.0;
         return Container(
           width: double.infinity,
-          margin: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingS),
+          margin: const EdgeInsetsDirectional.fromSTEB(
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingS,
+          ),
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: ThemeConstants.paddingL,
             vertical: ThemeConstants.paddingL,
@@ -70,7 +75,9 @@ class WalletBalanceCard extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.only(start: ThemeConstants.paddingM),
+                  padding: const EdgeInsetsDirectional.only(
+                    start: ThemeConstants.paddingM,
+                  ),
                   child: Column(
                     crossAxisAlignment: .start,
                     mainAxisSize: .min,

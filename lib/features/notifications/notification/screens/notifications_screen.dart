@@ -141,6 +141,7 @@ class _NotificationList extends StatelessWidget {
       onRefresh: onRefresh,
       child: ListView.separated(
         controller: scrollCtrl,
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: ThemeConstants.paddingL,
           vertical: ThemeConstants.paddingM,
@@ -152,6 +153,10 @@ class _NotificationList extends StatelessWidget {
             return PaginatedListFooter(
               isLoadingMore: isLoadingMore,
               hasMore: hasMore,
+              skeletonBuilder: (_) => const NotificationListSkeletonLoader(
+                itemCount: 1,
+                shrinkWrap: true,
+              ),
             );
           }
           return _NotificationCard(item: items[i]);

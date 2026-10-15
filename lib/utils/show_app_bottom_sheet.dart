@@ -10,7 +10,12 @@ import 'package:flutter/material.dart';
 /// Default content padding for a sheet body — bottom safe-area is added on top
 /// of the bottom value by [showAppBottomSheet].
 const EdgeInsetsDirectional _defaultSheetPadding =
-    EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL);
+    EdgeInsetsDirectional.fromSTEB(
+      ThemeConstants.paddingL,
+      ThemeConstants.paddingM,
+      ThemeConstants.paddingL,
+      ThemeConstants.paddingL,
+    );
 
 /// Standard bottom sheet launcher.
 /// Owns the whole sheet chrome — background colour, top radius, content padding

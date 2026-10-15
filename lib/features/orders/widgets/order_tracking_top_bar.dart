@@ -140,7 +140,12 @@ class _OrderTrackingTopBarState extends State<OrderTrackingTopBar> {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingM, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingL),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            ThemeConstants.paddingM,
+            ThemeConstants.paddingS,
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+          ),
           child: Row(
             crossAxisAlignment: .center,
             spacing: ThemeConstants.spaceM,
@@ -153,7 +158,7 @@ class _OrderTrackingTopBarState extends State<OrderTrackingTopBar> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: .center,
-                  spacing: ThemeConstants. spaceXXS,
+                  spacing: ThemeConstants.spaceXXS,
                   children: [
                     AppText(
                       (widget.statusLabel?.isNotEmpty ?? false)
@@ -176,7 +181,9 @@ class _OrderTrackingTopBarState extends State<OrderTrackingTopBar> {
                       remainingMinutes != null && remainingMinutes > 0
                           ? '${context.translate(LanguageLabelKeys.arrivingIn)} '
                                 '${remainingMinutes == 1 ? context.translate(LanguageLabelKeys.durationOneMinute) : context.translate(LanguageLabelKeys.durationMinutes).replaceAll('{count}', '$remainingMinutes')}'
-                          : context.translate(LanguageLabelKeys.reachingYouSoon),
+                          : context.translate(
+                              LanguageLabelKeys.reachingYouSoon,
+                            ),
                       style: context.tt.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: onPrimary.withValues(alpha: 0.85),

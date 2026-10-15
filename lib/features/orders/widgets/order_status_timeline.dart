@@ -52,7 +52,9 @@ class OrderStatusTimeline extends StatelessWidget {
                       height: dotSize,
                       decoration: AppDecorations.box(
                         color: !isDone
-                            ? context.cs.onSurfaceVariant.withValues(alpha: 0.12)
+                            ? context.cs.onSurfaceVariant.withValues(
+                                alpha: 0.12,
+                              )
                             : isLast
                             ? context.cs.primary
                             : context.cs.primary.withValues(alpha: 0.12),
@@ -71,7 +73,9 @@ class OrderStatusTimeline extends StatelessWidget {
                       ),
                       child: AppSvgIcon(
                         OrderStatusLabels.icon(item.status),
-                        size: isLast ? ThemeConstants.iconL : ThemeConstants.iconS,
+                        size: isLast
+                            ? ThemeConstants.iconL
+                            : ThemeConstants.iconS,
                         color: !isDone
                             ? context.cs.onSurfaceVariant
                             : isLast
@@ -89,7 +93,9 @@ class OrderStatusTimeline extends StatelessWidget {
                           ),
                           decoration: AppDecorations.box(
                             color: !isDone
-                                ? context.cs.onSurfaceVariant.withValues(alpha: 0.2)
+                                ? context.cs.onSurfaceVariant.withValues(
+                                    alpha: 0.2,
+                                  )
                                 : context.cs.primary.withValues(alpha: 0.2),
                             borderRadius: AppRadius.r2,
                           ),
@@ -102,7 +108,9 @@ class OrderStatusTimeline extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsetsDirectional.only(
                     bottom: isLast ? 0 : ThemeConstants.paddingXL,
-                    top: isLast ? ThemeConstants.paddingXS : ThemeConstants.paddingXS,
+                    top: isLast
+                        ? ThemeConstants.paddingXS
+                        : ThemeConstants.paddingXS,
                   ),
                   child: Column(
                     crossAxisAlignment: .start,
@@ -149,7 +157,9 @@ class OrderStatusTimeline extends StatelessWidget {
             horizontal: ThemeConstants.paddingS,
             vertical: ThemeConstants.paddingS,
           ),
-          margin: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingXS),
+          margin: const EdgeInsetsDirectional.only(
+            bottom: ThemeConstants.paddingXS,
+          ),
           decoration: AppDecorations.box(
             color: !isDone
                 ? context.cs.onSurfaceVariant.withValues(alpha: 0.06)

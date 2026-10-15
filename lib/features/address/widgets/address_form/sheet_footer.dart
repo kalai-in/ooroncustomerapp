@@ -12,7 +12,12 @@ class SheetFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXL, ThemeConstants.paddingM, ThemeConstants.paddingXL, ThemeConstants.paddingXL),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingXL,
+        ThemeConstants.paddingXL,
+      ),
       decoration: AppDecorations.bottomSheetFooter(
         color: context.cs.surface,
         borderColor: context.cs.outlineVariant.withValues(alpha: 0.3),

@@ -60,6 +60,7 @@ class LanguageLabelKeys {
   static const String onThisOrder = "on_this_order";
   static const String withCode = "with_code";
   static const String freeDeliveryApplied = "free_delivery_applied";
+  static const String freeDelivery = "free_delivery";
   static const String inYourOrder = "in_your_order";
   static const String orderConfirmedBeingPrepared =
       "order_confirmed_being_prepared";
@@ -193,6 +194,14 @@ class LanguageLabelKeys {
   // ── Address ─────────────────────────────────────────────────────────────────
   static const String address = "address";
   static const String selectAddress = "select_address";
+  static const String chooseSavedAddress = "choose_saved_address";
+  static const String chooseSavedBillingAddress =
+      "choose_saved_billing_address";
+  static const String addBillingAddressManually =
+      "add_billing_address_manually";
+  static const String addAddressManually = "add_address_manually";
+  static const String addYourAddress = "add_your_address";
+  static const String addYourBillingAddress = "add_your_billing_address";
   static const String deliveringTo = "delivering_to";
   static const String change = "change";
   static const String myAddresses = "my_addresses";
@@ -297,8 +306,7 @@ class LanguageLabelKeys {
   static const String youSavedAmount = "you_saved_amount";
   static const String paymentUrlNotReceived = "payment_url_not_received";
   static const String paymentFailedTryAgain = "payment_failed_try_again";
-  static const String phonePeStatusCheckFailed =
-      "phone_pe_status_check_failed";
+  static const String phonePeStatusCheckFailed = "phone_pe_status_check_failed";
   static const String phonePePaymentFailed = "phone_pe_payment_failed";
   static const String phonePePaymentDeclined = "phone_pe_payment_declined";
   static const String phonePePaymentCancelled = "phone_pe_payment_cancelled";
@@ -330,6 +338,7 @@ class LanguageLabelKeys {
   static const String paypalPaymentFailed = "paypal_payment_failed";
   static const String paymentCancelled = "payment_cancelled";
   static const String paystackKeyNotConfigured = "paystack_key_not_configured";
+  static const String razorpayKeyNotConfigured = "razorpay_key_not_configured";
   static const String paystackPaymentNotCompleted =
       "paystack_payment_not_completed";
   static const String stripeKeysNotConfigured = "stripe_keys_not_configured";
@@ -337,6 +346,7 @@ class LanguageLabelKeys {
   static const String stripePaymentFailed = "stripe_payment_failed";
   static const String stripeApiError = "stripe_api_error";
   static const String ratingsAndReviews = "ratings_and_reviews";
+  static const String noReviewsFound = "no_reviews_found";
   static const String ongoing = "ongoing";
   static const String completed = "completed";
   static const String billDetails = "bill_details";
@@ -375,6 +385,9 @@ class LanguageLabelKeys {
   static const String pressBackCancelPayment = "press_back_cancel_payment";
   static const String browseChoosePromoCode = "browse_choose_promo_code";
   static const String viewAllCoupons = "view_all_coupons";
+  static const String viewAll = "view_all";
+  static const String viewAllReviews = "view_all_reviews";
+  static const String customerReviews = "customer_reviews";
   static const String unlock = "unlock";
   static const String frequentlyBoughtTogether = "frequently_bought_together";
   static const String upgradeYourOrder = "upgrade_your_order";
@@ -450,8 +463,18 @@ class LanguageLabelKeys {
       "delivery_instruction_subtitle";
   static const String deliveryIn = "delivery_in";
   static const String delivery = "delivery";
+  static const String pickUp = "pick_up";
+  static const String pickupFrom = "pickup_from";
+  static const String readyForPickupIn = "ready_for_pickup_in";
+  static const String storeContactNumber = "store_contact_number";
+  static const String storeOpenNow = "store_open_now";
+  static const String storeClosedNow = "store_closed_now";
+  static const String getDirections = "get_directions";
+  static const String callStore = "call_store";
+  static const String billingUseProfileDetails = "billing_use_profile_details";
   static const String estimatedDeliveryBy = "estimated_delivery_by";
   static const String deliveryBy = "delivery_by";
+  static const String orderExpectedDeliveryBy = "order_expected_delivery_by";
   static const String shipmentOf = "shipment_of";
   static const String minutesShort = "minutes_short";
   static const String away = "away";
@@ -544,6 +567,38 @@ class LanguageLabelKeys {
   static const String noFaqsFound = "no_faqs_found";
   static const String noFaqsAvailable = "no_faqs_available";
 
+  // ── Spin Wheel ──────────────────────────────────────────────────────────────
+  static const String spinAndWin = "spin_and_win";
+  static const String myRewards = "my_rewards";
+  static const String noRewardsFound = "no_rewards_found";
+  static const String noRewardsAvailable = "no_rewards_available";
+  static const String spinButtonLabel = "spin_button_label";
+  static const String spinningStatus = "spinning_status";
+  static const String tapWheelToTryLuck = "tap_wheel_to_try_luck";
+  static const String betterLuckNextTime = "better_luck_next_time";
+  static const String youWonReward = "you_won_reward";
+  static const String spinResultYouWon = "spin_result_you_won";
+  static const String spinResultCongratulations = "spin_result_congratulations";
+  static const String spinResultCouponCode = "spin_result_coupon_code";
+  static const String spinResultCopy = "spin_result_copy";
+  static const String spinResultSpinAgain = "spin_result_spin_again";
+  static const String spinResultShopNow = "spin_result_shop_now";
+  static const String totalSpins = "total_spins";
+  static const String totalWins = "total_wins";
+  static const String walletRewards = "wallet_rewards";
+  static const String walletReward = "wallet_reward";
+  static const String promoCodeReward = "promo_code_reward";
+  static const String instantDiscount = "instant_discount";
+  static const String couponsWon = "coupons_won";
+  static const String freeDeliveriesWon = "free_deliveries_won";
+  static const String promoCodeCopied = "promo_code_copied";
+  static const String playNow = "play_now";
+  static const String nextRewardIn = "next_reward_in";
+  static const String nextSpinIn = "next_spin_in";
+  static const String getFreeWalletCash = "get_free_wallet_cash";
+  static const String spinWheelPromoDesc = "spin_wheel_promo_desc";
+  static const String spinNow = "spin_now";
+
   // ── Chat ────────────────────────────────────────────────────────────────────
   static const String attachment = "attachment";
   static const String noMessages = "no_messages";
@@ -583,6 +638,8 @@ class LanguageLabelKeys {
   static const String enterNewPassword = "enter_new_password";
   static const String enterSixDigitOtp = "enter_six_digit_otp";
   static const String forgotPassword = "forgot_password";
+  static const String forgotSomething = "forgot_something";
+  static const String addMoreItems = "add_more_items";
   static const String enterEmail = "enter_email";
   static const String enterPassword = "enter_password";
   static const String enterPhoneNumber = "enter_phone_number";
@@ -708,6 +765,8 @@ class LanguageLabelKeys {
   static const String off = "off";
   static const String outOfStock = "out_of_stock";
   static const String soldOut = "sold_out";
+  static const String notifyMe = "notify_me";
+  static const String notified = "notified";
   static const String leftInStock = "left_in_stock";
   static const String removeOutOfStockItems = "remove_out_of_stock_items";
   static const String notApplicable = "not_applicable";
@@ -751,9 +810,12 @@ class LanguageLabelKeys {
   // ── Promo code ──────────────────────────────────────────────────────────────
   static const String useCode = "use_code";
   static const String readMore = "read_more";
+  static const String readLess = "read_less";
   static const String showLess = "show_less";
   static const String flatDiscount = "flat_discount";
   static const String maxDiscount = "max_discount";
+  static const String validTill = "valid_till";
+  static const String expired = "expired";
 
   static const String txnId = "txn_id";
   static const String id = "id";

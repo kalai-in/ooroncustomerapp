@@ -57,7 +57,8 @@ class ChatCubit extends Cubit<ChatState> {
   static ChatCubit? active;
 
   String? get conversationId => _conversationId;
-  bool get isSocketConnected => _socket.state == SocketConnectionState.connected;
+  bool get isSocketConnected =>
+      _socket.state == SocketConnectionState.connected;
 
   ChatCubit({ChatRepository? repository, bool sendLocation = false})
     : _repository = repository ?? ChatRepository(),

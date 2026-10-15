@@ -1,5 +1,6 @@
 import 'package:customer/commons/cubit/base_pagination_cubit.dart';
 import 'package:customer/commons/utils/pagination_scroll_controller.dart';
+import 'package:customer/commons/widgets/app_network_image.dart';
 import 'package:customer/features/category/cubit/sub_category_cubit.dart';
 import 'package:customer/features/category/models/category_model.dart';
 import 'package:customer/features/category/widgets/sub_category_sidebar.dart';
@@ -38,6 +39,19 @@ class SubCategorySidebarPanel extends StatelessWidget {
       width: 84,
       child: BlocConsumer<SubCategoryCubit, PaginationState<Category>>(
         listener: (context, state) {
+          if (state is PaginationLoaded<Category>) {
+            // Fetch every icon up front so the first tap on any category
+            // never has to wait on a cold network fetch — only ever hits
+            // this once per screen since the cubit only loads once.
+            for (final cat in state.data) {
+              final url = cat.imageUrl ?? '';
+              if (url.isEmpty) continue;
+              // width/height:50 matches SidebarItem's explicit AppNetworkImage
+              // size so this lands in the image cache under the same key
+              // build() looks up.
+              AppNetworkImage.precache(context, url, width: 50, height: 50);
+            }
+          }
           if (state is PaginationLoaded<Category> &&
               state.data.isNotEmpty &&
               selectedCategoryId == null) {
@@ -79,7 +93,8 @@ class SubCategorySidebarPanel extends StatelessWidget {
                       // here, so it shouldn't look selected.
                       isSelected:
                           selectedCategoryId == cat.id &&
-                          (cat.hasChild != true || cat.id == autoChildCategoryId),
+                          (cat.hasChild != true ||
+                              cat.id == autoChildCategoryId),
                       onTap: () => onSelectCategory(cat),
                     );
                   },

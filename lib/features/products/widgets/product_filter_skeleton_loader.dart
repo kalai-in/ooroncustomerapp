@@ -54,7 +54,9 @@ class ProductFilterSkeletonLoader extends StatelessWidget {
           SizedBox(
             width: 110,
             child: ListView.builder(
-              padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingS),
+              padding: const EdgeInsetsDirectional.symmetric(
+                vertical: ThemeConstants.paddingS,
+              ),
               physics: const NeverScrollableScrollPhysics(),
               itemCount: railItemCount,
               itemBuilder: (_, index) =>
@@ -68,7 +70,9 @@ class ProductFilterSkeletonLoader extends StatelessWidget {
           ),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXS),
+              padding: const EdgeInsetsDirectional.symmetric(
+                vertical: ThemeConstants.paddingXS,
+              ),
               physics: const NeverScrollableScrollPhysics(),
               itemCount: optionItemCount,
               itemBuilder: (_, index) =>

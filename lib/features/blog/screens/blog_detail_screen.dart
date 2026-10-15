@@ -47,20 +47,29 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
       ),
       body: SingleChildScrollView(
         controller: _scrollController,
-        padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.spaceXXXL),
+        padding: const EdgeInsetsDirectional.only(
+          bottom: ThemeConstants.spaceXXXL,
+        ),
         child: Column(
           crossAxisAlignment: .start,
           children: [
             if ((blog.imageUrl ?? '').isNotEmpty) _buildHeroImage(context),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, 0),
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                ThemeConstants.paddingL,
+                ThemeConstants.paddingL,
+                ThemeConstants.paddingL,
+                0,
+              ),
               child: Column(
                 crossAxisAlignment: .start,
                 children: [
                   if ((categoryName != null && categoryName.isNotEmpty) ||
                       (blog.createdAt ?? '').isNotEmpty)
                     Padding(
-                      padding: const EdgeInsetsDirectional.only(bottom: ThemeConstants.paddingS),
+                      padding: const EdgeInsetsDirectional.only(
+                        bottom: ThemeConstants.paddingS,
+                      ),
                       child: Row(
                         children: [
                           if (categoryName != null && categoryName.isNotEmpty)
@@ -151,7 +160,11 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
         height: 220,
         color: context.cs.surfaceContainerHighest,
         alignment: Alignment.center,
-        child: FractionallySizedBox(widthFactor: 0.3, heightFactor: 0.3, child: AppSvgIcon(AssetsConstants.placeholder, fit: BoxFit.contain)),
+        child: FractionallySizedBox(
+          widthFactor: 0.3,
+          heightFactor: 0.3,
+          child: AppSvgIcon(AssetsConstants.placeholder, fit: BoxFit.contain),
+        ),
       ),
       errorWidget: Container(
         height: 220,

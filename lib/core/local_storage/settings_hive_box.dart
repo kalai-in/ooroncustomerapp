@@ -91,6 +91,24 @@ class SettingsHiveBox {
   String get channel =>
       _box.get(kChannel, defaultValue: AppConstants.quick) as String;
 
+  // ── Spin wheel ────────────────────────────────────────────────────────────
+
+  String get spinWheelLastShownDate =>
+      _box.get(kSpinWheelLastShownDate, defaultValue: '') as String;
+
+  Future<void> setSpinWheelLastShownDate(String date) =>
+      _box.put(kSpinWheelLastShownDate, date);
+
+  /// Null when there's no spin currently in flight / awaiting retry.
+  String? get spinWheelPendingRequestToken =>
+      _box.get(kSpinWheelPendingRequestToken) as String?;
+
+  Future<void> setSpinWheelPendingRequestToken(String token) =>
+      _box.put(kSpinWheelPendingRequestToken, token);
+
+  Future<void> clearSpinWheelPendingRequestToken() =>
+      _box.delete(kSpinWheelPendingRequestToken);
+
   // ── Store closed ──────────────────────────────────────────────────────────
 
   Future<void> setStoreClosed(int storeClosed) =>
@@ -168,6 +186,13 @@ class SettingsHiveBox {
   Future<void> saveZoneId(int? id) => _box.put(kZoneId, id);
 
   int? get zoneId => _box.get(kZoneId) as int?;
+
+  // ── Country ──────────────────────────────────────────────────────────────
+
+  Future<void> saveSelectedCountryId(int? id) =>
+      _box.put(kSelectedCountryId, id);
+
+  int? get selectedCountryId => _box.get(kSelectedCountryId) as int?;
 
   // ── Google Places cache ───────────────────────────────────────────────────
 

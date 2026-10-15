@@ -27,7 +27,8 @@ class LocationRequiredView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(applyBottomInset: false,
+    return AppScaffold(
+      applyBottomInset: false,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: LayoutBuilder(
@@ -96,7 +97,10 @@ class LocationRequiredView extends StatelessWidget {
                     ),
                   ),
                   AppSpacing.h24,
-                  CountryZoneSelector(onLocationConfirmed: onLocationConfirmed),
+                  CountryZoneSelector(
+                    onLocationConfirmed: onLocationConfirmed,
+                    autoSelectZone: false,
+                  ),
                 ],
               ),
             ),

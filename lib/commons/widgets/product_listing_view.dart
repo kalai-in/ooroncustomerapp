@@ -70,7 +70,7 @@ class ProductListingView extends StatelessWidget {
     return ProductCardGrid(
       controller: controller,
       shrinkWrap: shrinkWrap,
-      physics: physics,
+      physics: physics ?? const AlwaysScrollableScrollPhysics(),
       padding: padding,
       crossAxisCount: _crossAxisCount(context),
       crossAxisSpacing: spacing,
@@ -117,7 +117,7 @@ class ProductListingView extends StatelessWidget {
     return ListView.separated(
       controller: controller,
       shrinkWrap: shrinkWrap,
-      physics: physics,
+      physics: physics ?? const AlwaysScrollableScrollPhysics(),
       padding: padding,
       itemCount: products.length + (isFetchingMore ? 1 : 0),
       separatorBuilder: (_, _) => AppSpacing.h10,

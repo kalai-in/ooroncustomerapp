@@ -46,7 +46,11 @@ class LocationSuggestions extends StatelessWidget {
 
   Widget _container(BuildContext context, List<Widget> tiles) {
     return Container(
-      margin: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingS, start: ThemeConstants.paddingL, end: ThemeConstants.paddingL),
+      margin: const EdgeInsetsDirectional.only(
+        top: ThemeConstants.paddingS,
+        start: ThemeConstants.paddingL,
+        end: ThemeConstants.paddingL,
+      ),
       decoration: AppDecorations.outlinedCard(
         color: context.cs.surface,
         borderColor: context.cs.outline,
@@ -63,7 +67,9 @@ class LocationSuggestions extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 280),
           child: ListView.separated(
-            padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXS),
+            padding: const EdgeInsetsDirectional.symmetric(
+              vertical: ThemeConstants.paddingXS,
+            ),
             shrinkWrap: true,
             itemCount: tiles.length,
             separatorBuilder: (_, _) => Divider(

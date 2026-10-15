@@ -41,8 +41,14 @@ class _ThemeRevealAnimationState extends State<ThemeRevealAnimation>
 
     // Matches the reference animation: a single smooth grow with
     // no overshoot — verified frame-by-frame, it never bounces back in.
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOutCubic,
+    );
 
     // This widget is inserted in the same frame that applies the new theme,
     // which forces the whole (heavy) tab tree underneath to rebuild. Starting
@@ -79,11 +85,18 @@ class _ThemeRevealAnimationState extends State<ThemeRevealAnimation>
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
-        final radius = shrink ? maxDistance * (1 - _animation.value) : maxDistance * _animation.value;
+        final radius = shrink
+            ? maxDistance * (1 - _animation.value)
+            : maxDistance * _animation.value;
 
         return CustomPaint(
           size: Size.infinite,
-          painter: _RevealPainter(image: widget.oldSnapshot, center: widget.position, radius: radius, shrink: shrink),
+          painter: _RevealPainter(
+            image: widget.oldSnapshot,
+            center: widget.position,
+            radius: radius,
+            shrink: shrink,
+          ),
         );
       },
     );
@@ -96,18 +109,30 @@ class _RevealPainter extends CustomPainter {
   final double radius;
   final bool shrink;
 
-  _RevealPainter({required this.image, required this.center, required this.radius, required this.shrink});
+  _RevealPainter({
+    required this.image,
+    required this.center,
+    required this.radius,
+    required this.shrink,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+    final src = Rect.fromLTWH(
+      0,
+      0,
+      image.width.toDouble(),
+      image.height.toDouble(),
+    );
     final dst = Rect.fromLTWH(0, 0, size.width, size.height);
 
     if (shrink) {
       // Old snapshot only exists within the shrinking circle — everywhere
       // else is untouched (transparent), showing the already-live new UI.
       canvas.save();
-      canvas.clipPath(Path()..addOval(Rect.fromCircle(center: center, radius: radius)));
+      canvas.clipPath(
+        Path()..addOval(Rect.fromCircle(center: center, radius: radius)),
+      );
       canvas.drawImageRect(image, src, dst, Paint());
       canvas.restore();
     } else {

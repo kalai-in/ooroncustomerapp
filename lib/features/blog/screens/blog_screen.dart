@@ -125,7 +125,12 @@ class _BlogScreenState extends State<BlogScreen> {
     return _pager.attach(
       ListView.separated(
         controller: _pager.controller,
-        padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingM,
+          ThemeConstants.paddingL,
+          ThemeConstants.paddingL,
+        ),
         itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
         separatorBuilder: (context, index) => AppSpacing.h12,
         itemBuilder: (context, index) {
@@ -133,6 +138,8 @@ class _BlogScreenState extends State<BlogScreen> {
             return PaginatedListFooter(
               isLoadingMore: state.isFetchingMore,
               hasMore: state.hasMore,
+              skeletonBuilder: (_) =>
+                  const BlogListSkeletonLoader(itemCount: 1, shrinkWrap: true),
             );
           }
           return BlogCard(blog: state.data[index]);

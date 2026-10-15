@@ -1,3 +1,5 @@
+import 'package:customer/features/cart/models/delivery_type.dart';
+
 class OrderDetailArgs {
   final String orderId;
 
@@ -37,5 +39,14 @@ class OrderSuccessArgs {
   /// response — needed to route "Track My Order" to EcommerceOrderDetailArgs.
   final String orderItemId;
 
-  const OrderSuccessArgs({required this.orderId, this.orderItemId = ''});
+  /// Quick-channel "Track My Order" routes to [RouteNames.orderTracking]
+  /// for delivery, [RouteNames.orderDetail] for pickup (no live rider to
+  /// track for a pickup order).
+  final DeliveryType deliveryType;
+
+  const OrderSuccessArgs({
+    required this.orderId,
+    this.orderItemId = '',
+    this.deliveryType = DeliveryType.delivery,
+  });
 }

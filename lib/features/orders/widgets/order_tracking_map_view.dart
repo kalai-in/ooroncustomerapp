@@ -132,7 +132,9 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
   /// picture directly and drawing it onto our own canvas sidesteps that
   /// widget-paint timing entirely.
   Future<void> _captureDestinationIcon() async {
-    final icon = await _rasterizeSvgIcon(AssetsConstants.destinationLocationIcon);
+    final icon = await _rasterizeSvgIcon(
+      AssetsConstants.destinationLocationIcon,
+    );
     if (icon != null && mounted) setState(() => _destinationIcon = icon);
   }
 
@@ -270,14 +272,8 @@ class _OrderTrackingMapViewState extends State<OrderTrackingMapView> {
   gmap.CameraUpdate _googleBoundsUpdate(LatLng boyPoint) {
     final south = math.min(boyPoint.latitude, deliveryAddressPoint.latitude);
     final north = math.max(boyPoint.latitude, deliveryAddressPoint.latitude);
-    final west = math.min(
-      boyPoint.longitude,
-      deliveryAddressPoint.longitude,
-    );
-    final east = math.max(
-      boyPoint.longitude,
-      deliveryAddressPoint.longitude,
-    );
+    final west = math.min(boyPoint.longitude, deliveryAddressPoint.longitude);
+    final east = math.max(boyPoint.longitude, deliveryAddressPoint.longitude);
     return gmap.CameraUpdate.newLatLngBounds(
       gmap.LatLngBounds(
         southwest: gmap.LatLng(south, west),

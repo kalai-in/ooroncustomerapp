@@ -277,66 +277,62 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
                   AuthScreenHeader(title: title, subtitle: subtitle),
                   AppSpacing.h24,
                   if (_phase == 0)
-                        ForgotPasswordInputSection(
-                          isPhone: _isPhone,
-                          emailController: _emailController,
-                          phoneController: _phoneController,
-                          isLoading: isLoading,
-                          selectedCountry: _selectedCountry,
-                          onCountryCodeChanged: (code) =>
-                              setState(() => _countryCode = code),
-                          onCountryChanged: (country) =>
-                              setState(() => _selectedCountry = country),
-                          onSendOtp: _onSendOtp,
+                    ForgotPasswordInputSection(
+                      isPhone: _isPhone,
+                      emailController: _emailController,
+                      phoneController: _phoneController,
+                      isLoading: isLoading,
+                      selectedCountry: _selectedCountry,
+                      onCountryCodeChanged: (code) =>
+                          setState(() => _countryCode = code),
+                      onCountryChanged: (country) =>
+                          setState(() => _selectedCountry = country),
+                      onSendOtp: _onSendOtp,
+                    ),
+                  if (_phase == 1) ...[
+                    Center(child: AuthOtpFields(controller: _otpController)),
+                    AppSpacing.h24,
+                    if (!_isPhone)
+                      ForgotPasswordPasswordSection(
+                        passwordController: _passwordController,
+                        confirmPasswordController: _confirmController,
+                        isLoading: isLoading,
+                        onSubmit: _onVerifyOtp,
+                        submitLabel: context.translate(
+                          LanguageLabelKeys.resetPassword,
                         ),
-                      if (_phase == 1) ...[
-                        Center(
-                          child: AuthOtpFields(controller: _otpController),
-                        ),
-                        AppSpacing.h24,
-                        if (!_isPhone)
-                          ForgotPasswordPasswordSection(
-                            passwordController: _passwordController,
-                            confirmPasswordController: _confirmController,
-                            isLoading: isLoading,
-                            onSubmit: _onVerifyOtp,
-                            submitLabel: context.translate(
-                              LanguageLabelKeys.resetPassword,
-                            ),
-                          ),
-                        if (_isPhone) ...[
-                          AppSpacing.h20,
-                          AuthResendSection(
-                            resendTimer: _resendTimer,
-                            onResend: _onResend,
-                          ),
-                          AppSpacing.h24,
-                          AppButton(
-                            label: context.translate(
-                              LanguageLabelKeys.verifyOtp,
-                            ),
-                            isLoading: isLoading,
-                            onPressed: isLoading ? null : _onVerifyOtp,
-                          ),
-                        ],
-                        if (!_isPhone) ...[
-                          AppSpacing.h12,
-                          AuthResendSection(
-                            resendTimer: _resendTimer,
-                            onResend: _onResend,
-                          ),
-                        ],
-                      ],
-                      if (_phase == 2)
-                        ForgotPasswordPasswordSection(
-                          passwordController: _passwordController,
-                          confirmPasswordController: _confirmController,
-                          isLoading: isLoading,
-                          onSubmit: _onResetPassword,
-                          submitLabel: context.translate(
-                            LanguageLabelKeys.resetPassword,
-                          ),
-                        ),
+                      ),
+                    if (_isPhone) ...[
+                      AppSpacing.h20,
+                      AuthResendSection(
+                        resendTimer: _resendTimer,
+                        onResend: _onResend,
+                      ),
+                      AppSpacing.h24,
+                      AppButton(
+                        label: context.translate(LanguageLabelKeys.verifyOtp),
+                        isLoading: isLoading,
+                        onPressed: isLoading ? null : _onVerifyOtp,
+                      ),
+                    ],
+                    if (!_isPhone) ...[
+                      AppSpacing.h12,
+                      AuthResendSection(
+                        resendTimer: _resendTimer,
+                        onResend: _onResend,
+                      ),
+                    ],
+                  ],
+                  if (_phase == 2)
+                    ForgotPasswordPasswordSection(
+                      passwordController: _passwordController,
+                      confirmPasswordController: _confirmController,
+                      isLoading: isLoading,
+                      onSubmit: _onResetPassword,
+                      submitLabel: context.translate(
+                        LanguageLabelKeys.resetPassword,
+                      ),
+                    ),
                   AppSpacing.h16,
                 ],
               ),

@@ -9,7 +9,15 @@ class SurgeCharges {
   String? taxName;
   double? taxRate;
 
-  SurgeCharges({this.label, this.charge, this.isRefundable, this.taxableAmount, this.taxAmount, this.taxName, this.taxRate});
+  SurgeCharges({
+    this.label,
+    this.charge,
+    this.isRefundable,
+    this.taxableAmount,
+    this.taxAmount,
+    this.taxName,
+    this.taxRate,
+  });
 
   SurgeCharges.fromJson(Map<String, dynamic> json) {
     label = parseString(json['label']) ?? "";

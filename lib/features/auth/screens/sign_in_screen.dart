@@ -27,7 +27,7 @@ import 'package:customer/features/auth/widgets/auth_screen_header.dart';
 import 'package:customer/features/auth/widgets/auth_social_buttons.dart';
 import 'package:customer/features/auth/widgets/auth_terms_bar.dart';
 import 'package:customer/features/auth/widgets/sign_in_email_form.dart';
-import 'package:customer/features/auth/widgets/sign_in_mode_toggle.dart';
+import 'package:customer/features/auth/models/enums/sign_in_enums.dart';
 import 'package:customer/features/auth/widgets/sign_in_phone_form.dart';
 import 'package:customer/features/cart/cubit/guest_cart_sync_helper.dart';
 import 'package:customer/commons/cubit/settings_cubit.dart';
@@ -446,7 +446,9 @@ class _SignInScreenState extends State<SignInScreen>
         color: context.cs.onSurface,
         backgroundColor: context.cs.surface,
         borderColor: context.cs.outline,
-        contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingL),
+        contentPadding: const EdgeInsetsDirectional.symmetric(
+          horizontal: ThemeConstants.paddingL,
+        ),
         borderRadius: AppRadius.r20,
       ),
     );
@@ -457,7 +459,9 @@ class _SignInScreenState extends State<SignInScreen>
       children: [
         Expanded(child: Divider(color: context.cs.outlineVariant)),
         Padding(
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingL),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: ThemeConstants.paddingL,
+          ),
           child: AppText(
             context.translate(LanguageLabelKeys.orContinueWith),
             style: context.tt.bodySmall?.copyWith(

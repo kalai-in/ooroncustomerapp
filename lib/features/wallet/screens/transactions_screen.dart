@@ -112,13 +112,22 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         ListView.builder(
           controller: _pager.controller,
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingL),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingM,
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+          ),
           itemCount: state.data.length + (state.isFetchingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == state.data.length) {
               return PaginatedListFooter(
                 isLoadingMore: state.isFetchingMore,
                 hasMore: state.hasMore,
+                skeletonBuilder: (_) => const TransactionListSkeletonLoader(
+                  itemCount: 1,
+                  shrinkWrap: true,
+                ),
               );
             }
             return TransactionItem(txn: state.data[index]);

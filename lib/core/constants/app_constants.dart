@@ -18,7 +18,7 @@ abstract final class AppConstants {
   static const int defaultDecimalPoint = 2;
 
   // home builder — sections page size for infinite-scroll pagination
-  static const int homeSectionsPageLimit = 6;
+  static const int homeSectionsPageLimit = 10;
 
   //map Provider
   static String mapProvider = 'google';

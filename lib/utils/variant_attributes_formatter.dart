@@ -14,7 +14,7 @@ class VariantAttributesFormatter {
   /// "Color: Red, Size: M" → "Red" — just the first attribute's value.
   static String firstValue(String? attributesText) {
     if (attributesText == null || attributesText.isEmpty) return '';
-    final firstPair = attributesText.split('/').first.trim();
+    final firstPair = attributesText.split(',').first.trim();
     final colonIndex = firstPair.indexOf(':');
     return colonIndex == -1
         ? firstPair

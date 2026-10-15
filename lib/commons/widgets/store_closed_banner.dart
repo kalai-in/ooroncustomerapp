@@ -17,7 +17,12 @@ class StoreClosedBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingM),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingM,
+        ThemeConstants.paddingL,
+        ThemeConstants.paddingM,
+      ),
       child: Container(
         decoration: AppDecorations.box(
           color: context.cs.error.withValues(alpha: 0.08),

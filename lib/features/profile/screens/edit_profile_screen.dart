@@ -122,7 +122,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _pickImage() async {
     final source = await showAppBottomSheet<ImageSource>(
       context,
-      padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingS),
+      padding: const EdgeInsetsDirectional.symmetric(
+        vertical: ThemeConstants.paddingS,
+      ),
       builder: (ctx) => SlideAnimationList(
         children: [
           ListTile(
@@ -242,7 +244,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ],
         child: SingleChildScrollView(
           controller: _scrollController,
-          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingXXL, ThemeConstants.spaceXXXL, ThemeConstants.paddingXXL, ThemeConstants.paddingL),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            ThemeConstants.paddingXXL,
+            ThemeConstants.spaceXXXL,
+            ThemeConstants.paddingXXL,
+            ThemeConstants.paddingL,
+          ),
           child: Form(
             key: _formKey,
             child: Column(
@@ -336,12 +343,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       placeholder: AppSvgIcon(
                         AssetsConstants.userIcon,
                         size: ThemeConstants.iconXL,
-                        color: context.cs.primary, fit: BoxFit.scaleDown,
+                        color: context.cs.primary,
+                        fit: BoxFit.scaleDown,
                       ),
                       errorWidget: AppSvgIcon(
                         AssetsConstants.userIcon,
                         size: ThemeConstants.iconXL,
-                        color: context.cs.primary, fit: BoxFit.scaleDown,
+                        color: context.cs.primary,
+                        fit: BoxFit.scaleDown,
                       ),
                     )
                   : AppSvgIcon(
@@ -363,7 +372,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 color: context.cs.primary,
                 border: Border.all(color: context.cs.surface, width: 2),
               ),
-              padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingXS),
+              padding: const EdgeInsetsDirectional.all(
+                ThemeConstants.paddingXS,
+              ),
               child: AppSvgIcon(
                 AssetsConstants.cameraIcon,
                 size: ThemeConstants.iconL,

@@ -93,7 +93,10 @@ class OrderTrackingBottomSheet extends StatelessWidget {
         children: [
           Center(
             child: Container(
-              margin: const EdgeInsetsDirectional.only(top: ThemeConstants.paddingS, bottom: ThemeConstants.paddingXS),
+              margin: const EdgeInsetsDirectional.only(
+                top: ThemeConstants.paddingS,
+                bottom: ThemeConstants.paddingXS,
+              ),
               width: 40,
               height: 4,
               decoration: AppDecorations.dragHandle(
@@ -102,7 +105,12 @@ class OrderTrackingBottomSheet extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingS, ThemeConstants.paddingL, ThemeConstants.paddingXXL),
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              ThemeConstants.paddingL,
+              ThemeConstants.paddingS,
+              ThemeConstants.paddingL,
+              ThemeConstants.paddingXXL,
+            ),
             child: Column(
               crossAxisAlignment: .start,
               spacing: ThemeConstants.spaceM,
@@ -117,29 +125,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
                     ),
                   )
                 else if (order.otp != null && order.otp != 0)
-                  /* _SheetCard(
-                    child: Row(
-                      mainAxisAlignment: .spaceBetween,
-                      children: [
-                        AppText(
-                          context.translate(LanguageLabelKeys.otp),
-                          style: context.tt.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: textSecondary,
-                          ),
-                        ),
-                        AppText(
-                          order.otp!.toString(),
-                          style: context.tt.titleLarge?.copyWith(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: context.cs.primary,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ) */AppSpacing.shrink,
+                  AppSpacing.shrink,
                 _SheetCard(
                   child: Column(
                     crossAxisAlignment: .start,
@@ -248,8 +234,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
                         ),
                         Transform.flip(
                           flipX:
-                              Directionality.of(context) ==
-                              TextDirection.rtl,
+                              Directionality.of(context) == TextDirection.rtl,
                           child: AppSvgIcon(
                             AssetsConstants.arrowRightIcon,
                             color: textSecondary,
@@ -268,7 +253,7 @@ class OrderTrackingBottomSheet extends StatelessWidget {
                           Expanded(
                             child: Column(
                               crossAxisAlignment: .start,
-                              spacing: ThemeConstants. spaceXXS,
+                              spacing: ThemeConstants.spaceXXS,
                               children: [
                                 AppText(
                                   context.translate(

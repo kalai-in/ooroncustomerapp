@@ -335,7 +335,9 @@ class _CartButtonState extends State<CartButton>
             Expanded(child: Center(child: _addLabelText())),
             Container(
               color: context.cs.primary,
-              padding: const EdgeInsetsDirectional.symmetric(vertical: ThemeConstants.paddingXS),
+              padding: const EdgeInsetsDirectional.symmetric(
+                vertical: ThemeConstants.paddingXS,
+              ),
               child: Center(
                 child: AppText(
                   '$opts ${context.translate(LanguageLabelKeys.options)}',

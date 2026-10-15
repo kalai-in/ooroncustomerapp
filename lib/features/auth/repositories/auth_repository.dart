@@ -479,7 +479,9 @@ class AuthRepository {
         ApiParameters.platform: AppConstants.platformType,
         ApiParameters.friendsCode: friendsCode,
         ApiParameters.languageId: languageId,
-        ApiParameters.countryCode: countryCode,
+        if (mobile != null && mobile.trim().isNotEmpty &&
+            countryCode != null && countryCode.isNotEmpty)
+          ApiParameters.countryCode: countryCode,
         if (countryId != null && countryId.isNotEmpty)
           ApiParameters.countryId: countryId,
       };
@@ -490,7 +492,8 @@ class AuthRepository {
 
       if (type == "phone") {
         fields[ApiParameters.phoneAuthType] = phoneAuthType;
-        if (countryCode != null && countryCode.isNotEmpty) {
+        if (mobile != null && mobile.trim().isNotEmpty &&
+            countryCode != null && countryCode.isNotEmpty) {
           fields[ApiParameters.countryCode] = countryCode;
         }
       }
@@ -739,7 +742,8 @@ class AuthRepository {
         ApiParameters.email: email,
         if (countryId != null && countryId.isNotEmpty)
           ApiParameters.countryId: countryId,
-        if (countryCode != null && countryCode.isNotEmpty)
+        if (mobile != null && mobile.trim().isNotEmpty &&
+            countryCode != null && countryCode.isNotEmpty)
           ApiParameters.countryCode: countryCode,
         ApiParameters.latitude: hive.userLatitude,
         ApiParameters.longitude: hive.userLongitude,

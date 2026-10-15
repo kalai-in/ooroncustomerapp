@@ -25,7 +25,8 @@ final class RegionsError extends RegionsState {
 
 /// Fetches and holds the regions (states/provinces) of the currently
 /// selected country.
-class RegionsCubit extends Cubit<RegionsState> with ApiErrorGuard<RegionsState> {
+class RegionsCubit extends Cubit<RegionsState>
+    with ApiErrorGuard<RegionsState> {
   final AddressRepository _repository;
 
   RegionsCubit({AddressRepository? repository})
@@ -43,16 +44,21 @@ class RegionsCubit extends Cubit<RegionsState> with ApiErrorGuard<RegionsState> 
     if (!force && _countryId == countryId && state is! RegionsError) return;
     _countryId = countryId;
     emit(RegionsLoading());
-    await guard(() async {
-      final response = await _repository.getRegions(
-        countryId: countryId.toString(),
-      );
-      if (_countryId != countryId) return; // a newer country was selected meanwhile
-      emit(RegionsLoaded(regions: response.data ?? []));
-    }, onError: (msg) {
-      if (_countryId != countryId) return;
-      emit(RegionsError(message: msg));
-    });
+    await guard(
+      () async {
+        final response = await _repository.getRegions(
+          countryId: countryId.toString(),
+        );
+        if (_countryId != countryId) {
+          return; // a newer country was selected meanwhile
+        }
+        emit(RegionsLoaded(regions: response.data ?? []));
+      },
+      onError: (msg) {
+        if (_countryId != countryId) return;
+        emit(RegionsError(message: msg));
+      },
+    );
   }
 
   void reset() {

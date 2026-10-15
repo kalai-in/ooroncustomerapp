@@ -16,6 +16,7 @@ import 'package:customer/core/localization/models/language_model.dart';
 import 'package:customer/core/local_storage/settings_hive_box.dart';
 import 'package:customer/core/theme/cubit/theme_cubit.dart';
 import 'package:customer/features/profile/widgets/language_sheet.dart';
+import 'package:customer/features/spin_wheel/widgets/spin_wheel_banner_card.dart';
 import 'package:customer/features/profile/widgets/profile_dialogs.dart';
 import 'package:customer/commons/cubit/settings_cubit.dart';
 import 'package:customer/commons/cubit/country_settings_cubit.dart';
@@ -67,9 +68,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         controller: _scrollController,
         slivers: [
           SliverToBoxAdapter(child: _ProfileHeader()),
+          if (SettingsHiveBox.instance.getAppSettings()?.spinWheelAvailable ==
+              1)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(
+                  ThemeConstants.paddingL,
+                  ThemeConstants.paddingXS,
+                  ThemeConstants.paddingL,
+                  ThemeConstants.paddingS,
+                ),
+                child: SpinWheelBannerCard(),
+              ),
+            ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingXS, ThemeConstants.paddingL, 0),
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                ThemeConstants.paddingL,
+                ThemeConstants.paddingXS,
+                ThemeConstants.paddingL,
+                0,
+              ),
               child: Column(
                 crossAxisAlignment: .start,
                 children: [
@@ -91,60 +110,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             referralFirstOrder != 0 || referralReferred != 0;
 
                         return MenuCard(
-                      title: context.translate(LanguageLabelKeys.personalData),
-                      items: [
-                        MenuItemData(
-                          iconPath: AssetsConstants.favouriteIcon,
-                          label: context.translate(
-                            LanguageLabelKeys.shoppingList,
+                          title: context.translate(
+                            LanguageLabelKeys.personalData,
                           ),
-                          onTap: () => AppNavigator.pushNamed(
-                            context,
-                            RouteNames.favourite,
-                          ),
-                        ),
-                        MenuItemData(
-                          iconPath: AssetsConstants.addressIcon,
-                          label: context.translate(
-                            LanguageLabelKeys.myAddresses,
-                          ),
-                          onTap: () => AppNavigator.pushNamed(
-                            context,
-                            RouteNames.addresses,
-                          ),
-                        ),
-                        MenuItemData(
-                          iconPath: AssetsConstants.transactionIcon,
-                          label: context.translate(
-                            LanguageLabelKeys.transactionHistory,
-                          ),
-                          onTap: () => AppNavigator.pushNamed(
-                            context,
-                            RouteNames.transactions,
-                          ),
-                        ),
-                        MenuItemData(
-                          iconPath: AssetsConstants.walletIcon,
-                          label: context.translate(
-                            LanguageLabelKeys.walletHistory,
-                          ),
-                          onTap: () => AppNavigator.pushNamed(
-                            context,
-                            RouteNames.walletTransactions,
-                          ),
-                        ),
-                        if (showReferAndEarn)
-                          MenuItemData(
-                            iconPath: AssetsConstants.giftIcon,
-                            label: context.translate(
-                              LanguageLabelKeys.referAndEarn,
+                          items: [
+                            MenuItemData(
+                              iconPath: AssetsConstants.favouriteIcon,
+                              label: context.translate(
+                                LanguageLabelKeys.shoppingList,
+                              ),
+                              onTap: () => AppNavigator.pushNamed(
+                                context,
+                                RouteNames.favourite,
+                              ),
                             ),
-                            onTap: () => AppNavigator.pushNamed(
-                              context,
-                              RouteNames.referEarn,
+                            MenuItemData(
+                              iconPath: AssetsConstants.addressIcon,
+                              label: context.translate(
+                                LanguageLabelKeys.myAddresses,
+                              ),
+                              onTap: () => AppNavigator.pushNamed(
+                                context,
+                                RouteNames.addresses,
+                              ),
                             ),
-                          ),
-                      ],
+                            MenuItemData(
+                              iconPath: AssetsConstants.transactionIcon,
+                              label: context.translate(
+                                LanguageLabelKeys.transactionHistory,
+                              ),
+                              onTap: () => AppNavigator.pushNamed(
+                                context,
+                                RouteNames.transactions,
+                              ),
+                            ),
+                            MenuItemData(
+                              iconPath: AssetsConstants.walletIcon,
+                              label: context.translate(
+                                LanguageLabelKeys.walletHistory,
+                              ),
+                              onTap: () => AppNavigator.pushNamed(
+                                context,
+                                RouteNames.walletTransactions,
+                              ),
+                            ),
+                            if (showReferAndEarn)
+                              MenuItemData(
+                                iconPath: AssetsConstants.giftIcon,
+                                label: context.translate(
+                                  LanguageLabelKeys.referAndEarn,
+                                ),
+                                onTap: () => AppNavigator.pushNamed(
+                                  context,
+                                  RouteNames.referEarn,
+                                ),
+                              ),
+                            MenuItemData(
+                              iconPath: AssetsConstants.walletIcon,
+                              label: context.translate(
+                                LanguageLabelKeys.myRewards,
+                              ),
+                              onTap: () => AppNavigator.pushNamed(
+                                context,
+                                RouteNames.spinWheelRewards,
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),
@@ -161,7 +192,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             .firstOrNull;
                         final name = lang?.name ?? '';
                         final code =
-                            (lang?.code ?? SettingsHiveBox.instance.languageCode)
+                            (lang?.code ??
+                                    SettingsHiveBox.instance.languageCode)
                                 .toUpperCase();
                         langName = name.isNotEmpty ? '$name ($code)' : code;
                       } else {
@@ -169,9 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             .toUpperCase();
                       }
                       return MenuCard(
-                        title: context.translate(
-                          LanguageLabelKeys.preferences,
-                        ),
+                        title: context.translate(LanguageLabelKeys.preferences),
                         items: [
                           MenuItemData(
                             iconPath: AssetsConstants.languageIcon,
@@ -416,7 +446,9 @@ class _ThemeToggleActionState extends State<_ThemeToggleAction> {
     return BlocBuilder<ThemeCubit, ThemeState>(
       builder: (context, themeState) {
         final cubitIsDark = themeState.themeMode == ThemeMode.dark;
-        final isDark = (_previewDark != null && _previewDark != cubitIsDark) ? _previewDark! : cubitIsDark;
+        final isDark = (_previewDark != null && _previewDark != cubitIsDark)
+            ? _previewDark!
+            : cubitIsDark;
         return Builder(
           builder: (buttonContext) {
             return GestureDetector(
@@ -426,9 +458,12 @@ class _ThemeToggleActionState extends State<_ThemeToggleAction> {
               // wasn't. Opaque makes the whole padded box respond.
               behavior: HitTestBehavior.opaque,
               onTap: () async {
-                final RenderBox box = buttonContext.findRenderObject() as RenderBox;
+                final RenderBox box =
+                    buttonContext.findRenderObject() as RenderBox;
 
-                final position = box.localToGlobal(box.size.center(Offset.zero));
+                final position = box.localToGlobal(
+                  box.size.center(Offset.zero),
+                );
                 final newTheme = cubitIsDark ? ThemeMode.light : ThemeMode.dark;
 
                 // Wait for the theme switch's heavy tab rebuild to get its
@@ -436,7 +471,11 @@ class _ThemeToggleActionState extends State<_ThemeToggleAction> {
                 // it immediately used to race that rebuild's jank and freeze
                 // the icon mid-spin; this keeps the rotate and the reveal
                 // circle starting together, both past the jank window.
-                await MainScreen.changeTheme(context, newTheme: newTheme, position: position);
+                await MainScreen.changeTheme(
+                  context,
+                  newTheme: newTheme,
+                  position: position,
+                );
                 if (!mounted) return;
                 setState(() => _previewDark = !cubitIsDark);
               },
@@ -461,7 +500,9 @@ class _ThemeToggleActionState extends State<_ThemeToggleAction> {
                     child: FadeTransition(opacity: animation, child: child),
                   ),
                   child: AppSvgIcon(
-                    isDark ? AssetsConstants.darkThemeIcon : AssetsConstants.lightThemeIcon,
+                    isDark
+                        ? AssetsConstants.darkThemeIcon
+                        : AssetsConstants.lightThemeIcon,
                     key: ValueKey(isDark),
                     size: ThemeConstants.iconM,
                     color: context.cs.onSurface,
@@ -492,7 +533,12 @@ class _ProfileHeader extends StatelessWidget {
         final isLoggedIn = AuthHiveBox.instance.isLoggedIn;
 
         return Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingL, ThemeConstants.paddingS),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingL,
+            ThemeConstants.paddingS,
+          ),
           child: Container(
             decoration: AppDecorations.shadowedCard(
               color: context.cs.surface,
@@ -527,7 +573,8 @@ class _ProfileHeader extends StatelessWidget {
                           errorWidget: AppSvgIcon(
                             AssetsConstants.userIcon,
                             size: ThemeConstants.iconXL,
-                            color: context.cs.onSurfaceVariant, fit: BoxFit.scaleDown,
+                            color: context.cs.onSurfaceVariant,
+                            fit: BoxFit.scaleDown,
                           ),
                         )
                       : AppSvgIcon(
@@ -649,7 +696,8 @@ class _ExpandableMenuSection extends StatefulWidget {
     required this.iconPath,
     required this.label,
     required this.children,
-  }) : useRadioIndicator = false, trailing = null;
+  }) : useRadioIndicator = false,
+       trailing = null;
 
   @override
   State<_ExpandableMenuSection> createState() => _ExpandableMenuSectionState();

@@ -50,7 +50,12 @@ class MenuCard extends StatelessWidget {
         crossAxisAlignment: .start,
         children: [
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(ThemeConstants.paddingL, ThemeConstants.paddingM, ThemeConstants.paddingL, ThemeConstants.paddingM),
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              ThemeConstants.paddingL,
+              ThemeConstants.paddingM,
+              ThemeConstants.paddingL,
+              ThemeConstants.paddingM,
+            ),
             child: AppText(
               title,
               style: context.tt.titleMedium?.copyWith(
@@ -100,7 +105,8 @@ class MenuCard extends StatelessWidget {
                           AppSpacing.w4,
                         ],
                         Transform.flip(
-                          flipX: Directionality.of(context) == TextDirection.rtl,
+                          flipX:
+                              Directionality.of(context) == TextDirection.rtl,
                           child: AppSvgIcon(
                             AssetsConstants.arrowRightIcon,
                             color: context.cs.onSurfaceVariant,

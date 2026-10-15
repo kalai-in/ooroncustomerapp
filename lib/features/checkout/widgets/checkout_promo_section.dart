@@ -248,7 +248,11 @@ class _PromoTileIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return isApplied
-        ? AppSvgIcon(AssetsConstants.checkCircleIcon, size: ThemeConstants.iconL, color: color)
+        ? AppSvgIcon(
+            AssetsConstants.checkCircleIcon,
+            size: ThemeConstants.iconL,
+            color: color,
+          )
         : AppSvgIcon(
             AssetsConstants.discountCouponsIcon,
             size: ThemeConstants.iconL,

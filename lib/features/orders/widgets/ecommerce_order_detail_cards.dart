@@ -13,6 +13,7 @@ import 'package:customer/core/theme/app_radius.dart';
 import 'package:customer/core/theme/app_spacing.dart';
 import 'package:customer/features/address/cubit/address_cubit.dart';
 import 'package:customer/features/address/models/address_model.dart';
+import 'package:customer/features/cart/models/delivery_type.dart';
 import 'package:customer/features/address/widgets/address_actions.dart';
 import 'package:customer/features/address/widgets/address_picker_sheet.dart';
 import 'package:customer/features/chat/models/chat_message.dart';
@@ -43,6 +44,70 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:customer/utils/show_app_bottom_sheet.dart';
 import 'package:customer/core/theme/app_decorations.dart';
 import 'package:customer/core/constants/theme_constants.dart';
+
+/// Shown only while the order is still on its way — hidden once delivered,
+/// cancelled or returned, and hidden when the API sends no date at all.
+class EcommerceOrderDetailExpectedDeliveryCard extends StatelessWidget {
+  final EcommerceOrderDataModel order;
+  const EcommerceOrderDetailExpectedDeliveryCard({
+    super.key,
+    required this.order,
+  });
+
+  static bool shouldShow(EcommerceOrderDataModel order) {
+    final isPickup =
+        DeliveryType.fromApiValue(order.deliveryType) == DeliveryType.pickup;
+    const finalStatuses = [
+      OrderStatus.delivered,
+      OrderStatus.cancelled,
+      OrderStatus.returned,
+      OrderStatus.pickup,
+    ];
+    return !isPickup &&
+        (order.estimatedDeliveryDate?.isNotEmpty ?? false) &&
+        !finalStatuses.contains(order.activeStatus);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!shouldShow(order)) return const SizedBox.shrink();
+
+    return OrderDetailCard(
+      child: Row(
+        mainAxisSize: .min,
+        spacing: ThemeConstants.spaceXS,
+        children: [
+          AppSvgIcon(
+            AssetsConstants.expectedDeliveryIcon,
+            size: ThemeConstants.iconS,
+            color: context.cs.onSurfaceVariant,
+          ),
+          Text.rich(
+            TextSpan(
+              text:
+                  '${context.translate(LanguageLabelKeys.orderExpectedDeliveryBy)} ',
+              style: context.tt.bodySmall?.copyWith(
+                fontWeight: FontWeight.w400,
+                color: context.cs.onSurfaceVariant,
+              ),
+              children: [
+                TextSpan(
+                  text: AppDateFormatter.formatDate(
+                    order.estimatedDeliveryDate,
+                  ),
+                  style: context.tt.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: context.cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class EcommerceOrderDetailReturnRejectCard extends StatelessWidget {
   final EcommerceOrderDataModel order;
@@ -127,6 +192,23 @@ class EcommerceOrderDetailReturnRejectCard extends StatelessWidget {
   }
 }
 
+/// Pickup-store card shown as its own section — kept separate from
+/// [EcommerceOrderDetailCustomerInfoCard] so the customer's own address
+/// (billing) never gets mixed up with the store's address.
+class EcommerceOrderDetailPickupStoreCard extends StatelessWidget {
+  final EcommerceOrderDataModel order;
+  const EcommerceOrderDetailPickupStoreCard({super.key, required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPickup =
+        DeliveryType.fromApiValue(order.deliveryType) == DeliveryType.pickup;
+    final pickupStore = order.pickupStore;
+    if (!isPickup || pickupStore == null) return const SizedBox.shrink();
+    return OrderPickupStoreCard(store: pickupStore);
+  }
+}
+
 class EcommerceOrderDetailCustomerInfoCard extends StatelessWidget {
   final EcommerceOrderDataModel order;
   const EcommerceOrderDetailCustomerInfoCard({super.key, required this.order});
@@ -137,6 +219,8 @@ class EcommerceOrderDetailCustomerInfoCard extends StatelessWidget {
         ? order.address!.address!
         : '';
     final orderIdText = order.orderNumber?.toString() ?? '';
+    final isPickup =
+        DeliveryType.fromApiValue(order.deliveryType) == DeliveryType.pickup;
 
     final rows = <Widget>[
       OrderDetailLabelValueRow(
@@ -170,7 +254,7 @@ class EcommerceOrderDetailCustomerInfoCard extends StatelessWidget {
           label: context.translate(LanguageLabelKeys.mobileNumber),
           value: order.address!.mobile!,
         ),
-      if (fullAddress.isNotEmpty)
+      if (!isPickup && fullAddress.isNotEmpty)
         OrderDetailLabelValueRow(
           label: context.translate(LanguageLabelKeys.deliveryAddress),
           value: fullAddress,
@@ -305,8 +389,7 @@ class EcommerceOrderDetailItemRow extends StatelessWidget {
         DateTime.now().isBefore(returnDeadline);
     final returnRequested = (order.returnRequested ?? 0) != 0;
     final isRated =
-        order.productRating == true &&
-        (order.itemRating?.isNotEmpty ?? false);
+        order.productRating == true && (order.itemRating?.isNotEmpty ?? false);
     final showRate =
         order.productRating == true &&
         order.activeStatus == OrderStatus.delivered &&
@@ -339,11 +422,24 @@ class EcommerceOrderDetailItemRow extends StatelessWidget {
             crossAxisAlignment: .start,
             children: [
               hasImage
-                  ? AppNetworkImage(
-                      url: order.image!,
-                      width: imgSize,
-                      height: imgSize,
-                      borderRadius: AppRadius.r8,
+                  ? ClipRRect(
+                      borderRadius: AppRadius.r10,
+                      child: Container(
+                        decoration: AppDecorations.box(
+                          color: context.cs.surfaceContainer,
+                          border: Border.all(
+                            color: context.cs.outline.withValues(alpha: 0.12),
+                          ),
+                          borderRadius: AppRadius.r10,
+                        ),
+                        child: AppNetworkImage(
+                          url: order.image!,
+                          width: imgSize,
+                          height: imgSize,
+                          fit: BoxFit.contain,
+                          borderRadius: AppRadius.r10,
+                        ),
+                      ),
                     )
                   : ProductImagePlaceholder(size: imgSize),
               AppSpacing.w12,
@@ -559,11 +655,24 @@ class _OtherItemRow extends StatelessWidget {
         crossAxisAlignment: .start,
         children: [
           hasImage
-              ? AppNetworkImage(
-                  url: item.image!,
-                  width: imgSize,
-                  height: imgSize,
-                  borderRadius: AppRadius.r8,
+              ? ClipRRect(
+                  borderRadius: AppRadius.r10,
+                  child: Container(
+                    decoration: AppDecorations.box(
+                      color: context.cs.surfaceContainer,
+                      border: Border.all(
+                        color: context.cs.outline.withValues(alpha: 0.12),
+                      ),
+                      borderRadius: AppRadius.r10,
+                    ),
+                    child: AppNetworkImage(
+                      url: item.image!,
+                      width: imgSize,
+                      height: imgSize,
+                      fit: BoxFit.contain,
+                      borderRadius: AppRadius.r10,
+                    ),
+                  ),
                 )
               : ProductImagePlaceholder(size: imgSize),
           AppSpacing.w12,
@@ -678,7 +787,8 @@ class EcommerceOrderDetailPriceSummaryCard extends StatelessWidget {
               ? taxBreakdownMessage(
                   context,
                   order.taxBreakdown!,
-                  (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                  (amount) =>
+                      '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
                 )
               : null,
           suffixSheetTitle: hasTax
@@ -688,11 +798,14 @@ class EcommerceOrderDetailPriceSummaryCard extends StatelessWidget {
               ? (sheetContext) => taxBreakdownSheet(
                   sheetContext,
                   order.taxBreakdown!,
-                  (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                  (amount) =>
+                      '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
                 )
               : null,
         ),
-        if ((order.deliveryCharge?.amount ?? 0) > 0)
+        if (DeliveryType.fromApiValue(order.deliveryType) !=
+                DeliveryType.pickup &&
+            (order.deliveryCharge?.amount ?? 0) > 0)
           OrderDetailPriceRow(
             label: context.translate(LanguageLabelKeys.deliveryCharge),
             value: '$currency${order.deliveryCharge?.amount ?? 0}',
@@ -705,7 +818,8 @@ class EcommerceOrderDetailPriceSummaryCard extends StatelessWidget {
                 )
                 ? (sheetContext) => additionalChargeDetailSheet(
                     sheetContext,
-                    (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                    (amount) =>
+                        '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
                     label: context.translate(LanguageLabelKeys.deliveryCharge),
                     totalAmount: order.deliveryCharge?.amount ?? 0,
                     taxName: order.deliveryCharge?.taxName,
@@ -737,7 +851,8 @@ class EcommerceOrderDetailPriceSummaryCard extends StatelessWidget {
               detailContentBuilder: hasTaxDetail
                   ? (sheetContext) => additionalChargeDetailSheet(
                       sheetContext,
-                      (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                      (amount) =>
+                          '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
                       label: label,
                       totalAmount: charge.amount ?? 0,
                       isRefundable: charge.isRefundable,
@@ -764,7 +879,8 @@ class EcommerceOrderDetailPriceSummaryCard extends StatelessWidget {
               detailContentBuilder: hasTaxDetail
                   ? (sheetContext) => additionalChargeDetailSheet(
                       sheetContext,
-                      (amount) => '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
+                      (amount) =>
+                          '$currency${amount.formatPrice(order.decimalPoint ?? 2)}',
                       label: label,
                       totalAmount: surge.charge ?? 0,
                       isRefundable: surge.isRefundable,
@@ -818,7 +934,10 @@ class EcommerceOrderDetailTrackingCard extends StatelessWidget {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: context.cs.surfaceContainerHighest,
-                child: AppSvgIcon(AssetsConstants.deliveryBikeIcon, size: ThemeConstants.iconM),
+                child: AppSvgIcon(
+                  AssetsConstants.deliveryBikeIcon,
+                  size: ThemeConstants.iconM,
+                ),
               ),
               Expanded(
                 child: Column(

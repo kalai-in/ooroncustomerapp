@@ -2,6 +2,7 @@ enum RedirectType {
   product,
   category,
   brand,
+  page,
   none,
   unknown;
 
@@ -13,6 +14,8 @@ enum RedirectType {
         return RedirectType.category;
       case 'brand':
         return RedirectType.brand;
+      case 'page':
+        return RedirectType.page;
       case 'none':
         return RedirectType.none;
       case null:

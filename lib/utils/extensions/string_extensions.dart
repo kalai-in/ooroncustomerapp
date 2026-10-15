@@ -8,12 +8,21 @@ extension NullableStringExtension on String? {
 }
 
 extension StringColorExtension on String? {
-  /// Parses a hex color string (e.g. "#RRGGBB" or "RRGGBB"/"AARRGGBB") into
-  /// a [Color]. Returns null for null/empty/unparsable input.
+  /// Parses a hex color string ("#RRGGBB" or "RRGGBB"/"RRGGBBAA") into a
+  /// [Color]. The 8-digit form is CSS-style with alpha last (the admin
+  /// panel's color picker exports it that way), not Flutter's native
+  /// AARRGGBB — reordered below so Color() gets the alpha channel first.
+  /// Returns null for null/empty/unparsable input.
   Color? toColor() {
     final hex = this;
     if (hex == null || hex.isEmpty) return null;
     final cleaned = hex.replaceAll('#', '');
+    if (cleaned.length == 8) {
+      final rgb = cleaned.substring(0, 6);
+      final alpha = cleaned.substring(6, 8);
+      final value = int.tryParse('$alpha$rgb', radix: 16);
+      return value != null ? Color(value) : null;
+    }
     final value = int.tryParse(
       cleaned.length == 6 ? 'FF$cleaned' : cleaned,
       radix: 16,

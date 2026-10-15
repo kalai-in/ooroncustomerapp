@@ -21,6 +21,7 @@ import 'package:customer/commons/widgets/app_svg_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/commons/widgets/app_text.dart';
 import 'package:customer/core/constants/theme_constants.dart';
+import 'package:customer/utils/show_app_bottom_sheet.dart';
 
 class CheckoutPlaceOrderBar extends StatelessWidget {
   const CheckoutPlaceOrderBar({
@@ -43,6 +44,7 @@ class CheckoutPlaceOrderBar extends StatelessWidget {
     this.appliedPromo,
     this.hasMissingRequiredPrescription = false,
     this.onUploadPrescription,
+    this.isPickup = false,
   });
 
   final CartData cartData;
@@ -68,6 +70,10 @@ class CheckoutPlaceOrderBar extends StatelessWidget {
   /// selection prompts.
   final bool hasMissingRequiredPrescription;
   final VoidCallback? onUploadPrescription;
+
+  /// Self-pickup mode: no shipping address needed, so address selection is
+  /// bypassed and the pickup store is shown instead.
+  final bool isPickup;
 
   double get _postPromoTotal => resolveCheckoutPostPromoTotal(
     cartData: cartData,
@@ -98,7 +104,28 @@ class CheckoutPlaceOrderBar extends StatelessWidget {
   /// Selected address is outside every serviceable zone
   /// (is_deliverable_address == 0): the order can't be placed, so the pay /
   /// place-order controls are swapped for a "not available here" prompt.
-  bool get _notDeliverable => cartData.isDeliverableAddress == 0;
+  /// Doesn't apply to pickup — the store is always the zone's fixed store,
+  /// not an address the customer could be outside of.
+  bool get _notDeliverable => !isPickup && cartData.isDeliverableAddress == 0;
+
+  /// Pickup's "no address yet" tap target — asks saved-list vs. manual
+  /// before committing to either flow.
+  void _showPickupAddressChoiceSheet(BuildContext context) {
+    showAppBottomSheet<void>(
+      context,
+      title: context.translate(LanguageLabelKeys.addYourBillingAddress),
+      builder: (sheetContext) => _PickupAddressChoiceSheet(
+        onChooseAddress: () {
+          Navigator.pop(sheetContext);
+          onChooseAddress();
+        },
+        onAddManually: () {
+          Navigator.pop(sheetContext);
+          onEditBillingAddress();
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +134,11 @@ class CheckoutPlaceOrderBar extends StatelessWidget {
     }
 
     final hasAddress = selectedAddress != null;
+    // Pickup with no saved address selected still has a valid address on
+    // file once the manual billing sheet is filled — that data doubles as
+    // the pickup address (billing_* fields, no address_id).
+    final hasManualPickupAddress = isPickup && billingAddress != null;
+    final resolved = hasAddress || hasManualPickupAddress;
 
     return _BarContainer(
       padding: EdgeInsetsDirectional.fromSTEB(
@@ -115,7 +147,7 @@ class CheckoutPlaceOrderBar extends StatelessWidget {
         0,
         context.bottomSafePadding + ThemeConstants.paddingL,
       ),
-      child: hasAddress
+      child: resolved
           ? Column(
               mainAxisSize: .min,
               spacing: ThemeConstants.spaceM,
@@ -123,22 +155,41 @@ class CheckoutPlaceOrderBar extends StatelessWidget {
                 // Address + billing checkbox share one continuous card (same
                 // background, no gap) so they read as one delivery/billing
                 // block instead of two separate chips.
-                Column(
-                  mainAxisSize: .min,
-                  children: [
-                    _AddressStrip(
-                      selectedAddress: selectedAddress!,
-                      onChooseAddress: onChooseAddress,
-                    ),
-                    if (!_notDeliverable)
-                      CheckoutBillingAddressSection(
-                        sameAsShipping: billingSameAsShipping,
-                        billingAddress: billingAddress,
-                        onToggle: onBillingToggle,
-                        onEdit: onEditBillingAddress,
+                if (hasAddress)
+                  Column(
+                    mainAxisSize: .min,
+                    children: [
+                      _AddressStrip(
+                        selectedAddress: selectedAddress!,
+                        isPickup: isPickup,
+                        // Pickup's "Change" re-asks saved-list vs. manual
+                        // (same as the initial add) instead of jumping
+                        // straight into the picker — delivery keeps the
+                        // direct picker, unchanged.
+                        onChooseAddress: isPickup
+                            ? () => _showPickupAddressChoiceSheet(context)
+                            : onChooseAddress,
                       ),
-                  ],
-                ),
+                      // Pickup has no shipping address to compare against —
+                      // billing_same_as_shipping is ignored server-side for
+                      // pickup, so skip the checkbox entirely.
+                      if (!_notDeliverable && !isPickup)
+                        CheckoutBillingAddressSection(
+                          sameAsShipping: billingSameAsShipping,
+                          billingAddress: billingAddress,
+                          onToggle: onBillingToggle,
+                          onEdit: onEditBillingAddress,
+                        ),
+                    ],
+                  )
+                else
+                  _ManualPickupAddressStrip(
+                    billingAddress: billingAddress!,
+                    // Also re-asks saved-list vs. manual — otherwise once a
+                    // manual address is filled there's no way back to
+                    // picking a saved one.
+                    onEdit: () => _showPickupAddressChoiceSheet(context),
+                  ),
                 if (_notDeliverable)
                   _NotDeliverablePrompt(onChooseAddress: onChooseAddress)
                 else if (hasMissingRequiredPrescription)
@@ -171,9 +222,16 @@ class CheckoutPlaceOrderBar extends StatelessWidget {
               ),
               child: AppButton(
                 label: context.translate(
-                  LanguageLabelKeys.chooseAddressAtNextStep,
+                  isPickup
+                      ? LanguageLabelKeys.addBillingAddress
+                      : LanguageLabelKeys.chooseAddressAtNextStep,
                 ),
-                onPressed: onChooseAddress,
+                // Pickup has no saved address yet — ask which path first
+                // (saved list vs. manual entry) instead of jumping straight
+                // into the picker, same button as delivery otherwise.
+                onPressed: isPickup
+                    ? () => _showPickupAddressChoiceSheet(context)
+                    : onChooseAddress,
                 height: 50,
               ),
             ),
@@ -235,10 +293,12 @@ class _AddressStrip extends StatelessWidget {
   const _AddressStrip({
     required this.selectedAddress,
     required this.onChooseAddress,
+    this.isPickup = false,
   });
 
   final AddressData selectedAddress;
   final VoidCallback onChooseAddress;
+  final bool isPickup;
 
   @override
   Widget build(BuildContext context) {
@@ -284,7 +344,7 @@ class _AddressStrip extends StatelessWidget {
                     children: [
                       TextSpan(
                         text:
-                            '${context.translate(LanguageLabelKeys.deliveringTo)} ',
+                            '${context.translate(isPickup ? LanguageLabelKeys.billingAddress : LanguageLabelKeys.deliveringTo)} ',
                       ),
                       TextSpan(
                         text:
@@ -326,6 +386,123 @@ class _AddressStrip extends StatelessWidget {
   }
 }
 
+/// Same chrome as [_AddressStrip], but for pickup's manually-typed address
+/// (billing_* fields sent with no address_id) instead of a saved [AddressData].
+class _ManualPickupAddressStrip extends StatelessWidget {
+  const _ManualPickupAddressStrip({
+    required this.billingAddress,
+    required this.onEdit,
+  });
+
+  final BillingAddressData billingAddress;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsetsDirectional.only(
+        start: ThemeConstants.paddingL,
+        end: ThemeConstants.paddingL,
+        top: ThemeConstants.paddingS,
+        bottom: ThemeConstants.paddingS,
+      ),
+      decoration: AppDecorations.box(
+        color: context.cs.surfaceContainerLow,
+        borderRadius: AppRadius.top16,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: AppDecorations.box(
+              color: context.cs.primaryContainer,
+              borderRadius: AppRadius.r8,
+            ),
+            child: AppSvgIcon(
+              AssetsConstants.buildingIcon,
+              size: ThemeConstants.iconL,
+              color: context.cs.onSurfaceVariant,
+              fit: BoxFit.scaleDown,
+            ),
+          ),
+          AppSpacing.w10,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: .start,
+              mainAxisSize: .min,
+              children: [
+                AppText(
+                  billingAddress.name,
+                  style: context.tt.bodySmall?.copyWith(
+                    color: context.cs.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                AppText(
+                  '${billingAddress.address}, ${billingAddress.city}',
+                  style: context.tt.bodySmall?.copyWith(
+                    color: context.cs.onSurface.withValues(alpha: 0.55),
+                    fontSize: 11,
+                  ),
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                ),
+              ],
+            ),
+          ),
+          AppSpacing.w8,
+          GestureDetector(
+            onTap: onEdit,
+            child: AppText(
+              context.translate(LanguageLabelKeys.change),
+              style: context.tt.bodySmall?.copyWith(
+                color: context.cs.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Sheet content for pickup's "no address yet" tap — choose a saved address,
+/// or type one manually via the billing-address sheet (its fields double as
+/// the pickup address when no address_id is sent).
+class _PickupAddressChoiceSheet extends StatelessWidget {
+  const _PickupAddressChoiceSheet({
+    required this.onChooseAddress,
+    required this.onAddManually,
+  });
+
+  final VoidCallback onChooseAddress;
+  final VoidCallback onAddManually;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: .min,
+      spacing: ThemeConstants.spaceS,
+      children: [
+        AppButton(
+          label: context.translate(LanguageLabelKeys.chooseSavedBillingAddress),
+          onPressed: onChooseAddress,
+          height: 50,
+          variant: AppButtonVariant.outline,
+        ),
+        AppButton(
+          label: context.translate(LanguageLabelKeys.addBillingAddressManually),
+          onPressed: onAddManually,
+          height: 50,
+        ),
+      ],
+    );
+  }
+}
+
 /// Bottom prompt shown in place of the pay / place-order controls when the
 /// selected address can't be served — a warning strip plus a clear CTA to
 /// change the address.
@@ -337,7 +514,9 @@ class _NotDeliverablePrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingL),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: ThemeConstants.paddingL,
+      ),
       child: Column(
         mainAxisSize: .min,
         children: [
@@ -394,7 +573,9 @@ class _UploadPrescriptionPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingL),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: ThemeConstants.paddingL,
+      ),
       child: AppButton(
         label: context.translate(LanguageLabelKeys.uploadPrescription),
         onPressed: isLoading ? null : onUploadPrescription,
@@ -416,7 +597,9 @@ class _SelectPaymentPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingL),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: ThemeConstants.paddingL,
+      ),
       child: AppButton(
         label: context.translate(LanguageLabelKeys.selectPayment),
         onPressed: isLoading ? null : onChoosePayment,
@@ -489,7 +672,9 @@ class _PaymentMethodTile extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Padding(
-        padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingL),
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: ThemeConstants.paddingL,
+        ),
         child: ShimmerBuilder(
           builder: (context, color) => Column(
             crossAxisAlignment: .start,
@@ -507,7 +692,9 @@ class _PaymentMethodTile extends StatelessWidget {
     return GestureDetector(
       onTap: onChoosePayment,
       child: Padding(
-        padding: const EdgeInsetsDirectional.symmetric(horizontal: ThemeConstants.paddingL),
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: ThemeConstants.paddingL,
+        ),
         child: Row(
           mainAxisSize: .min,
           children: [
@@ -520,7 +707,10 @@ class _PaymentMethodTile extends StatelessWidget {
                     mainAxisSize: .min,
                     children: [
                       selectedPayment != null
-                          ? AppSvgIcon(selectedPayment!.iconPath, size: ThemeConstants.iconXS)
+                          ? AppSvgIcon(
+                              selectedPayment!.iconPath,
+                              size: ThemeConstants.iconXS,
+                            )
                           : AppSvgIcon(
                               AssetsConstants.cardIcon,
                               size: ThemeConstants.iconXS,
@@ -585,14 +775,20 @@ class _PlaceOrderButton extends StatelessWidget {
       onTap: isLoading ? null : onPlaceOrder,
       child: Container(
         padding: const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
-        margin: EdgeInsetsDirectional.only(end: ThemeConstants.paddingL, start: startInset),
+        margin: EdgeInsetsDirectional.only(
+          end: ThemeConstants.paddingL,
+          start: startInset,
+        ),
         height: 50,
         decoration: AppDecorations.box(
           color: context.cs.primary,
           borderRadius: AppRadius.r12,
         ),
         child: isLoading
-            ? LoadingWidget(size: ThemeConstants.loaderSize, color: context.cs.onPrimary)
+            ? LoadingWidget(
+                size: ThemeConstants.loaderSize,
+                color: context.cs.onPrimary,
+              )
             : Row(
                 children: [
                   Expanded(

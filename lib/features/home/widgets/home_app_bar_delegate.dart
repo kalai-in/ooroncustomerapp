@@ -94,6 +94,8 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
           BackgroundThemeType.image) {
         final url = layout?.backgroundImageUrl;
         if (url != null && url.isNotEmpty) {
+          final fallbackColor =
+              parseHomeHexColor(layout?.backgroundColor) ?? gradient[0];
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -101,11 +103,11 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                 url: url,
                 fit: BoxFit.contain,
                 placeholder: HomeAnimatedGradient(
-                  colors: _gradientFrom(gradient[0]),
+                  colors: _gradientFrom(fallbackColor),
                   child: const SizedBox.expand(),
                 ),
                 errorWidget: HomeAnimatedGradient(
-                  colors: _gradientFrom(gradient[0]),
+                  colors: _gradientFrom(fallbackColor),
                   child: const SizedBox.expand(),
                 ),
               ),
@@ -136,6 +138,8 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
           BackgroundThemeType.image) {
         final url = tab.backgroundImageUrl;
         if (url != null && url.isNotEmpty) {
+          final fallbackColor =
+              parseHomeHexColor(tab.backgroundColor) ?? gradient[0];
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -143,11 +147,11 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                 url: url,
                 fit: BoxFit.cover,
                 placeholder: HomeAnimatedGradient(
-                  colors: _gradientFrom(gradient[0]),
+                  colors: _gradientFrom(fallbackColor),
                   child: const SizedBox.expand(),
                 ),
                 errorWidget: HomeAnimatedGradient(
-                  colors: _gradientFrom(gradient[0]),
+                  colors: _gradientFrom(fallbackColor),
                   child: const SizedBox.expand(),
                 ),
               ),
@@ -352,8 +356,12 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                                     Container(
                                                       padding:
                                                           const EdgeInsetsDirectional.symmetric(
-                                                            horizontal: ThemeConstants.paddingS,
-                                                            vertical: ThemeConstants.paddingXS,
+                                                            horizontal:
+                                                                ThemeConstants
+                                                                    .paddingS,
+                                                            vertical:
+                                                                ThemeConstants
+                                                                    .paddingXS,
                                                           ),
                                                       decoration:
                                                           AppDecorations.box(
@@ -366,13 +374,15 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                                           ),
                                                       child: Row(
                                                         mainAxisSize: .min,
-                                                        spacing: ThemeConstants. spaceXXS,
+                                                        spacing: ThemeConstants
+                                                            .spaceXXS,
                                                         children: [
                                                           AppSvgIcon(
                                                             AssetsConstants
                                                                 .directionsWalkIcon,
                                                             color: contentColor,
-                                                            size: ThemeConstants.iconXS,
+                                                            size: ThemeConstants
+                                                                .iconXS,
                                                           ),
                                                           AppText(
                                                             '$distance ${context.translate(LanguageLabelKeys.away)}',
@@ -395,7 +405,8 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                             ] else
                                               Row(
                                                 mainAxisSize: .min,
-                                                spacing: ThemeConstants. spaceXXS,
+                                                spacing:
+                                                    ThemeConstants.spaceXXS,
                                                 children: [
                                                   Flexible(
                                                     child: AppText(
@@ -425,7 +436,8 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                             if (locationAddress.isNotEmpty)
                                               Row(
                                                 mainAxisSize: .min,
-                                                spacing: ThemeConstants. spaceXXS,
+                                                spacing:
+                                                    ThemeConstants.spaceXXS,
                                                 children: [
                                                   Flexible(
                                                     child: AppText(
@@ -458,7 +470,8 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                                           .withValues(
                                                             alpha: 0.8,
                                                           ),
-                                                      size: ThemeConstants.iconXS,
+                                                      size:
+                                                          ThemeConstants.iconXS,
                                                     ),
                                                 ],
                                               ),
@@ -473,7 +486,9 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                                       ),
                                       child: Container(
                                         padding:
-                                            const EdgeInsetsDirectional.all(ThemeConstants.paddingS),
+                                            const EdgeInsetsDirectional.all(
+                                              ThemeConstants.paddingS,
+                                            ),
                                         decoration:
                                             AppDecorations.circleIconBadge(
                                               color: context.cs.surface,
@@ -506,8 +521,14 @@ class HomeAppBarDelegate extends SliverPersistentHeaderDelegate {
                           ThemeConstants.paddingM,
                           ThemeConstants.paddingM,
                         ),
-                        child: HomeSearchBar(
-                          searchSuggestions: searchSuggestions,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: HomeSearchBar(
+                                searchSuggestions: searchSuggestions,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       if (categoryTabs.isNotEmpty && tabController != null) ...[

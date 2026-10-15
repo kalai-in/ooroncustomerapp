@@ -204,11 +204,6 @@ class ApiClient {
 
   /// Handle API Response
   dynamic _handleResponse(Response response) {
-    /* if (response.statusCode == 200 || response.statusCode == 201) {
-      return response.data;
-    } else {
-      throw ApiException(message: response.statusMessage ?? "Something went wrong", statusCode: response.statusCode);
-    } */
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = response.data;
 
